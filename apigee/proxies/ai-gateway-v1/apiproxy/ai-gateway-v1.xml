@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="5" name="ai-gateway-v1">
+    <DisplayName>Apigee X AI Economics Gateway</DisplayName>
+    <Description>Operationalizes FrugalGPT (arXiv:2305.05176) and LLMLingua (arXiv:2310.05736) at the Apigee X gateway layer with Semantic Caching, Coarse-to-Fine Prompt Compression, Model Routing/Cascade, and Multi-Turn Context Pruning.</Description>
+    <ProxyEndpoints>
+        <ProxyEndpoint>default</ProxyEndpoint>
+    </ProxyEndpoints>
+    <TargetEndpoints>
+        <TargetEndpoint>vertex-flash-au</TargetEndpoint>
+        <TargetEndpoint>vertex-pro-global</TargetEndpoint>
+        <TargetEndpoint>demo-ui-bff</TargetEndpoint>
+    </TargetEndpoints>
+</APIProxy>

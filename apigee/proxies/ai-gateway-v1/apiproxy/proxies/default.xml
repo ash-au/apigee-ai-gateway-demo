@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="default">
+    <Description>Main Northbound ProxyEndpoint for AI Economics Gateway</Description>
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>JS-PreparePreOptimize</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-PreOptimize</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+            </Step>
+            <Step>
+                <Name>JS-ProcessPreOptimize</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+    <Flows>
+        <Flow name="CORS-Preflight">
+            <Request/>
+            <Response>
+                <Step>
+                    <Name>AM-CorsHeaders</Name>
+                </Step>
+            </Response>
+            <Condition>request.verb = "OPTIONS"</Condition>
+        </Flow>
+        <Flow name="Reset-Gateway-State">
+            <Request>
+                <Step>
+                    <Name>SC-ResetState</Name>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>AM-ResetResponse</Name>
+                </Step>
+                <Step>
+                    <Name>AM-CorsHeaders</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/reset")</Condition>
+        </Flow>
+        <Flow name="Chat-Completion">
+            <Request/>
+            <Response/>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+        </Flow>
+    </Flows>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response>
+            <Step>
+                <Name>JS-PrepareCascadeEval</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat") and (ai.routing_decision != "CACHE_SHORT_CIRCUIT")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-EvaluateAndCascade</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat") and (ai.routing_decision != "CACHE_SHORT_CIRCUIT")</Condition>
+            </Step>
+            <Step>
+                <Name>JS-BuildFinalResponse</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+            </Step>
+            <Step>
+                <Name>AM-CorsHeaders</Name>
+            </Step>
+        </Response>
+    </PostFlow>
+    <HTTPProxyConnection>
+        <BasePath>/v1/ai-economics</BasePath>
+    </HTTPProxyConnection>
+    <RouteRule name="Route-Options-Or-Reset">
+        <Condition>(request.verb = "OPTIONS") or ((request.verb = "POST") and (proxy.pathsuffix MatchesPath "/reset"))</Condition>
+    </RouteRule>
+    <RouteRule name="Route-DemoUI-BFF">
+        <Condition>(not (proxy.pathsuffix MatchesPath "/chat")) and (not (proxy.pathsuffix MatchesPath "/reset"))</Condition>
+        <TargetEndpoint>demo-ui-bff</TargetEndpoint>
+    </RouteRule>
+    <RouteRule name="Route-CacheShortCircuit">
+        <Condition>ai.routing_decision = "CACHE_SHORT_CIRCUIT"</Condition>
+    </RouteRule>
+    <RouteRule name="Route-VertexFlash">
+        <Condition>ai.routing_decision = "GEMINI_2_5_FLASH"</Condition>
+        <TargetEndpoint>vertex-flash-au</TargetEndpoint>
+    </RouteRule>
+    <RouteRule name="Route-VertexPro">
+        <TargetEndpoint>vertex-pro-global</TargetEndpoint>
+    </RouteRule>
+</ProxyEndpoint>

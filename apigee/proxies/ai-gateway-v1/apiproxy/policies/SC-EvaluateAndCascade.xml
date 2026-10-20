@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-EvaluateAndCascade">
+    <DisplayName>SC-EvaluateAndCascade</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="cascadeEvalRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.cascade_eval_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>cascadeEvalResponse</Response>
+    <Timeout>90000</Timeout>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleIDToken>
+                <Audience>https://gateway-optimizer-1019413155504.australia-southeast1.run.app</Audience>
+            </GoogleIDToken>
+        </Authentication>
+        <URL>https://gateway-optimizer-1019413155504.australia-southeast1.run.app/v1/optimize/cascade</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>

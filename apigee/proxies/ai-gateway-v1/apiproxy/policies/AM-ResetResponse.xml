@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage continueOnError="false" enabled="true" name="AM-ResetResponse">
+    <DisplayName>AM-ResetResponse</DisplayName>
+    <Set>
+        <Payload contentType="application/json">{resetStateResponse.content}</Payload>
+        <StatusCode>200</StatusCode>
+    </Set>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>

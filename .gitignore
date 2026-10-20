@@ -1,0 +1,22 @@
+# Python virtual environments & caches
+.venv/
+venv/
+ENV/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS & Editor files
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# Build & temporary artifacts
+*.log
+/tmp/
+apigee/proxies/*/*.zip

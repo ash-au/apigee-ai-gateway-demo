@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-PreOptimize">
+    <DisplayName>SC-PreOptimize</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="preOptimizeRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.pre_optimize_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>preOptimizeResponse</Response>
+    <Timeout>60000</Timeout>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleIDToken>
+                <Audience>https://gateway-optimizer-1019413155504.australia-southeast1.run.app</Audience>
+            </GoogleIDToken>
+        </Authentication>
+        <URL>https://gateway-optimizer-1019413155504.australia-southeast1.run.app/v1/optimize/pre</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>
