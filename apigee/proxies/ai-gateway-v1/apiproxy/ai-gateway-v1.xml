@@ -1,13 +1,44 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<APIProxy revision="5" name="ai-gateway-v1">
-    <DisplayName>Apigee X AI Economics Gateway</DisplayName>
-    <Description>Operationalizes FrugalGPT (arXiv:2305.05176) and LLMLingua (arXiv:2310.05736) at the Apigee X gateway layer with Semantic Caching, Coarse-to-Fine Prompt Compression, Model Routing/Cascade, and Multi-Turn Context Pruning.</Description>
+<APIProxy revision="4" name="ai-gateway-v1">
+    <DisplayName>Apigee X AI Economics &amp; Governance Gateway (FrugalGPT, LLMLingua &amp; Native AI Policies)</DisplayName>
+    <Description>Enterprise AI Gateway proving token and cost reduction plus native Apigee AI policies: LLMTokenQuota, PromptTokenLimit, SanitizeUserPrompt, SanitizeModelResponse, SemanticCacheLookup, SemanticCachePopulate, and SemanticGovernance.</Description>
+    <Policies>
+        <Policy>AM-CorsHeaders</Policy>
+        <Policy>AM-DisablePathSuffix</Policy>
+        <Policy>AM-ResetResponse</Policy>
+        <Policy>JS-BuildFinalResponse</Policy>
+        <Policy>JS-EnrichPolicyTelemetry</Policy>
+        <Policy>JS-FormatPolicyFault</Policy>
+        <Policy>JS-PrepareCascadeEval</Policy>
+        <Policy>JS-PrepareNativePolicyRequest</Policy>
+        <Policy>JS-PreparePreOptimize</Policy>
+        <Policy>JS-ProcessPreOptimize</Policy>
+        <Policy>LTQ-EnforceTokenQuota</Policy>
+        <Policy>PTL-EnforcePromptLimit</Policy>
+        <Policy>SC-EvaluateAndCascade</Policy>
+        <Policy>SC-PreOptimize</Policy>
+        <Policy>SC-ResetState</Policy>
+        <Policy>SCL-NativeSemanticCacheLookup</Policy>
+        <Policy>SCP-NativeSemanticCachePopulate</Policy>
+        <Policy>SG-EnforceEnterpriseDomain</Policy>
+        <Policy>SMR-SanitizeModelResponse</Policy>
+        <Policy>SUP-SanitizeUserPrompt</Policy>
+    </Policies>
     <ProxyEndpoints>
         <ProxyEndpoint>default</ProxyEndpoint>
     </ProxyEndpoints>
+    <Resources>
+        <Resource>jsc://build_final_response.js</Resource>
+        <Resource>jsc://enrich_policy_telemetry.js</Resource>
+        <Resource>jsc://format_policy_fault.js</Resource>
+        <Resource>jsc://prepare_cascade_eval.js</Resource>
+        <Resource>jsc://prepare_native_policy_request.js</Resource>
+        <Resource>jsc://prepare_pre_optimize.js</Resource>
+        <Resource>jsc://process_pre_optimize.js</Resource>
+    </Resources>
     <TargetEndpoints>
+        <TargetEndpoint>demo-ui-bff</TargetEndpoint>
         <TargetEndpoint>vertex-flash-au</TargetEndpoint>
         <TargetEndpoint>vertex-pro-global</TargetEndpoint>
-        <TargetEndpoint>demo-ui-bff</TargetEndpoint>
     </TargetEndpoints>
 </APIProxy>

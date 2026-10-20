@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript continueOnError="false" enabled="true" timeLimit="500" name="JS-EnrichPolicyTelemetry">
+    <DisplayName>JS-EnrichPolicyTelemetry</DisplayName>
+    <Properties/>
+    <ResourceURL>jsc://enrich_policy_telemetry.js</ResourceURL>
+</Javascript>

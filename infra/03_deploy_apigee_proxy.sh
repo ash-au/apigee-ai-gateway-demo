@@ -82,6 +82,9 @@ for attempt in range(40):
     if state == "READY":
         print(f"SUCCESS: {org}/{env} revision {rev} is READY at {public_url}")
         break
+    elif state == "ERROR":
+        print(f"ERROR deploying {org}/{env} rev {rev}: {r_stat.json().get('errors')}")
+        sys.exit(1)
     time.sleep(3)
 else:
     print(f"WARNING: Timed out waiting for READY state on {org}/{env} (last state: {state})")

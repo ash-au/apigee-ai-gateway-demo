@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <ProxyEndpoint name="default">
-    <Description>Main Northbound ProxyEndpoint for AI Economics Gateway</Description>
+    <Description>Main Northbound ProxyEndpoint for AI Economics &amp; AI Governance Gateway</Description>
+    <DefaultFaultRule name="DefaultFaultRule">
+        <Step>
+            <Name>JS-FormatPolicyFault</Name>
+            <Condition>proxy.pathsuffix MatchesPath "/policies/**"</Condition>
+        </Step>
+        <Step>
+            <Name>AM-CorsHeaders</Name>
+        </Step>
+        <AlwaysEnforce>true</AlwaysEnforce>
+    </DefaultFaultRule>
     <PreFlow name="PreFlow">
         <Request>
+            <!-- Existing FrugalGPT & LLMLingua Economics Flow (/chat) -->
             <Step>
                 <Name>JS-PreparePreOptimize</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
@@ -14,6 +25,11 @@
             <Step>
                 <Name>JS-ProcessPreOptimize</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+            </Step>
+            <!-- Native Apigee AI Policies Request Preparation (/policies/**) -->
+            <Step>
+                <Name>JS-PrepareNativePolicyRequest</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
             </Step>
         </Request>
         <Response/>
@@ -49,6 +65,85 @@
             <Response/>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
         </Flow>
+        <!-- Use Case Group 2: Native Token FinOps & Quotas (PromptTokenLimit + LLMTokenQuota) -->
+        <Flow name="Policy-Token-Governance">
+            <Request>
+                <Step>
+                    <Name>PTL-EnforcePromptLimit</Name>
+                    <Condition>request.header.X-Enable-Prompt-Limit != "false"</Condition>
+                </Step>
+                <Step>
+                    <Name>LTQ-EnforceOnly</Name>
+                    <Condition>request.header.X-Enable-Token-Quota != "false"</Condition>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>LTQ-EnforceTokenQuota</Name>
+                    <Condition>request.header.X-Enable-Token-Quota != "false"</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-EnrichPolicyTelemetry</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/token-governance")</Condition>
+        </Flow>
+        <!-- Use Case Group 3: Native Model Armor Safety (SanitizeUserPrompt + SanitizeModelResponse) -->
+        <Flow name="Policy-Model-Armor">
+            <Request>
+                <Step>
+                    <Name>SUP-SanitizeUserPrompt</Name>
+                    <Condition>request.header.X-Enable-Sanitize-Prompt != "false"</Condition>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>SMR-SanitizeModelResponse</Name>
+                    <Condition>request.header.X-Enable-Sanitize-Response != "false"</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-EnrichPolicyTelemetry</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/model-armor")</Condition>
+        </Flow>
+        <!-- Use Case Group 4a: Native Semantic Governance (SemanticGovernance) -->
+        <Flow name="Policy-Semantic-Governance">
+            <Request/>
+            <Response>
+                <Step>
+                    <Name>SG-EnforceEnterpriseDomain</Name>
+                    <Condition>request.header.X-Enable-Semantic-Governance != "false"</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-EnrichPolicyTelemetry</Name>
+                </Step>
+                <Step>
+                    <Name>RF-SemanticGovernanceViolation</Name>
+                    <Condition>ai.sg_violation_detected = "true"</Condition>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/semantic-governance")</Condition>
+        </Flow>
+        <!-- Use Case Group 4b: Native Semantic Cache (SemanticCacheLookup + SemanticCachePopulate) -->
+        <Flow name="Policy-Native-Semantic-Cache">
+            <Request>
+                <Step>
+                    <Name>SCL-NativeSemanticCacheLookup</Name>
+                    <Condition>request.header.X-Enable-Native-Cache != "false"</Condition>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>SCP-NativeSemanticCachePopulate</Name>
+                    <Condition>(request.header.X-Enable-Native-Cache != "false") and (SemanticCacheLookup.SCL-NativeSemanticCacheLookup.cache_hit != true)</Condition>
+                </Step>
+                <Step>
+                    <Name>JS-EnrichPolicyTelemetry</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/native-cache")</Condition>
+        </Flow>
     </Flows>
     <PostFlow name="PostFlow">
         <Request/>
@@ -76,8 +171,12 @@
     <RouteRule name="Route-Options-Or-Reset">
         <Condition>(request.verb = "OPTIONS") or ((request.verb = "POST") and (proxy.pathsuffix MatchesPath "/reset"))</Condition>
     </RouteRule>
+    <RouteRule name="Route-NativePolicies-VertexFlash">
+        <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
+        <TargetEndpoint>vertex-flash-au</TargetEndpoint>
+    </RouteRule>
     <RouteRule name="Route-DemoUI-BFF">
-        <Condition>(not (proxy.pathsuffix MatchesPath "/chat")) and (not (proxy.pathsuffix MatchesPath "/reset"))</Condition>
+        <Condition>(not (proxy.pathsuffix MatchesPath "/chat")) and (not (proxy.pathsuffix MatchesPath "/reset")) and (not (proxy.pathsuffix MatchesPath "/policies/**"))</Condition>
         <TargetEndpoint>demo-ui-bff</TargetEndpoint>
     </RouteRule>
     <RouteRule name="Route-CacheShortCircuit">

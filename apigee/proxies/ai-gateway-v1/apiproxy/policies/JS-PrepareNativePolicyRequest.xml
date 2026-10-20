@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript continueOnError="false" enabled="true" timeLimit="500" name="JS-PrepareNativePolicyRequest">
+    <DisplayName>JS-PrepareNativePolicyRequest</DisplayName>
+    <Properties/>
+    <ResourceURL>jsc://prepare_native_policy_request.js</ResourceURL>
+</Javascript>

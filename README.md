@@ -28,6 +28,34 @@ This system operationalizes two foundational peer-reviewed papers directly insid
 | **Demo UI & Side-by-Side BFF (Google IAP)** | `apac-cs-5g-demo5` (`australia-southeast1`) | `apigee-ai-economics-demo` | **`https://apigee-ai-economics-demo-1019413155504.australia-southeast1.run.app`** | `demo-bff-sa@apac-cs-5g-demo5.iam.gserviceaccount.com` |
 | **Apigee X AI Economics Proxy (`ai-gateway-v1`)** | `apac-cs-5g-demo5` (`australia-southeast1`) | **Environment:** `demo` (`demo-group`) | **`https://10.106.240.2.nip.io/v1/ai-economics/chat`** *(via Direct VPC Egress)* | `apigee-ai-gw-sa@apac-cs-5g-demo5.iam.gserviceaccount.com` |
 | **Gateway Optimizer Callout (`gateway-optimizer`)** | `apac-cs-5g-demo5` (`australia-southeast1`) | `gateway-optimizer` | `https://gateway-optimizer-1019413155504.australia-southeast1.run.app` | `gw-optimizer-sa@apac-cs-5g-demo5.iam.gserviceaccount.com` |
+| **Model Armor Safety Template** | `apac-cs-5g-demo5` (`us-central1`) | `apigee-ai-safety-template` | `projects/apac-cs-5g-demo5/locations/us-central1/templates/apigee-ai-safety-template` | `apigee-ai-gw-sa@apac-cs-5g-demo5.iam.gserviceaccount.com` |
+| **Vertex AI Vector Search (`SHARD_SIZE_MEDIUM`)** | `apac-cs-5g-demo5` (`australia-southeast1`) | `apigee-semantic-cache-endpoint` (`3216599276826132480`) | `https://958897680.australia-southeast1-1019413155504.vdb.vertexai.goog` | `apigee-ai-gw-sa@apac-cs-5g-demo5.iam.gserviceaccount.com` |
+
+---
+
+## Multi-Tab Use Cases & All 7 Native Apigee X AI Policies
+
+The UI is organized into **4 Use-Case Tabs**, preserving the original FrugalGPT & LLMLingua economics workbench in **Tab 1** and adding live execution for all **7 Native Apigee X AI Policies** across **Tabs 2–4**:
+
+| UI Tab | Apigee X Conditional Flow | Native Apigee Policies Invoked | What It Proves |
+| :--- | :--- | :--- | :--- |
+| **Tab 1: AI Cost & Token Economics** | `POST /v1/ai-economics/chat` | `SC-PreOptimize`, `SC-EvaluateAndCascade`, `Route-CacheShortCircuit` | FrugalGPT semantic caching + L1/L2 model cascades + LLMLingua-2 prompt compression + multi-turn context pruning. |
+| **Tab 2: Token FinOps & Quotas** | `POST /v1/ai-economics/policies/token-governance` | 1. `PTL-EnforcePromptLimit` (`<PromptTokenLimit>`)<br>2. `LTQ-EnforceTokenQuota` (`<LLMTokenQuota>`) | Pre-flight prompt token spike arrest (`X-Prompt-Token-Limit`) and rolling 1-minute token quota chargeback (`X-Quota-Limit`) using real Vertex AI `usageMetadata.totalTokenCount`. |
+| **Tab 3: AI Safety & Model Armor** | `POST /v1/ai-economics/policies/model-armor` | 3. `SUP-SanitizeUserPrompt` (`<SanitizeUserPrompt>`)<br>4. `SMR-SanitizeModelResponse` (`<SanitizeModelResponse>`) | Native Google Cloud Model Armor integration blocking prompt injections, jailbreaks, PII/PCI credit-card leaks, and malicious URLs at the gateway edge (`0` LLM tokens billed on inbound blocks). |
+| **Tab 4: Semantic Governance & Native Cache** | `POST /v1/ai-economics/policies/semantic-governance`<br>`POST /v1/ai-economics/policies/native-cache` | 5. `SCL-NativeSemanticCacheLookup` (`<SemanticCacheLookup>`)<br>6. `SCP-NativeSemanticCachePopulate` (`<SemanticCachePopulate>`)<br>7. `SG-EnforceEnterpriseDomain` (`<SemanticGovernance>`) | Declarative domain guardrails via `<SemanticGovernance>` + zero-code XML semantic caching backed by Vertex AI Vector Search (`SHARD_SIZE_MEDIUM` / `e2-standard-16`), plus 1-click UI & CLI node suspend/wake controls. |
+
+### Suspending & Waking the Vertex AI Vector Search Node (`$0/hr` Idle Mode)
+To avoid continuous hourly node charges (`~$1.08/hr` for `SHARD_SIZE_MEDIUM` / `e2-standard-16`) when not running live demos of native `<SemanticCacheLookup>`, use either the **UI button on Tab 4** or the CLI helper script:
+```bash
+# Check live Vector Search Index, Endpoint & Deployed Node state
+./infra/toggle_vector_search.sh status
+
+# Suspend node (undeploys index from endpoint -> $0.00/hr compute cost)
+./infra/toggle_vector_search.sh off
+
+# Wake node before a demo (re-deploys index to endpoint)
+./infra/toggle_vector_search.sh on
+```
 
 ---
 
@@ -70,15 +98,16 @@ This system operationalizes two foundational peer-reviewed papers directly insid
 ├── HONESTY_AND_TRADEOFFS.md           # Candid engineering notes on heuristics, latency, and token accounting
 ├── infra/
 │   ├── 01_setup_gcp_and_iam.sh        # Provisions least-privilege Service Accounts & IAM bindings
-│   ├── 02_deploy_optimizer.sh         # Builds & deploys gateway-optimizer to Cloud Run (australia-southeast1)
+│   ├── 02_setup_apigee_ingress.sh     # Sets up Apigee ingress / environment group
 │   ├── 03_deploy_apigee_proxy.sh      # Packages, imports, and deploys ai-gateway-v1 to Apigee X
-│   └── 04_deploy_demo_ui.sh           # Builds & deploys apigee-ai-economics-demo UI/BFF to Cloud Run
+│   ├── 04_deploy_demo_ui.sh           # Builds & deploys apigee-ai-economics-demo UI/BFF to Cloud Run
+│   └── toggle_vector_search.sh        # CLI helper to check, wake (on), or suspend (off) Vector Search node
 ├── apigee/
-│   ├── proxies/ai-gateway-v1/         # Complete Apigee X API proxy bundle (XML policies + Rhino JS)
+│   ├── proxies/ai-gateway-v1/         # Complete Apigee X API proxy bundle (all 7 native AI policies + JS)
 │   └── tests/test_apigee_proxy_live.sh# End-to-end live curl test suite against Apigee X
 └── services/
     ├── gateway-optimizer/             # FastAPI + LLMLingua-2 + FrugalGPT cascade & semantic cache service
-    └── demo-ui/                       # FastAPI side-by-side BFF + Editorial HTML/CSS/JS frontend
+    └── demo-ui/                       # FastAPI side-by-side BFF + 4-Tab Google Brand UI frontend
 ```
 
 ---
@@ -86,7 +115,7 @@ This system operationalizes two foundational peer-reviewed papers directly insid
 ## Reproducible Deployment Instructions
 
 ### Prerequisites
-* `gcloud` CLI authenticated with permissions on `apac-cs-5g-demo5` and Apigee organization `jw-apigeex-0`.
+* `gcloud` CLI authenticated with permissions on `apac-cs-5g-demo5` (Apigee environment `demo`).
 * Python 3.11+ and `zip` installed locally.
 
 ### Step 1: Provision Service Accounts & IAM

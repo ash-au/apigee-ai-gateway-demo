@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RaiseFault continueOnError="false" enabled="true" name="RF-SemanticGovernanceViolation">
+    <DisplayName>RF-SemanticGovernanceViolation</DisplayName>
+    <FaultResponse>
+        <Set>
+            <StatusCode>422</StatusCode>
+            <ReasonPhrase>Unprocessable Entity - SemanticGovernance Violation</ReasonPhrase>
+            <Payload contentType="application/json">{
+  "policy": "SG-EnforceEnterpriseDomain",
+  "rule_id": "enterprise-domain-guardrail",
+  "enforcement_mode": "ENFORCE",
+  "verdict": "NON_COMPLIANT",
+  "violation_domain": "{SemanticGovernance.SG-EnforceEnterpriseDomain.violation_domain}",
+  "reason": "{ai.sg_violation_reason}"
+}</Payload>
+        </Set>
+    </FaultResponse>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>

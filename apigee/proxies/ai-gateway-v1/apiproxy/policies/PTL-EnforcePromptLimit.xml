@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PromptTokenLimit continueOnError="false" enabled="true" name="PTL-EnforcePromptLimit">
+    <DisplayName>PTL-EnforcePromptLimit</DisplayName>
+    <LLMProvider>
+        <VertexAI/>
+    </LLMProvider>
+    <Rate ref="request.header.X-Prompt-Token-Limit">250pm</Rate>
+</PromptTokenLimit>

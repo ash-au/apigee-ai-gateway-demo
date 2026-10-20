@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SanitizeUserPrompt continueOnError="false" enabled="true" name="SUP-SanitizeUserPrompt">
+    <DisplayName>SUP-SanitizeUserPrompt</DisplayName>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+    <ModelArmor>
+        <TemplateName>projects/apac-cs-5g-demo5/locations/us-central1/templates/apigee-ai-safety-template</TemplateName>
+    </ModelArmor>
+    <UserPromptSource>{jsonPath($.contents[-1].parts[-1].text,request.content)}</UserPromptSource>
+</SanitizeUserPrompt>

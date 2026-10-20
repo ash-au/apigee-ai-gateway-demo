@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SemanticGovernance continueOnError="false" enabled="true" name="SG-EnforceEnterpriseDomain">
+    <DisplayName>SG-EnforceEnterpriseDomain</DisplayName>
+    <EnforcementMode>ENFORCE</EnforcementMode>
+    <LLMProvider>
+        <VertexAI>
+            <GeminiEndpoint>https://australia-southeast1-aiplatform.googleapis.com/v1/projects/apac-cs-5g-demo5/locations/australia-southeast1/publishers/google/models/gemini-2.5-flash:generateContent</GeminiEndpoint>
+        </VertexAI>
+    </LLMProvider>
+    <Rules>
+        <Rule id="enterprise-domain-guardrail">
+            <Body>The response must only provide enterprise cloud architecture, cybersecurity, FinOps, software engineering, or API management guidance. It must NOT provide personal stock trading recommendations, cryptocurrency speculation, medical diagnoses, creative fiction/poetry, or competitor disparagement.</Body>
+        </Rule>
+    </Rules>
+</SemanticGovernance>

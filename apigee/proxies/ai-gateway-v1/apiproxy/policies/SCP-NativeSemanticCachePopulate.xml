@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SemanticCachePopulate continueOnError="false" enabled="true" name="SCP-NativeSemanticCachePopulate">
+    <DisplayName>SCP-NativeSemanticCachePopulate</DisplayName>
+    <SimilaritySearch>
+        <VertexAI>
+            <URL>https://australia-southeast1-aiplatform.googleapis.com/v1/projects/1019413155504/locations/australia-southeast1/indexes/8419013310438965248:upsertDatapoints</URL>
+        </VertexAI>
+    </SimilaritySearch>
+    <TTLInSeconds>3600</TTLInSeconds>
+</SemanticCachePopulate>

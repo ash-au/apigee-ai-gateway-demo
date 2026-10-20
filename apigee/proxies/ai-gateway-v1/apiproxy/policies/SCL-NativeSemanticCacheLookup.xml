@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<SemanticCacheLookup continueOnError="false" enabled="true" name="SCL-NativeSemanticCacheLookup">
+    <DisplayName>SCL-NativeSemanticCacheLookup</DisplayName>
+    <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+    <UserPromptSource>{jsonPath('$.contents[-1].parts[-1].text',request.content,true)}</UserPromptSource>
+    <Embeddings>
+        <VertexAI>
+            <URL>https://australia-southeast1-aiplatform.googleapis.com/v1/projects/apac-cs-5g-demo5/locations/australia-southeast1/publishers/google/models/text-embedding-005:predict</URL>
+        </VertexAI>
+    </Embeddings>
+    <SimilaritySearch>
+        <VertexAI>
+            <URL>https://958897680.australia-southeast1-1019413155504.vdb.vertexai.goog/v1/projects/1019413155504/locations/australia-southeast1/indexEndpoints/3216599276826132480:findNeighbors</URL>
+            <DeployedIndexID>apigee_semantic_cache_deployed</DeployedIndexID>
+            <Threshold>0.85</Threshold>
+            <DistanceMeasureType>DOT_PRODUCT_DISTANCE</DistanceMeasureType>
+        </VertexAI>
+    </SimilaritySearch>
+</SemanticCacheLookup>

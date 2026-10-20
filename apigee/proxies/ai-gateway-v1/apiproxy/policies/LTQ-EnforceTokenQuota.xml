@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LLMTokenQuota continueOnError="false" enabled="true" name="LTQ-EnforceTokenQuota" type="rollingwindow">
+    <DisplayName>LTQ-EnforceTokenQuota</DisplayName>
+    <SharedName>ai-gateway-token-quota-counter</SharedName>
+    <CountOnly>true</CountOnly>
+    <Allow count="500" countRef="request.header.X-Quota-Limit"/>
+    <Interval ref="request.header.X-Quota-Interval">1</Interval>
+    <TimeUnit ref="request.header.X-Quota-TimeUnit">minute</TimeUnit>
+    <Distributed>true</Distributed>
+    <Synchronous>true</Synchronous>
+    <Identifier ref="request.header.X-Quota-Id"/>
+    <LLMTokenUsageSource>{jsonPath('$.usageMetadata.totalTokenCount',response.content,true)}</LLMTokenUsageSource>
+    <LLMModelSource>{jsonPath('$.modelVersion',response.content,true)}</LLMModelSource>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</LLMTokenQuota>

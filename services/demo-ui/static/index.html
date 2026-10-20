@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apigee X as an AI Gateway — Token &amp; Cost Economics</title>
+  <title>Apigee X as an AI Gateway — Token Economics &amp; Native AI Policies</title>
   <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css" />
 </head>
 <body>
@@ -15,10 +15,10 @@
           Google Cloud Project: apac-cs-5g-demo5 &bull; Apigee X Environment: demo &bull; Region: australia-southeast1 (Sydney)
         </div>
         <h1 class="masthead-title">
-          Apigee X as an AI Gateway: Proving the Token &amp; Cost Economics
+          Apigee X as an AI Gateway: Token Economics &amp; Enterprise AI Governance
         </h1>
         <p class="masthead-subtitle">
-          Operationalizing <strong>FrugalGPT</strong> (Stanford, arXiv:2305.05176) and <strong>LLMLingua-2</strong> (Microsoft Research, arXiv:2310.05736) at the API gateway layer &mdash; comparing point-to-point <code>gemini-2.5-pro</code> calls against Apigee-governed traffic with real Vertex AI <code>usageMetadata</code>.
+          Proving how <strong>Apigee X</strong> reduces LLM token consumption and enforces enterprise guardrails &mdash; combining <strong>FrugalGPT</strong> &amp; <strong>LLMLingua-2</strong> optimizations with all <strong>7 Native Apigee X AI Policies</strong> (<code>PromptTokenLimit</code>, <code>LLMTokenQuota</code>, <code>SanitizeUserPrompt</code>, <code>SanitizeModelResponse</code>, <code>SemanticCacheLookup</code>, <code>SemanticCachePopulate</code>, and <code>SemanticGovernance</code>).
         </p>
       </div>
       <div class="masthead-actions">
@@ -31,370 +31,784 @@
       </div>
     </header>
 
-    <!-- Cumulative Session Economics Ledger -->
-    <section class="ledger-banner" aria-label="Cumulative Session Economics">
-      <div class="ledger-cell">
-        <div class="ledger-label">1. Direct Baseline (No Gateway)</div>
-        <div class="ledger-value" id="ledger-direct-cost">$0.000000</div>
-        <div class="ledger-sub" id="ledger-direct-tokens">0 tokens across 0 runs (Gemini 2.5 Pro)</div>
-      </div>
-      <div class="ledger-cell">
-        <div class="ledger-label">2. Via Apigee X AI Gateway</div>
-        <div class="ledger-value" id="ledger-gateway-cost">$0.000000</div>
-        <div class="ledger-sub" id="ledger-gateway-tokens">0 billed tokens (incl. all overhead)</div>
-      </div>
-      <div class="ledger-cell">
-        <div class="ledger-label">3. Observed Token Reduction</div>
-        <div class="ledger-value savings-number" id="ledger-token-pct">&mdash;</div>
-        <div class="ledger-sub" id="ledger-tokens-saved">0 net tokens saved</div>
-      </div>
-      <div class="ledger-cell">
-        <div class="ledger-label">4. Observed Cost Reduction</div>
-        <div class="ledger-value savings-number" id="ledger-cost-pct">&mdash;</div>
-        <div class="ledger-sub" id="ledger-cost-saved">$0.000000 net saved</div>
-      </div>
-      <div class="ledger-cell">
-        <div class="ledger-label">5. Enterprise Annualized Savings</div>
-        <div class="ledger-value savings-number" id="ledger-annual-savings">$0 / yr</div>
-        <div class="scale-slider-wrap">
-          <input
-            type="range"
-            id="scale-slider"
-            class="scale-slider"
-            min="1"
-            max="50"
-            step="1"
-            value="10"
-          />
-          <div class="ledger-sub" id="scale-slider-label">
-            At 10M requests/month (using observed avg delta)
+    <!-- Primary Use-Case Navigation Tabs -->
+    <nav class="primary-tabs-bar" aria-label="AI Gateway Use Case Groups">
+      <button class="primary-tab-btn active" data-maintab="main-tab-economics" type="button">
+        <span class="tab-Dot dot-blue"></span>
+        <div>
+          <div class="primary-tab-title">1. AI Cost &amp; Token Economics</div>
+          <div class="primary-tab-sub">FrugalGPT + LLMLingua-2 + Firestore Cache (Existing)</div>
+        </div>
+      </button>
+      <button class="primary-tab-btn" data-maintab="main-tab-token-finops" type="button">
+        <span class="tab-Dot dot-green"></span>
+        <div>
+          <div class="primary-tab-title">2. Token FinOps &amp; Quotas</div>
+          <div class="primary-tab-sub">Native <code>PromptTokenLimit</code> + <code>LLMTokenQuota</code></div>
+        </div>
+      </button>
+      <button class="primary-tab-btn" data-maintab="main-tab-model-armor" type="button">
+        <span class="tab-Dot dot-red"></span>
+        <div>
+          <div class="primary-tab-title">3. AI Safety &amp; Model Armor</div>
+          <div class="primary-tab-sub">Native <code>SanitizeUserPrompt</code> + <code>SanitizeModelResponse</code></div>
+        </div>
+      </button>
+      <button class="primary-tab-btn" data-maintab="main-tab-semantic-gov" type="button">
+        <span class="tab-Dot dot-yellow"></span>
+        <div>
+          <div class="primary-tab-title">4. Semantic Governance &amp; Native Cache</div>
+          <div class="primary-tab-sub"><code>SemanticGovernance</code> + <code>SemanticCacheLookup/Populate</code></div>
+        </div>
+      </button>
+    </nav>
+
+    <!-- =======================================================================
+         MAIN TAB 1: EXISTING FRUGALGPT & LLMLINGUA ECONOMICS DEMO (UNTOUCHED)
+         ======================================================================= -->
+    <div id="main-tab-economics" class="main-tab-pane active">
+      <!-- Cumulative Session Economics Ledger -->
+      <section class="ledger-banner" aria-label="Cumulative Session Economics">
+        <div class="ledger-cell">
+          <div class="ledger-label">1. Direct Baseline (No Gateway)</div>
+          <div class="ledger-value" id="ledger-direct-cost">$0.000000</div>
+          <div class="ledger-sub" id="ledger-direct-tokens">0 tokens across 0 runs (Gemini 2.5 Pro)</div>
+        </div>
+        <div class="ledger-cell">
+          <div class="ledger-label">2. Via Apigee X AI Gateway</div>
+          <div class="ledger-value" id="ledger-gateway-cost">$0.000000</div>
+          <div class="ledger-sub" id="ledger-gateway-tokens">0 billed tokens (incl. all overhead)</div>
+        </div>
+        <div class="ledger-cell">
+          <div class="ledger-label">3. Observed Token Reduction</div>
+          <div class="ledger-value savings-number" id="ledger-token-pct">&mdash;</div>
+          <div class="ledger-sub" id="ledger-tokens-saved">0 net tokens saved</div>
+        </div>
+        <div class="ledger-cell">
+          <div class="ledger-label">4. Observed Cost Reduction</div>
+          <div class="ledger-value savings-number" id="ledger-cost-pct">&mdash;</div>
+          <div class="ledger-sub" id="ledger-cost-saved">$0.000000 net saved</div>
+        </div>
+        <div class="ledger-cell">
+          <div class="ledger-label">5. Enterprise Annualized Savings</div>
+          <div class="ledger-value savings-number" id="ledger-annual-savings">$0 / yr</div>
+          <div class="scale-slider-wrap">
+            <input
+              type="range"
+              id="scale-slider"
+              class="scale-slider"
+              min="1"
+              max="50"
+              step="1"
+              value="10"
+            />
+            <div class="ledger-sub" id="scale-slider-label">
+              At 10M requests/month (using observed avg delta)
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Control Deck: 5 Curated Scenarios + 4 Independently Togglable Gateway Policies -->
-    <section class="control-grid">
-      <!-- Left: Curated Scenarios -->
-      <div class="panel">
+      <!-- Control Deck: 5 Curated Scenarios + 4 Independently Togglable Gateway Policies -->
+      <section class="control-grid">
+        <!-- Left: Curated Scenarios -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Curated Enterprise Scenarios (5-Step Sequence)</h2>
+            <button id="btn-run-sequence" class="btn btn-subtle" type="button">
+              Run All 5 Scenarios Sequentially
+            </button>
+          </div>
+          <div id="scenario-list" class="scenario-list">
+            <!-- Populated dynamically from /api/scenarios -->
+          </div>
+        </div>
+
+        <!-- Right: 4 Gateway Policy Toggles -->
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Apigee X Gateway Policy Toggles (HTTP Headers)</h2>
+            <div style="display: flex; gap: 6px;">
+              <button id="btn-toggles-all-on" class="btn btn-subtle" type="button">Enable All 4</button>
+              <button id="btn-toggles-all-off" class="btn btn-subtle" type="button">All Off (Passthrough)</button>
+            </div>
+          </div>
+          <div class="toggles-list">
+            <!-- Toggle 1: Semantic Cache -->
+            <div class="toggle-card enabled" id="card-toggle-cache">
+              <div>
+                <div class="toggle-top">
+                  <span class="toggle-name">1. Semantic Caching</span>
+                  <label class="switch" aria-label="Toggle Semantic Caching">
+                    <input type="checkbox" id="toggle-cache" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-header-tag">X-Opt-Cache: true</span>
+                <p class="toggle-desc">
+                  <strong>FrugalGPT &sect;3.1:</strong> Embeds query via Vertex AI <code>text-embedding-005</code> in Sydney. If cosine similarity &ge; <code>0.85</code>, Apigee short-circuits Vertex AI at 0 LLM tokens.
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle 2: Prompt Compression -->
+            <div class="toggle-card enabled" id="card-toggle-compress">
+              <div>
+                <div class="toggle-top">
+                  <span class="toggle-name">2. Prompt Compression</span>
+                  <label class="switch" aria-label="Toggle Prompt Compression">
+                    <input type="checkbox" id="toggle-compress" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-header-tag">X-Opt-Compress: true</span>
+                <p class="toggle-desc">
+                  <strong>LLMLingua-2:</strong> Coarse-to-Fine budget controller (&tau;<sub>instr</sub>=0.85, &tau;<sub>rag</sub>=0.35, &tau;<sub>query</sub>=1.0) + BERT token pruning on CPU before southbound LLM call.
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle 3: Model Routing & Cascade -->
+            <div class="toggle-card enabled" id="card-toggle-route">
+              <div>
+                <div class="toggle-top">
+                  <span class="toggle-name">3. Model Routing &amp; Cascade</span>
+                  <label class="switch" aria-label="Toggle Model Routing and Cascade">
+                    <input type="checkbox" id="toggle-route" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-header-tag">X-Opt-Route: true</span>
+                <p class="toggle-desc">
+                  <strong>FrugalGPT &sect;3.3:</strong> Routes to L<sub>1</sub> <code>gemini-2.5-flash</code> ($0.30/$2.50). Post-generation scorer <em>g(q,a)</em> verifies reliability &ge; 0.80 or cascades to L<sub>2</sub> <code>gemini-2.5-pro</code>.
+                </p>
+              </div>
+            </div>
+
+            <!-- Toggle 4: Context Pruning -->
+            <div class="toggle-card enabled" id="card-toggle-prune">
+              <div>
+                <div class="toggle-top">
+                  <span class="toggle-name">4. Context Pruning / Dedup</span>
+                  <label class="switch" aria-label="Toggle Context Pruning">
+                    <input type="checkbox" id="toggle-prune" checked />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+                <span class="toggle-header-tag">X-Opt-Prune: true</span>
+                <p class="toggle-desc">
+                  <strong>Multi-Turn State Distillation:</strong> Condenses older turns into a rolling state summary via Flash + strips duplicate boilerplate paragraphs.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Inspectable & Editable Request Composer -->
+      <section class="composer-panel">
         <div class="panel-header">
-          <h2 class="panel-title">Curated Enterprise Scenarios (5-Step Sequence)</h2>
-          <button id="btn-run-sequence" class="btn btn-subtle" type="button">
-            Run All 5 Scenarios Sequentially
+          <h2 class="panel-title">Request Payload Inspector &amp; Live Execution</h2>
+          <span class="panel-meta" id="active-scenario-meta">Scenario 1 selected</span>
+        </div>
+
+        <div id="presenter-note" class="presenter-note-bar">
+          Select a scenario above or customize the prompt fields below, then click <strong>Execute Side-by-Side Comparison</strong>.
+        </div>
+
+        <div class="composer-fields">
+          <div class="field-group">
+            <label class="field-label" for="input-system">
+              <span>System Instruction (&tau;<sub>instr</sub> = 0.85)</span>
+              <span id="meta-system-len"></span>
+            </label>
+            <textarea id="input-system" class="field-textarea" rows="2"></textarea>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="input-history">
+              <span>Multi-Turn Conversation History (JSON Array)</span>
+              <span id="meta-history-turns">0 prior turns</span>
+            </label>
+            <textarea id="input-history" class="field-textarea" rows="2" placeholder="[]"></textarea>
+          </div>
+
+          <div class="field-group full-width">
+            <label class="field-label" for="input-rag">
+              <span>Retrieved RAG Context &amp; Policy Excerpts (&tau;<sub>rag</sub> = 0.35)</span>
+              <span id="meta-rag-len"></span>
+            </label>
+            <textarea id="input-rag" class="field-textarea" rows="4" placeholder="(Optional) Paste retrieved RAG documents or policy excerpts..."></textarea>
+          </div>
+
+          <div class="field-group full-width">
+            <label class="field-label" for="input-prompt">
+              <span>User Query (&tau;<sub>query</sub> = 1.00 — Never Compressed)</span>
+            </label>
+            <textarea id="input-prompt" class="field-textarea" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="composer-footer">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);">
+            Apigee X Target: <strong id="footer-apigee-url">https://10.106.240.2.nip.io/v1/ai-economics/chat (apac-cs-5g-demo5 / env: demo)</strong>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="run-status-indicator" style="font-size: 12px; color: var(--text-secondary);"></span>
+            <button id="btn-execute-compare" class="btn btn-primary" type="button">
+              Execute Side-by-Side Comparison (Live Vertex AI + Apigee X)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side-by-Side Comparison Arena -->
+      <section class="comparison-grid" aria-label="Side-by-Side Comparison Results">
+        <!-- Left Column: Direct Point-to-Point Baseline -->
+        <article class="comparison-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Baseline &bull; Point-to-Point Integration (No Gateway)</div>
+              <h3 class="card-heading">Direct to Vertex AI Gemini 2.5 Pro</h3>
+            </div>
+            <span class="model-pill" id="direct-model-pill">gemini-2.5-pro</span>
+          </div>
+
+          <div class="metrics-strip">
+            <div class="metric-box">
+              <div class="metric-label">Total Billed Tokens</div>
+              <div class="metric-main" id="direct-total-tokens">&mdash;</div>
+              <div class="metric-delta" id="direct-tokens-sub" style="color: var(--text-secondary);">Unoptimized payload</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Total Request Cost</div>
+              <div class="metric-main" id="direct-total-cost">&mdash;</div>
+              <div class="metric-delta" style="color: var(--text-secondary);">$1.25/1M in &bull; $10/1M out</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Thinking Tokens</div>
+              <div class="metric-main" id="direct-thinking-tokens">&mdash;</div>
+              <div class="metric-delta" style="color: var(--text-secondary);">Billed @ $10.00/1M</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">End-to-End Latency</div>
+              <div class="metric-main" id="direct-latency">&mdash;</div>
+              <div class="metric-delta" id="direct-finish-reason" style="color: var(--text-secondary);">aiplatform.googleapis.com</div>
+            </div>
+          </div>
+
+          <div class="token-breakdown-bar" id="direct-breakdown-bar">
+            <span class="token-kv">Prompt: <strong id="direct-prompt-tok">0</strong></span>
+            <span class="token-kv">Candidates (Visible): <strong id="direct-cand-tok">0</strong></span>
+            <span class="token-kv">Thoughts (Internal Reasoning): <strong id="direct-thought-tok">0</strong></span>
+          </div>
+
+          <div class="response-body" id="direct-response-body">Run a scenario above to compare Direct Vertex AI Gemini 2.5 Pro against the Apigee X AI Gateway in real time.</div>
+        </article>
+
+        <!-- Right Column: Via Apigee X AI Gateway -->
+        <article class="comparison-card gateway-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Governed &amp; Optimized &bull; Apigee X (apac-cs-5g-demo5 / env: demo)</div>
+              <h3 class="card-heading">Via Apigee X AI Economics Gateway</h3>
+            </div>
+            <span class="model-pill" id="gateway-model-pill">ai-gateway-v1</span>
+          </div>
+
+          <div class="metrics-strip">
+            <div class="metric-box">
+              <div class="metric-label">Grand Total Tokens</div>
+              <div class="metric-main" id="gateway-total-tokens">&mdash;</div>
+              <div class="metric-delta savings-number" id="gateway-token-delta">&mdash;</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Total Gateway Cost</div>
+              <div class="metric-main" id="gateway-total-cost">&mdash;</div>
+              <div class="metric-delta savings-number" id="gateway-cost-delta">&mdash;</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">Gateway Overhead</div>
+              <div class="metric-main" id="gateway-overhead-tokens">&mdash;</div>
+              <div class="metric-delta" id="gateway-overhead-cost" style="color: var(--text-secondary);">Embed + Summarizer</div>
+            </div>
+            <div class="metric-box">
+              <div class="metric-label">End-to-End Latency</div>
+              <div class="metric-main" id="gateway-latency">&mdash;</div>
+              <div class="metric-delta" id="gateway-cache-badge" style="color: var(--text-secondary);">Cache: &mdash;</div>
+            </div>
+          </div>
+
+          <div class="token-breakdown-bar" id="gateway-breakdown-bar">
+            <span class="token-kv">LLM Prompt: <strong id="gw-prompt-tok">0</strong></span>
+            <span class="token-kv">LLM Output: <strong id="gw-cand-tok">0</strong></span>
+            <span class="token-kv">LLM Thoughts: <strong id="gw-thought-tok">0</strong></span>
+            <span class="token-kv">Embedding Tok: <strong id="gw-embed-tok">0</strong></span>
+            <span class="token-kv">Pruner Tok: <strong id="gw-prune-tok">0</strong></span>
+          </div>
+
+          <div class="response-body" id="gateway-response-body">Waiting for execution...</div>
+        </article>
+      </section>
+
+      <!-- Staff Engineer Deep Inspection Drawer -->
+      <section class="audit-drawer" aria-label="Staff Engineer Telemetry Audit Drawer">
+        <div class="audit-tabs" role="tablist">
+          <button class="audit-tab active" data-tab="tab-compression" type="button">
+            1. LLMLingua-2 Prompt Compression Diff
+          </button>
+          <button class="audit-tab" data-tab="tab-cascade" type="button">
+            2. FrugalGPT Routing &amp; Cascade Audit (g(q,a))
+          </button>
+          <button class="audit-tab" data-tab="tab-cache-prune" type="button">
+            3. Semantic Cache &amp; Context Pruning State
+          </button>
+          <button class="audit-tab" data-tab="tab-headers-raw" type="button">
+            4. Apigee X HTTP Headers &amp; Raw Telemetry JSON
           </button>
         </div>
-        <div id="scenario-list" class="scenario-list">
-          <!-- Populated dynamically from /api/scenarios -->
-        </div>
-      </div>
 
-      <!-- Right: 4 Gateway Policy Toggles -->
-      <div class="panel">
+        <!-- Tab 1: Prompt Compression Diff -->
+        <div class="audit-content" id="tab-compression">
+          <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong>Coarse-to-Fine Budget Controller + Token Perplexity Pruning</strong>
+              <span style="color: var(--text-secondary); font-size: 12px; margin-left: 8px;" id="comp-method-label">
+                microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank
+              </span>
+            </div>
+            <div style="font-family: var(--font-mono); font-size: 12px;" id="comp-stats-summary">
+              Tokens Before: &mdash; | Tokens After: &mdash; | Compression Ratio: &mdash;
+            </div>
+          </div>
+          <div class="diff-grid">
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;">
+                <span>Original Assembled Prompt (Before Compression)</span>
+                <span id="comp-before-count"></span>
+              </div>
+              <div class="code-block" id="comp-original-box">Run a request to inspect the assembled prompt before compression.</div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;">
+                <span>Compressed Prompt Dispatched by Apigee X to Vertex AI</span>
+                <span id="comp-after-count" class="savings-number"></span>
+              </div>
+              <div class="code-block" id="comp-compressed-box">Run a request with X-Opt-Compress: true to inspect the pruned prompt.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: FrugalGPT Routing & Cascade Audit -->
+        <div class="audit-content" id="tab-cascade" style="display: none;">
+          <div id="cascade-audit-body">
+            Run a request to inspect the FrugalGPT complexity router and post-generation reliability scorer <code>g(q, a)</code>.
+          </div>
+        </div>
+
+        <!-- Tab 3: Semantic Cache & Context Pruning -->
+        <div class="audit-content" id="tab-cache-prune" style="display: none;">
+          <div id="cache-prune-audit-body">
+            Run a request to inspect Vertex AI <code>text-embedding-005</code> cosine similarity and multi-turn rolling context summarization.
+          </div>
+        </div>
+
+        <!-- Tab 4: Live HTTP Headers & Raw JSON -->
+        <div class="audit-content" id="tab-headers-raw" style="display: none;">
+          <div class="diff-grid">
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;">
+                <span>Northbound Request &amp; Southbound Apigee X HTTP Headers</span>
+              </div>
+              <div class="code-block" id="raw-headers-box">Run a request to view live HTTP headers.</div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;">
+                <span>Full Apigee X + Direct Baseline JSON Telemetry Envelope</span>
+              </div>
+              <div class="code-block" id="raw-json-box">Run a request to view the raw JSON response.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- =======================================================================
+         MAIN TAB 2: TOKEN FINOPS & QUOTAS (PromptTokenLimit + LLMTokenQuota)
+         ======================================================================= -->
+    <div id="main-tab-token-finops" class="main-tab-pane" style="display: none;">
+      <section class="control-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Token FinOps Scenarios (<code>PromptTokenLimit</code> &amp; <code>LLMTokenQuota</code>)</h2>
+          </div>
+          <div id="tg-scenario-list" class="scenario-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Live Apigee X Token Policy Parameters</h2>
+          </div>
+          <div class="composer-fields" style="margin-bottom: 0;">
+            <div class="field-group">
+              <label class="field-label" for="tg-prompt-limit">
+                <span>1. <code>PromptTokenLimit</code> Rate (<code>X-Prompt-Token-Limit</code>)</span>
+              </label>
+              <input id="tg-prompt-limit" class="field-input" type="text" value="120pm" />
+              <span style="font-size: 11px; color: var(--text-secondary);">Pre-flight prompt token spike arrest (e.g. <code>80pm</code>, <code>120pm</code>, <code>250pm</code>)</span>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="tg-quota-limit">
+                <span>2. <code>LLMTokenQuota</code> Budget / Min (<code>X-Quota-Limit</code>)</span>
+              </label>
+              <input id="tg-quota-limit" class="field-input" type="number" value="500" />
+              <span style="font-size: 11px; color: var(--text-secondary);">Rolling 1-minute total token quota enforced against Vertex AI <code>usageMetadata.totalTokenCount</code></span>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="tg-quota-id">
+                <span>Consumer / App Identifier (<code>X-Quota-Id</code>)</span>
+              </label>
+              <input id="tg-quota-id" class="field-input" type="text" value="tier-standard-app" />
+            </div>
+            <div class="field-group" style="justify-content: center; gap: 10px;">
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600;">
+                <input type="checkbox" id="tg-enable-ptl" checked /> Enforce <code>PTL-EnforcePromptLimit</code>
+              </label>
+              <label style="display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600;">
+                <input type="checkbox" id="tg-enable-ltq" checked /> Enforce <code>LTQ-EnforceTokenQuota</code>
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="composer-panel">
         <div class="panel-header">
-          <h2 class="panel-title">Apigee X Gateway Policy Toggles (HTTP Headers)</h2>
-          <div style="display: flex; gap: 6px;">
-            <button id="btn-toggles-all-on" class="btn btn-subtle" type="button">Enable All 4</button>
-            <button id="btn-toggles-all-off" class="btn btn-subtle" type="button">All Off (Passthrough)</button>
+          <h2 class="panel-title">Test Prompt &amp; Live Apigee Execution (<code>/v1/ai-economics/policies/token-governance</code>)</h2>
+        </div>
+        <textarea id="tg-prompt" class="field-textarea" rows="4"></textarea>
+        <div class="composer-footer" style="margin-top: 12px;">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);">
+            Apigee Flow: <strong>Policy-Token-Governance (PTL-EnforcePromptLimit &rarr; Vertex Flash &rarr; LTQ-EnforceTokenQuota)</strong>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="tg-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+            <button id="btn-run-tg" class="btn btn-primary" type="button">
+              Execute Token Governance Test (Direct vs. Apigee X)
+            </button>
           </div>
         </div>
-        <div class="toggles-list">
-          <!-- Toggle 1: Semantic Cache -->
-          <div class="toggle-card enabled" id="card-toggle-cache">
+      </section>
+
+      <section class="comparison-grid">
+        <article class="comparison-card">
+          <div class="card-top-bar">
             <div>
-              <div class="toggle-top">
-                <span class="toggle-name">1. Semantic Caching</span>
-                <label class="switch" aria-label="Toggle Semantic Caching">
-                  <input type="checkbox" id="toggle-cache" checked />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <span class="toggle-header-tag">X-Opt-Cache: true</span>
-              <p class="toggle-desc">
-                <strong>FrugalGPT &sect;3.1:</strong> Embeds query via Vertex AI <code>text-embedding-005</code> in Sydney. If cosine similarity &ge; <code>0.85</code>, Apigee short-circuits Vertex AI at 0 LLM tokens.
-              </p>
+              <div class="card-kicker">Unprotected Baseline &bull; No Token Ceiling or Quota</div>
+              <h3 class="card-heading">Direct to Vertex AI (Unbounded Spend)</h3>
             </div>
+            <span class="model-pill" id="tg-direct-pill">HTTP 200</span>
           </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Prompt Tokens: <strong id="tg-direct-prompt-tok">0</strong></span>
+            <span class="token-kv">Total Tokens Billed: <strong id="tg-direct-total-tok">0</strong></span>
+            <span class="token-kv">Cost: <strong id="tg-direct-cost">$0.000000</strong></span>
+            <span class="token-kv">Latency: <strong id="tg-direct-lat">0 ms</strong></span>
+          </div>
+          <div class="response-body" id="tg-direct-body">Select a scenario and click Execute to compare Direct Vertex AI against Apigee X Token Governance.</div>
+        </article>
 
-          <!-- Toggle 2: Prompt Compression -->
-          <div class="toggle-card enabled" id="card-toggle-compress">
+        <article class="comparison-card gateway-card">
+          <div class="card-top-bar">
             <div>
-              <div class="toggle-top">
-                <span class="toggle-name">2. Prompt Compression</span>
-                <label class="switch" aria-label="Toggle Prompt Compression">
-                  <input type="checkbox" id="toggle-compress" checked />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <span class="toggle-header-tag">X-Opt-Compress: true</span>
-              <p class="toggle-desc">
-                <strong>LLMLingua-2:</strong> Coarse-to-Fine budget controller (&tau;<sub>instr</sub>=0.85, &tau;<sub>rag</sub>=0.35, &tau;<sub>query</sub>=1.0) + BERT token pruning on CPU before southbound LLM call.
-              </p>
+              <div class="card-kicker">Governed by Apigee X &bull; <code>PromptTokenLimit</code> + <code>LLMTokenQuota</code></div>
+              <h3 class="card-heading">Via Apigee X Token FinOps Flow</h3>
             </div>
+            <span class="model-pill" id="tg-gw-pill">READY</span>
           </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Policy Verdict: <strong id="tg-gw-verdict">&mdash;</strong></span>
+            <span class="token-kv">Quota Used / Limit: <strong id="tg-gw-quota-used">&mdash;</strong></span>
+            <span class="token-kv">Quota Remaining: <strong id="tg-gw-quota-rem">&mdash;</strong></span>
+            <span class="token-kv">Billed Tokens: <strong id="tg-gw-tok">0</strong></span>
+          </div>
+          <div class="response-body" id="tg-gw-body">Waiting for execution...</div>
+        </article>
+      </section>
 
-          <!-- Toggle 3: Model Routing & Cascade -->
-          <div class="toggle-card enabled" id="card-toggle-route">
+      <section class="audit-drawer">
+        <div class="panel-header" style="padding: 14px 20px; margin: 0; background: var(--surface-well);">
+          <h2 class="panel-title">Apigee X Native Policy XML &amp; Runtime Flow Variables (<code>ratelimit.*</code>)</h2>
+        </div>
+        <div class="audit-content">
+          <div class="diff-grid">
             <div>
-              <div class="toggle-top">
-                <span class="toggle-name">3. Model Routing &amp; Cascade</span>
-                <label class="switch" aria-label="Toggle Model Routing and Cascade">
-                  <input type="checkbox" id="toggle-route" checked />
-                  <span class="slider"></span>
-                </label>
-              </div>
-              <span class="toggle-header-tag">X-Opt-Route: true</span>
-              <p class="toggle-desc">
-                <strong>FrugalGPT &sect;3.3:</strong> Routes to L<sub>1</sub> <code>gemini-2.5-flash</code> ($0.30/$2.50). Post-generation scorer <em>g(q,a)</em> verifies reliability &ge; 0.80 or cascades to L<sub>2</sub> <code>gemini-2.5-pro</code>.
-              </p>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Live Apigee XML Policies Deployed in <code>demo</code></span></div>
+              <div class="code-block" id="tg-xml-box"></div>
             </div>
-          </div>
-
-          <!-- Toggle 4: Context Pruning -->
-          <div class="toggle-card enabled" id="card-toggle-prune">
             <div>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Apigee Runtime Flow Variables &amp; Response Telemetry</span></div>
+              <div class="code-block" id="tg-telemetry-box">Run a test to inspect live Apigee flow variables.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- =======================================================================
+         MAIN TAB 3: AI SAFETY & MODEL ARMOR (SanitizeUserPrompt + SanitizeModelResponse)
+         ======================================================================= -->
+    <div id="main-tab-model-armor" class="main-tab-pane" style="display: none;">
+      <section class="control-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Red-Team &amp; Compliance Scenarios (Google Cloud Model Armor)</h2>
+          </div>
+          <div id="ma-scenario-list" class="scenario-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Active Model Armor Policies &amp; Filters</h2>
+          </div>
+          <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px;">
+            Template: <code>projects/apac-cs-5g-demo5/locations/us-central1/templates/apigee-ai-safety-template</code>
+          </div>
+          <div class="toggles-list">
+            <div class="toggle-card enabled">
               <div class="toggle-top">
-                <span class="toggle-name">4. Context Pruning / Dedup</span>
-                <label class="switch" aria-label="Toggle Context Pruning">
-                  <input type="checkbox" id="toggle-prune" checked />
-                  <span class="slider"></span>
-                </label>
+                <span class="toggle-name">3. <code>SanitizeUserPrompt</code></span>
+                <input type="checkbox" id="ma-enable-prompt" checked />
               </div>
-              <span class="toggle-header-tag">X-Opt-Prune: true</span>
-              <p class="toggle-desc">
-                <strong>Multi-Turn State Distillation:</strong> Condenses older turns into a rolling state summary via Flash + strips duplicate boilerplate paragraphs.
-              </p>
+              <span class="toggle-header-tag">SUP-SanitizeUserPrompt</span>
+              <p class="toggle-desc">Inspects inbound user prompt in Apigee Request Flow for Prompt Injection, Jailbreaks, PII/SDP (SSN, Credit Cards), and RAI violations before LLM inference.</p>
+            </div>
+            <div class="toggle-card enabled">
+              <div class="toggle-top">
+                <span class="toggle-name">4. <code>SanitizeModelResponse</code></span>
+                <input type="checkbox" id="ma-enable-response" checked />
+              </div>
+              <span class="toggle-header-tag">SMR-SanitizeModelResponse</span>
+              <p class="toggle-desc">Inspects outbound Vertex AI completion in Apigee Response Flow for Malicious Phishing URLs, PII leakage, and unsafe completions before returning to caller.</p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Inspectable & Editable Request Composer -->
-    <section class="composer-panel">
-      <div class="panel-header">
-        <h2 class="panel-title">Request Payload Inspector &amp; Live Execution</h2>
-        <span class="panel-meta" id="active-scenario-meta">Scenario 1 selected</span>
-      </div>
-
-      <div id="presenter-note" class="presenter-note-bar">
-        Select a scenario above or customize the prompt fields below, then click <strong>Execute Side-by-Side Comparison</strong>.
-      </div>
-
-      <div class="composer-fields">
-        <div class="field-group">
-          <label class="field-label" for="input-system">
-            <span>System Instruction (&tau;<sub>instr</sub> = 0.85)</span>
-            <span id="meta-system-len"></span>
-          </label>
-          <textarea id="input-system" class="field-textarea" rows="2"></textarea>
+      <section class="composer-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Test Prompt &amp; Live Apigee Execution (<code>/v1/ai-economics/policies/model-armor</code>)</h2>
         </div>
-
-        <div class="field-group">
-          <label class="field-label" for="input-history">
-            <span>Multi-Turn Conversation History (JSON Array)</span>
-            <span id="meta-history-turns">0 prior turns</span>
-          </label>
-          <textarea id="input-history" class="field-textarea" rows="2" placeholder="[]"></textarea>
-        </div>
-
-        <div class="field-group full-width">
-          <label class="field-label" for="input-rag">
-            <span>Retrieved RAG Context &amp; Policy Excerpts (&tau;<sub>rag</sub> = 0.35)</span>
-            <span id="meta-rag-len"></span>
-          </label>
-          <textarea id="input-rag" class="field-textarea" rows="4" placeholder="(Optional) Paste retrieved RAG documents or policy excerpts..."></textarea>
-        </div>
-
-        <div class="field-group full-width">
-          <label class="field-label" for="input-prompt">
-            <span>User Query (&tau;<sub>query</sub> = 1.00 — Never Compressed)</span>
-          </label>
-          <textarea id="input-prompt" class="field-textarea" rows="2"></textarea>
-        </div>
-      </div>
-
-      <div class="composer-footer">
-        <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);">
-          Apigee X Target: <strong id="footer-apigee-url">https://10.106.240.2.nip.io/v1/ai-economics/chat (apac-cs-5g-demo5 / env: demo)</strong>
-        </div>
-        <div style="display: flex; align-items: center; gap: 12px;">
-          <span id="run-status-indicator" style="font-size: 12px; color: var(--text-secondary);"></span>
-          <button id="btn-execute-compare" class="btn btn-primary" type="button">
-            Execute Side-by-Side Comparison (Live Vertex AI + Apigee X)
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <!-- Side-by-Side Comparison Arena -->
-    <section class="comparison-grid" aria-label="Side-by-Side Comparison Results">
-      <!-- Left Column: Direct Point-to-Point Baseline -->
-      <article class="comparison-card">
-        <div class="card-top-bar">
-          <div>
-            <div class="card-kicker">Baseline &bull; Point-to-Point Integration (No Gateway)</div>
-            <h3 class="card-heading">Direct to Vertex AI Gemini 2.5 Pro</h3>
+        <textarea id="ma-prompt" class="field-textarea" rows="3"></textarea>
+        <div class="composer-footer" style="margin-top: 12px;">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);">
+            Apigee Flow: <strong>Policy-Model-Armor (SUP-SanitizeUserPrompt &rarr; Vertex Flash &rarr; SMR-SanitizeModelResponse)</strong>
           </div>
-          <span class="model-pill" id="direct-model-pill">gemini-2.5-pro</span>
-        </div>
-
-        <div class="metrics-strip">
-          <div class="metric-box">
-            <div class="metric-label">Total Billed Tokens</div>
-            <div class="metric-main" id="direct-total-tokens">&mdash;</div>
-            <div class="metric-delta" id="direct-tokens-sub" style="color: var(--text-secondary);">Unoptimized payload</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">Total Request Cost</div>
-            <div class="metric-main" id="direct-total-cost">&mdash;</div>
-            <div class="metric-delta" style="color: var(--text-secondary);">$1.25/1M in &bull; $10/1M out</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">Thinking Tokens</div>
-            <div class="metric-main" id="direct-thinking-tokens">&mdash;</div>
-            <div class="metric-delta" style="color: var(--text-secondary);">Billed @ $10.00/1M</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">End-to-End Latency</div>
-            <div class="metric-main" id="direct-latency">&mdash;</div>
-            <div class="metric-delta" id="direct-finish-reason" style="color: var(--text-secondary);">aiplatform.googleapis.com</div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="ma-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+            <button id="btn-run-ma" class="btn btn-primary" type="button">
+              Execute Model Armor Safety Test (Direct vs. Apigee X)
+            </button>
           </div>
         </div>
+      </section>
 
-        <div class="token-breakdown-bar" id="direct-breakdown-bar">
-          <span class="token-kv">Prompt: <strong id="direct-prompt-tok">0</strong></span>
-          <span class="token-kv">Candidates (Visible): <strong id="direct-cand-tok">0</strong></span>
-          <span class="token-kv">Thoughts (Internal Reasoning): <strong id="direct-thought-tok">0</strong></span>
-        </div>
-
-        <div class="response-body" id="direct-response-body">Run a scenario above to compare Direct Vertex AI Gemini 2.5 Pro against the Apigee X AI Gateway in real time.</div>
-      </article>
-
-      <!-- Right Column: Via Apigee X AI Gateway -->
-      <article class="comparison-card gateway-card">
-        <div class="card-top-bar">
-          <div>
-            <div class="card-kicker">Governed &amp; Optimized &bull; Apigee X (apac-cs-5g-demo5 / env: demo)</div>
-            <h3 class="card-heading">Via Apigee X AI Economics Gateway</h3>
-          </div>
-          <span class="model-pill" id="gateway-model-pill">ai-gateway-v1</span>
-        </div>
-
-        <div class="metrics-strip">
-          <div class="metric-box">
-            <div class="metric-label">Grand Total Tokens</div>
-            <div class="metric-main" id="gateway-total-tokens">&mdash;</div>
-            <div class="metric-delta savings-number" id="gateway-token-delta">&mdash;</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">Total Gateway Cost</div>
-            <div class="metric-main" id="gateway-total-cost">&mdash;</div>
-            <div class="metric-delta savings-number" id="gateway-cost-delta">&mdash;</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">Gateway Overhead</div>
-            <div class="metric-main" id="gateway-overhead-tokens">&mdash;</div>
-            <div class="metric-delta" id="gateway-overhead-cost" style="color: var(--text-secondary);">Embed + Summarizer</div>
-          </div>
-          <div class="metric-box">
-            <div class="metric-label">End-to-End Latency</div>
-            <div class="metric-main" id="gateway-latency">&mdash;</div>
-            <div class="metric-delta" id="gateway-cache-badge" style="color: var(--text-secondary);">Cache: &mdash;</div>
-          </div>
-        </div>
-
-        <div class="token-breakdown-bar" id="gateway-breakdown-bar">
-          <span class="token-kv">LLM Prompt: <strong id="gw-prompt-tok">0</strong></span>
-          <span class="token-kv">LLM Output: <strong id="gw-cand-tok">0</strong></span>
-          <span class="token-kv">LLM Thoughts: <strong id="gw-thought-tok">0</strong></span>
-          <span class="token-kv">Embedding Tok: <strong id="gw-embed-tok">0</strong></span>
-          <span class="token-kv">Pruner Tok: <strong id="gw-prune-tok">0</strong></span>
-        </div>
-
-        <div class="response-body" id="gateway-response-body">Waiting for execution...</div>
-      </article>
-    </section>
-
-    <!-- Staff Engineer Deep Inspection Drawer -->
-    <section class="audit-drawer" aria-label="Staff Engineer Telemetry Audit Drawer">
-      <div class="audit-tabs" role="tablist">
-        <button class="audit-tab active" data-tab="tab-compression" type="button">
-          1. LLMLingua-2 Prompt Compression Diff
-        </button>
-        <button class="audit-tab" data-tab="tab-cascade" type="button">
-          2. FrugalGPT Routing &amp; Cascade Audit (g(q,a))
-        </button>
-        <button class="audit-tab" data-tab="tab-cache-prune" type="button">
-          3. Semantic Cache &amp; Context Pruning State
-        </button>
-        <button class="audit-tab" data-tab="tab-headers-raw" type="button">
-          4. Apigee X HTTP Headers &amp; Raw Telemetry JSON
-        </button>
-      </div>
-
-      <!-- Tab 1: Prompt Compression Diff -->
-      <div class="audit-content" id="tab-compression">
-        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
-          <div>
-            <strong>Coarse-to-Fine Budget Controller + Token Perplexity Pruning</strong>
-            <span style="color: var(--text-secondary); font-size: 12px; margin-left: 8px;" id="comp-method-label">
-              microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank
-            </span>
-          </div>
-          <div style="font-family: var(--font-mono); font-size: 12px;" id="comp-stats-summary">
-            Tokens Before: &mdash; | Tokens After: &mdash; | Compression Ratio: &mdash;
-          </div>
-        </div>
-        <div class="diff-grid">
-          <div>
-            <div class="field-label" style="margin-bottom: 6px;">
-              <span>Original Assembled Prompt (Before Compression)</span>
-              <span id="comp-before-count"></span>
+      <section class="comparison-grid">
+        <article class="comparison-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Unprotected Baseline &bull; Point-to-Point to Vertex AI</div>
+              <h3 class="card-heading">Direct to Vertex AI (No Gateway Sanitization)</h3>
             </div>
-            <div class="code-block" id="comp-original-box">Run a request to inspect the assembled prompt before compression.</div>
+            <span class="model-pill" id="ma-direct-pill">UNPROTECTED</span>
           </div>
-          <div>
-            <div class="field-label" style="margin-bottom: 6px;">
-              <span>Compressed Prompt Dispatched by Apigee X to Vertex AI</span>
-              <span id="comp-after-count" class="savings-number"></span>
-            </div>
-            <div class="code-block" id="comp-compressed-box">Run a request with X-Opt-Compress: true to inspect the pruned prompt.</div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Prompt Tokens: <strong id="ma-direct-prompt-tok">0</strong></span>
+            <span class="token-kv">Total Billed Tokens: <strong id="ma-direct-total-tok">0</strong></span>
+            <span class="token-kv">Wasted Spend: <strong id="ma-direct-cost">$0.000000</strong></span>
+            <span class="token-kv">Latency: <strong id="ma-direct-lat">0 ms</strong></span>
           </div>
-        </div>
-      </div>
+          <div class="response-body" id="ma-direct-body">Select a red-team scenario above and click Execute to see what happens without Apigee X + Model Armor.</div>
+        </article>
 
-      <!-- Tab 2: FrugalGPT Routing & Cascade Audit -->
-      <div class="audit-content" id="tab-cascade" style="display: none;">
-        <div id="cascade-audit-body">
-          Run a request to inspect the FrugalGPT complexity router and post-generation reliability scorer <code>g(q, a)</code>.
-        </div>
-      </div>
-
-      <!-- Tab 3: Semantic Cache & Context Pruning -->
-      <div class="audit-content" id="tab-cache-prune" style="display: none;">
-        <div id="cache-prune-audit-body">
-          Run a request to inspect Vertex AI <code>text-embedding-005</code> cosine similarity and multi-turn rolling context summarization.
-        </div>
-      </div>
-
-      <!-- Tab 4: Live HTTP Headers & Raw JSON -->
-      <div class="audit-content" id="tab-headers-raw" style="display: none;">
-        <div class="diff-grid">
-          <div>
-            <div class="field-label" style="margin-bottom: 6px;">
-              <span>Northbound Request &amp; Southbound Apigee X HTTP Headers</span>
+        <article class="comparison-card gateway-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Protected by Apigee X &bull; <code>SanitizeUserPrompt</code> + <code>SanitizeModelResponse</code></div>
+              <h3 class="card-heading">Via Apigee X + Google Cloud Model Armor</h3>
             </div>
-            <div class="code-block" id="raw-headers-box">Run a request to view live HTTP headers.</div>
+            <span class="model-pill" id="ma-gw-pill">PROTECTED</span>
           </div>
-          <div>
-            <div class="field-label" style="margin-bottom: 6px;">
-              <span>Full Apigee X + Direct Baseline JSON Telemetry Envelope</span>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Gateway Action: <strong id="ma-gw-verdict">&mdash;</strong></span>
+            <span class="token-kv">Fault / Policy: <strong id="ma-gw-fault">&mdash;</strong></span>
+            <span class="token-kv">LLM Tokens Billed: <strong id="ma-gw-tok">0</strong></span>
+            <span class="token-kv">Latency: <strong id="ma-gw-lat">0 ms</strong></span>
+          </div>
+          <div class="response-body" id="ma-gw-body">Waiting for execution...</div>
+        </article>
+      </section>
+
+      <section class="audit-drawer">
+        <div class="panel-header" style="padding: 14px 20px; margin: 0; background: var(--surface-well);">
+          <h2 class="panel-title">Apigee X Model Armor Policy XML &amp; Inspection Telemetry</h2>
+        </div>
+        <div class="audit-content">
+          <div class="diff-grid">
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Live Apigee XML Policies Deployed in <code>demo</code></span></div>
+              <div class="code-block" id="ma-xml-box"></div>
             </div>
-            <div class="code-block" id="raw-json-box">Run a request to view the raw JSON response.</div>
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Model Armor Fault &amp; Flow Variable Telemetry</span></div>
+              <div class="code-block" id="ma-telemetry-box">Run a test to inspect Model Armor verdict details.</div>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
+
+    <!-- =======================================================================
+         MAIN TAB 4: SEMANTIC GOVERNANCE & NATIVE APIGEE SEMANTIC CACHE
+         ======================================================================= -->
+    <div id="main-tab-semantic-gov" class="main-tab-pane" style="display: none;">
+      <!-- Vertex AI Vector Search Node Status & Cost Control Bar -->
+      <section class="panel" style="margin-bottom: 20px; border-left: 4px solid var(--google-blue);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div class="masthead-kicker" style="margin-bottom: 4px;">
+              Vertex AI Vector Search Infrastructure &bull; Native Apigee <code>SemanticCacheLookup</code> &amp; <code>SemanticCachePopulate</code>
+            </div>
+            <h3 style="margin: 0 0 4px 0; font-size: 16px;">
+              Dedicated Vector Search Node Control (<code id="vs-shard-label">SHARD_SIZE_MEDIUM / e2-standard-16</code>)
+            </h3>
+            <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);" id="vs-resource-details">
+              Checking Vertex AI Vector Search Index &amp; Endpoint state in <code>australia-southeast1</code>...
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <span class="model-pill" id="vs-state-badge" style="font-size: 12px; padding: 6px 12px;">CHECKING...</span>
+            <span class="model-pill" id="vs-cost-badge" style="font-size: 12px; padding: 6px 12px;">$0.00/hr</span>
+            <button id="btn-vs-wake" class="btn btn-primary" type="button" style="padding: 7px 14px; font-size: 12px;">
+              Wake Up Node (Deploy Index)
+            </button>
+            <button id="btn-vs-suspend" class="btn btn-outline" type="button" style="padding: 7px 14px; font-size: 12px;">
+              Suspend Node ($0/hr)
+            </button>
+            <button id="btn-vs-refresh" class="btn btn-subtle" type="button">
+              Refresh Status
+            </button>
+          </div>
+        </div>
+        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border-hairline); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-secondary);">
+          <span>CLI Helper: <code>./infra/toggle_vector_search.sh status | on | off</code></span>
+          <span id="vs-domain-label">Public Endpoint: <code>958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</code></span>
+        </div>
+      </section>
+
+      <section class="control-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Select Policy Use Case (<code>SemanticGovernance</code> vs. Native Cache)</h2>
+            <div style="display: flex; gap: 6px;">
+              <button id="btn-submode-sg" class="btn btn-primary" type="button" style="padding: 5px 12px; font-size: 12px;">
+                7. SemanticGovernance
+              </button>
+              <button id="btn-submode-nc" class="btn btn-outline" type="button" style="padding: 5px 12px; font-size: 12px;">
+                5 &amp; 6. Native Semantic Cache
+              </button>
+            </div>
+          </div>
+          <div id="sg-scenario-list" class="scenario-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Active Apigee X Policy Configuration</h2>
+          </div>
+          <div id="sg-policy-explanation" style="font-size: 12.5px; color: var(--text-primary); line-height: 1.55;">
+            <p style="margin-top: 0;">
+              <strong><code>SG-EnforceEnterpriseDomain</code> (<code>&lt;SemanticGovernance&gt;</code>):</strong>
+              Uses Vertex AI Gemini (<code>gemini-2.5-flash</code>) natively inside the Apigee Response Flow to verify that model completions strictly adhere to declarative domain rules:
+            </p>
+            <div class="code-block" style="max-height: 140px;">Rule id="enterprise-domain-guardrail":
+"The response must only provide enterprise cloud architecture, cybersecurity, FinOps, software engineering, or API management guidance. It must NOT provide personal stock trading recommendations, cryptocurrency speculation, medical diagnoses, creative fiction/poetry, or competitor disparagement."</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="composer-panel">
+        <div class="panel-header">
+          <h2 class="panel-title" id="sg-composer-title">Test Prompt &amp; Live Apigee Execution (<code>/v1/ai-economics/policies/semantic-governance</code>)</h2>
+        </div>
+        <textarea id="sg-prompt" class="field-textarea" rows="3"></textarea>
+        <div class="composer-footer" style="margin-top: 12px;">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);" id="sg-flow-footer">
+            Apigee Flow: <strong>Policy-Semantic-Governance (Vertex Flash &rarr; SG-EnforceEnterpriseDomain)</strong>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="sg-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+            <button id="btn-run-sg" class="btn btn-primary" type="button">
+              Execute Policy Test (Direct vs. Apigee X)
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="comparison-grid">
+        <article class="comparison-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Unprotected Baseline &bull; No Domain Guardrail</div>
+              <h3 class="card-heading">Direct to Vertex AI</h3>
+            </div>
+            <span class="model-pill" id="sg-direct-pill">UNRESTRICTED</span>
+          </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Prompt Tokens: <strong id="sg-direct-prompt-tok">0</strong></span>
+            <span class="token-kv">Total Billed Tokens: <strong id="sg-direct-total-tok">0</strong></span>
+            <span class="token-kv">Cost: <strong id="sg-direct-cost">$0.000000</strong></span>
+            <span class="token-kv">Latency: <strong id="sg-direct-lat">0 ms</strong></span>
+          </div>
+          <div class="response-body" id="sg-direct-body">Select a scenario above and click Execute to compare Direct Vertex AI against Apigee X.</div>
+        </article>
+
+        <article class="comparison-card gateway-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Governed by Apigee X &bull; <code>apac-cs-5g-demo5 / env: demo</code></div>
+              <h3 class="card-heading" id="sg-gw-heading">Via Apigee X Semantic Governance</h3>
+            </div>
+            <span class="model-pill" id="sg-gw-pill">READY</span>
+          </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Gateway Verdict: <strong id="sg-gw-verdict">&mdash;</strong></span>
+            <span class="token-kv">Fault / Cache Hit: <strong id="sg-gw-fault">&mdash;</strong></span>
+            <span class="token-kv">Billed Tokens: <strong id="sg-gw-tok">0</strong></span>
+            <span class="token-kv">Latency: <strong id="sg-gw-lat">0 ms</strong></span>
+          </div>
+          <div class="response-body" id="sg-gw-body">Waiting for execution...</div>
+        </article>
+      </section>
+
+      <section class="audit-drawer">
+        <div class="panel-header" style="padding: 14px 20px; margin: 0; background: var(--surface-well);">
+          <h2 class="panel-title">Apigee X Native Policy XML &amp; Runtime Telemetry</h2>
+        </div>
+        <div class="audit-content">
+          <div class="diff-grid">
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Live Apigee XML Policies Deployed in <code>demo</code></span></div>
+              <div class="code-block" id="sg-xml-box"></div>
+            </div>
+            <div>
+              <div class="field-label" style="margin-bottom: 6px;"><span>Apigee Runtime Flow Variables &amp; JSON Response</span></div>
+              <div class="code-block" id="sg-telemetry-box">Run a test to inspect live Apigee flow variables.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- Architecture, Papers & Pricing ("About") Modal -->
@@ -404,50 +818,43 @@
         <div>
           <div class="masthead-kicker">Architecture &amp; Research Reference</div>
           <h2 id="about-modal-title" style="margin: 0; font-size: 20px;">
-            How the Apigee X AI Economics Gateway Works
+            How the Apigee X AI Economics &amp; Governance Gateway Works
           </h2>
         </div>
         <button id="btn-close-about" class="btn btn-outline" type="button">Close</button>
       </div>
 
       <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0;">
-        1. Research Foundations Operationalized at the Gateway Layer
+        1. Research Foundations &amp; Native Apigee X AI Policies
       </h3>
       <table class="editorial-table" style="margin-bottom: 20px;">
         <thead>
           <tr>
-            <th>Paper</th>
-            <th>Core Mechanism</th>
-            <th>Live Implementation in This Demo</th>
+            <th>Layer / Tab</th>
+            <th>Core Mechanism / Policies</th>
+            <th>Live Implementation in <code>apac-cs-5g-demo5</code> (<code>demo</code> env)</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>
-              <strong>FrugalGPT</strong><br />
-              Chen, Zaharia &amp; Zou (Stanford, 2023)<br />
-              <code>arXiv:2305.05176</code>
-            </td>
-            <td>
-              <strong>&sect;3.1 Completion Cache</strong> &amp;<br />
-              <strong>&sect;3.3 Sequential LLM Cascade</strong>
-            </td>
-            <td>
-              Apigee X calls <code>text-embedding-005</code> in <code>australia-southeast1</code>; if cosine similarity &ge; <code>0.85</code>, Apigee executes a targetless <code>Route-CacheShortCircuit</code> (0 LLM tokens). On cache miss, Apigee routes to L<sub>1</sub> (<code>gemini-2.5-flash</code>) and evaluates reliability score <code>g(q, a)</code> using token logprobs, structural completeness, and uncertainty markers. If <code>g(q, a) &lt; 0.80</code>, it escalates to L<sub>2</sub> (<code>gemini-2.5-pro</code>) and bills <strong>both</strong> calls.
-            </td>
+            <td><strong>Tab 1: AI Economics</strong><br/>FrugalGPT &amp; LLMLingua-2</td>
+            <td><code>SC-PreOptimize</code>, <code>SC-EvaluateAndCascade</code>, <code>Route-CacheShortCircuit</code></td>
+            <td>Combines Firestore Semantic Caching, LLMLingua-2 BERT token pruning, FrugalGPT L1&rarr;L2 model cascades, and multi-turn state summarization.</td>
           </tr>
           <tr>
-            <td>
-              <strong>LLMLingua / LLMLingua-2</strong><br />
-              Jiang et al. (Microsoft Research, 2023/2024)<br />
-              <code>arXiv:2310.05736</code>
-            </td>
-            <td>
-              <strong>&sect;3.1 Coarse-to-Fine Budget Controller</strong> &amp; Token Perplexity Pruning
-            </td>
-            <td>
-              Allocates separate retention budgets: System Instructions (&tau;<sub>instr</sub> = 0.85), Retrieved RAG / Few-Shot Demos (&tau;<sub>rag</sub> = 0.35), and User Query (&tau;<sub>query</sub> = 1.00, never compressed). Filters low-relevance demonstrations by embedding similarity, then runs <code>microsoft/llmlingua-2-bert-base-multilingual-cased-meetingbank</code> on Cloud Run CPU to prune low-information tokens.
-            </td>
+            <td><strong>Tab 2: Token FinOps</strong><br/>Native Quota &amp; Limits</td>
+            <td><code>PromptTokenLimit</code> &amp; <code>LLMTokenQuota</code></td>
+            <td>Pre-flight prompt token spike arrest (<code>PTL-EnforcePromptLimit</code>) and post-response rolling token budget enforcement (<code>LTQ-EnforceTokenQuota</code>) using actual Vertex AI <code>usageMetadata.totalTokenCount</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Tab 3: Model Armor</strong><br/>Safety &amp; Sanitization</td>
+            <td><code>SanitizeUserPrompt</code> &amp; <code>SanitizeModelResponse</code></td>
+            <td>Integrates natively with Google Cloud Model Armor template <code>apigee-ai-safety-template</code> to block prompt injections, jailbreaks, PII/SDP leaks, and malicious URLs.</td>
+          </tr>
+          <tr>
+            <td><strong>Tab 4: Semantic Gov &amp; Cache</strong></td>
+            <td><code>SemanticGovernance</code>, <code>SemanticCacheLookup</code>, <code>SemanticCachePopulate</code></td>
+            <td>Declarative domain rule enforcement via Gemini and native Apigee XML vector caching backed by Vertex AI Vector Search (<code>SHARD_SIZE_MEDIUM</code>).</td>
           </tr>
         </tbody>
       </table>
@@ -485,16 +892,6 @@
           </tr>
         </tbody>
       </table>
-
-      <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em;">
-        3. Engineering Honesty &amp; Architectural Trade-offs
-      </h3>
-      <ul style="font-size: 12.5px; color: var(--text-navy); line-height: 1.6; padding-left: 18px; margin-bottom: 0;">
-        <li><strong>Thinking Tokens Explicitly Billed:</strong> Gemini 2.5 models generate internal reasoning tokens (<code>thoughtsTokenCount</code>) billed at the output rate. Both sides of this demo surface and bill thinking tokens explicitly.</li>
-        <li><strong>Gateway Overhead Included:</strong> Every embedding lookup (<code>text-embedding-005</code>) and multi-turn pruning summary (<code>gemini-2.5-flash</code>) is added to the gateway's billed token count and USD cost.</li>
-        <li><strong>Honest Cascade Double-Billing:</strong> When L<sub>1</sub> (Flash) fails the reliability threshold (<code>g &lt; 0.80</code>) and escalates to L<sub>2</sub> (Pro), the gateway bills <em>both</em> the L<sub>1</sub> attempt and the L<sub>2</sub> completion.</li>
-        <li><strong>CPU Compression Latency vs. Token Savings:</strong> Running <code>LLMLingua-2</code> BERT token classification on Cloud Run CPU adds ~1.5&ndash;6s of compute latency on long RAG contexts; in high-throughput production, deploying the compressor on an L4 GPU sidecar drops compression latency below 60ms.</li>
-      </ul>
     </div>
   </div>
 

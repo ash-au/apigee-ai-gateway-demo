@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript continueOnError="false" enabled="true" timeLimit="500" name="JS-FormatPolicyFault">
+    <DisplayName>JS-FormatPolicyFault</DisplayName>
+    <Properties/>
+    <ResourceURL>jsc://format_policy_fault.js</ResourceURL>
+</Javascript>
