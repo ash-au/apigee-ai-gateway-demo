@@ -44,6 +44,16 @@ if (Array.isArray(body.messages) && body.messages.length > 0) {
     msgs.push({ role: "user", content: userText });
 }
 
+var directProThresholdHdr = context.getVariable("request.header.X-Complexity-Direct-Pro-Threshold");
+var directProThreshold = body.complexity_direct_pro_threshold !== undefined
+    ? Number(body.complexity_direct_pro_threshold)
+    : (directProThresholdHdr !== null && directProThresholdHdr !== undefined && directProThresholdHdr !== "" ? Number(directProThresholdHdr) : null);
+
+var l1MaxOutHdr = context.getVariable("request.header.X-L1-Max-Output-Tokens");
+var l1MaxOut = body.l1_max_output_tokens !== undefined
+    ? Number(body.l1_max_output_tokens)
+    : (l1MaxOutHdr !== null && l1MaxOutHdr !== undefined && l1MaxOutHdr !== "" ? Number(l1MaxOutHdr) : null);
+
 var preOptimizePayload = {
     session_id: sessionId,
     scenario_id: scenarioId,
@@ -52,8 +62,10 @@ var preOptimizePayload = {
     few_shot_examples: body.few_shot_examples || [],
     messages: msgs,
     toggles: toggles,
-    compression_target_ratio: body.compression_target_ratio || 0.38,
-    similarity_threshold: body.similarity_threshold || 0.85
+    compression_target_ratio: body.compression_target_ratio || 0.55,
+    similarity_threshold: body.similarity_threshold || 0.85,
+    complexity_direct_pro_threshold: directProThreshold,
+    l1_max_output_tokens: l1MaxOut
 };
 
 context.setVariable("ai.session_id", sessionId);

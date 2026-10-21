@@ -11,7 +11,7 @@ from fastapi import FastAPI, HTTPException
 from app.cache import SemanticCacheEngine
 from app.cascade import FrugalGPTCascadeEngine
 from app.compressor import LLMLinguaCompressorEngine
-from app.config import MODEL_PRO, PROJECT_ID, REGION
+from app.config import L1_MAX_OUTPUT_TOKENS, MODEL_FLASH, MODEL_PRO, PROJECT_ID, REGION
 from app.models import (
     CascadeEvaluateRequest,
     CascadeEvaluateResponse,
@@ -63,6 +63,8 @@ def _build_vertex_payload(
     few_shots: list[str],
     messages: list[ChatMessage],
     thinking_budget: int = 0,
+    target_model: str = MODEL_PRO,
+    l1_max_output_tokens: int | None = None,
 ) -> dict[str, Any]:
     """Construct a valid Vertex AI Gemini 2.5 generateContent JSON payload."""
     sys_parts: list[str] = []
@@ -80,9 +82,16 @@ def _build_vertex_payload(
         role = "model" if msg.role == "model" else "user"
         contents.append({"role": role, "parts": [{"text": msg.content}]})
 
+    if target_model == MODEL_FLASH:
+        max_output_tokens = (
+            l1_max_output_tokens if l1_max_output_tokens is not None else L1_MAX_OUTPUT_TOKENS
+        )
+    else:
+        max_output_tokens = 2048
+
     gen_config: dict[str, Any] = {
         "temperature": 0.1,
-        "maxOutputTokens": 2048,
+        "maxOutputTokens": max_output_tokens,
     }
     if thinking_budget >= 0:
         gen_config["thinkingConfig"] = {"thinkingBudget": thinking_budget}
@@ -245,12 +254,13 @@ def optimize_pre(req: PreOptimizeRequest) -> PreOptimizeResponse:
             resp.compressed_assembled_prompt = raw_assembled
 
         # ------------------------------------------------------------------
-        # 4. FrugalGPT Model Routing (L1 Selection)
+        # 4. FrugalGPT Model Routing (L1 Selection or PRO_DIRECT_HIGH_COMPLEXITY)
         # ------------------------------------------------------------------
         route_res = cascade_engine.select_initial_model(
             user_query=user_query,
             rag_context=working_rag,
             routing_enabled=req.toggles.model_routing,
+            complexity_direct_pro_threshold=req.complexity_direct_pro_threshold,
         )
         resp.routing_decision = route_res.decision
         resp.target_model = route_res.target_model
@@ -267,6 +277,8 @@ def optimize_pre(req: PreOptimizeRequest) -> PreOptimizeResponse:
             few_shots=working_shots,
             messages=working_messages,
             thinking_budget=route_res.thinking_budget,
+            target_model=route_res.target_model,
+            l1_max_output_tokens=req.l1_max_output_tokens,
         )
         return resp
     except Exception as exc:

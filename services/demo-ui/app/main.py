@@ -90,7 +90,7 @@ class CompareRequest(BaseModel):
     conversation_history: List[TurnModel] = Field(default_factory=list)
     user_prompt: str = ""
     toggles: Optional[TogglesModel] = None
-    compression_target_ratio: float = 0.38
+    compression_target_ratio: float = 0.55
     similarity_threshold: float = 0.85
 
 

@@ -185,7 +185,7 @@ class LLMLinguaCompressorEngine:
         rag_context: str,
         few_shot_examples: list[str],
         messages: list[ChatMessage],
-        target_ratio: float = 0.38,
+        target_ratio: float = 0.55,
     ) -> CompressionResult:
         """Execute LLMLingua Coarse-to-Fine Budget Controller + Token Compression."""
         t0 = time.perf_counter()

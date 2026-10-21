@@ -234,7 +234,7 @@
         model_routing: elToggleRoute.checked,
         context_pruning: elTogglePrune.checked,
       },
-      compression_target_ratio: scen.compression_target_ratio || 0.38,
+      compression_target_ratio: scen.compression_target_ratio || 0.55,
       similarity_threshold: scen.similarity_threshold || 0.85,
     };
 

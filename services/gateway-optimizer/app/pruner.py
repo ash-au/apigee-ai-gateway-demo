@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass
 from typing import Optional
 
-from app.config import MODEL_FLASH, PRICING
+from app.config import MODEL_FLASH, PRICING, PRUNE_MIN_HISTORY_TOKENS
 from app.models import ChatMessage
 from app.vertex_client import VertexAIClient
 
@@ -74,6 +74,7 @@ class ContextPrunerEngine:
         session_id: str,
         messages: list[ChatMessage],
         rag_context: str = "",
+        min_history_tokens: int = PRUNE_MIN_HISTORY_TOKENS,
     ) -> PruneResult:
         """Condense older conversation turns into a factual state summary while keeping the latest delta verbatim."""
         t0 = time.perf_counter()
@@ -126,40 +127,56 @@ class ContextPrunerEngine:
                 cached_summary = self._summary_cache.get(cache_key)
 
             if cached_summary is not None:
+                # Always reuse cached summary when available (0 summarizer token cost)
                 summary_text = cached_summary
+                pruned_messages: list[ChatMessage] = [
+                    ChatMessage(
+                        role="user",
+                        content=f"[PRIOR SESSION STATE SUMMARY (Turns 1-{cutoff})]\n{summary_text}",
+                    ),
+                    *recent_delta,
+                ]
             else:
-                # Call Gemini 2.5 Flash with thinkingBudget=0 to produce a dense factual state summary
-                summarizer_prompt = (
-                    "Summarize the following prior conversation turns into a dense, factual bulleted state summary "
-                    "(max 140 words). Preserve all exact identifiers, timestamps, metrics, root causes, error codes, "
-                    "and decisions reached. Omit conversational filler and repeated log lines.\n\n"
-                    f"PRIOR TURNS:\n{older_text}"
-                )
-                payload = {
-                    "contents": [{"role": "user", "parts": [{"text": summarizer_prompt}]}],
-                    "generationConfig": {
-                        "temperature": 0.0,
-                        "maxOutputTokens": 240,
-                        "thinkingConfig": {"thinkingBudget": 0},
-                    },
-                }
-                gen_text, usage, _, _ = self._vertex.generate_content(payload, model=MODEL_FLASH)
-                summary_text = gen_text.strip()
-                flash_in = usage.prompt_tokens
-                flash_out = usage.candidate_tokens
-                flash_think = usage.thinking_tokens
-                overhead_cost = usage.cost_usd
+                prunable_history_tokens = self._vertex.count_tokens(older_text, model=MODEL_FLASH)
+                if prunable_history_tokens >= min_history_tokens:
+                    # Call Gemini 2.5 Flash with thinkingBudget=0 to produce a dense factual state summary
+                    summarizer_prompt = (
+                        "Summarize the following prior conversation turns into a dense, factual bulleted state summary "
+                        "(max 140 words). Preserve all exact identifiers, timestamps, metrics, root causes, error codes, "
+                        "and decisions reached. Omit conversational filler and repeated log lines.\n\n"
+                        f"PRIOR TURNS:\n{older_text}"
+                    )
+                    payload = {
+                        "contents": [{"role": "user", "parts": [{"text": summarizer_prompt}]}],
+                        "generationConfig": {
+                            "temperature": 0.0,
+                            "maxOutputTokens": 240,
+                            "thinkingConfig": {"thinkingBudget": 0},
+                        },
+                    }
+                    gen_text, usage, _, _ = self._vertex.generate_content(payload, model=MODEL_FLASH)
+                    summary_text = gen_text.strip()
+                    flash_in = usage.prompt_tokens
+                    flash_out = usage.candidate_tokens
+                    flash_think = usage.thinking_tokens
+                    overhead_cost = usage.cost_usd
 
-                with self._lock:
-                    self._summary_cache[cache_key] = summary_text
+                    with self._lock:
+                        self._summary_cache[cache_key] = summary_text
 
-            pruned_messages: list[ChatMessage] = [
-                ChatMessage(
-                    role="user",
-                    content=f"[PRIOR SESSION STATE SUMMARY (Turns 1-{cutoff})]\n{summary_text}",
-                ),
-                *recent_delta,
-            ]
+                    pruned_messages = [
+                        ChatMessage(
+                            role="user",
+                            content=f"[PRIOR SESSION STATE SUMMARY (Turns 1-{cutoff})]\n{summary_text}",
+                        ),
+                        *recent_delta,
+                    ]
+                else:
+                    # Skip summarisation below PRUNE_MIN_HISTORY_TOKENS; only apply zero-cost paragraph deduplication
+                    pruned_messages = [
+                        ChatMessage(role=m.role, content=self._deduplicate_paragraphs(m.content))
+                        for m in messages
+                    ]
         else:
             pruned_messages = [
                 ChatMessage(role=m.role, content=self._deduplicate_paragraphs(m.content))
@@ -169,9 +186,10 @@ class ContextPrunerEngine:
         pruned_serialized = self._serialize_messages(pruned_messages, dedup_rag)
         tokens_after = self._vertex.count_tokens(pruned_serialized, model=MODEL_FLASH)
         latency_ms = round((time.perf_counter() - t0) * 1000.0, 2)
+        applied = (summary_text is not None) or (tokens_after < tokens_before)
 
         return PruneResult(
-            applied=True,
+            applied=applied,
             pruned_messages=pruned_messages,
             deduplicated_rag_context=dedup_rag,
             turns_before=turns_before,

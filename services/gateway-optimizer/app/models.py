@@ -33,6 +33,9 @@ class TokenUsageBreakdown(BaseModel):
     cost_usd: float = 0.0
 
 
+from app.config import DEFAULT_COMPRESSION_TARGET_RATIO
+
+
 class PreOptimizeRequest(BaseModel):
     """Incoming request from Apigee X ServiceCallout before calling Vertex AI."""
 
@@ -43,8 +46,20 @@ class PreOptimizeRequest(BaseModel):
     few_shot_examples: list[str] = Field(default_factory=list)
     messages: list[ChatMessage] = Field(min_length=1)
     toggles: OptimizationToggles = Field(default_factory=OptimizationToggles)
-    compression_target_ratio: float = Field(default=0.38, ge=0.15, le=0.90)
+    compression_target_ratio: float = Field(default=DEFAULT_COMPRESSION_TARGET_RATIO, ge=0.15, le=0.90)
     similarity_threshold: float = Field(default=0.85, ge=0.70, le=0.99)
+    complexity_direct_pro_threshold: Optional[float] = Field(
+        default=None,
+        ge=0.0,
+        le=1.0,
+        description="Optional per-request override for COMPLEXITY_DIRECT_PRO_THRESHOLD (default 0.55)",
+    )
+    l1_max_output_tokens: Optional[int] = Field(
+        default=None,
+        ge=64,
+        le=8192,
+        description="Optional per-request override for L1_MAX_OUTPUT_TOKENS (default 1024)",
+    )
 
 
 class PreOptimizeResponse(BaseModel):
@@ -85,7 +100,12 @@ class PreOptimizeResponse(BaseModel):
     compression_latency_ms: float = 0.0
 
     # 4. FrugalGPT Model Routing decision
-    routing_decision: Literal["CACHE_SHORT_CIRCUIT", "GEMINI_2_5_FLASH", "GEMINI_2_5_PRO"] = "GEMINI_2_5_PRO"
+    routing_decision: Literal[
+        "CACHE_SHORT_CIRCUIT",
+        "GEMINI_2_5_FLASH",
+        "GEMINI_2_5_PRO",
+        "PRO_DIRECT_HIGH_COMPLEXITY",
+    ] = "GEMINI_2_5_PRO"
     target_model: str = "gemini-2.5-pro"
     routing_reason: str = ""
     complexity_score: float = 0.0

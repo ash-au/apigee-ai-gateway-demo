@@ -7,7 +7,12 @@ import re
 from dataclasses import dataclass
 from typing import Any, Literal, Optional
 
-from app.config import DEFAULT_CASCADE_CONFIDENCE_THRESHOLD, MODEL_FLASH, MODEL_PRO
+from app.config import (
+    COMPLEXITY_DIRECT_PRO_THRESHOLD,
+    DEFAULT_CASCADE_CONFIDENCE_THRESHOLD,
+    MODEL_FLASH,
+    MODEL_PRO,
+)
 from app.models import TokenUsageBreakdown
 from app.vertex_client import VertexAIClient
 
@@ -53,7 +58,7 @@ HEDGING_PHRASES: list[str] = [
 class RoutingDecision:
     """Initial tier routing decision before invoking Vertex AI."""
 
-    decision: Literal["GEMINI_2_5_FLASH", "GEMINI_2_5_PRO"]
+    decision: Literal["GEMINI_2_5_FLASH", "GEMINI_2_5_PRO", "PRO_DIRECT_HIGH_COMPLEXITY"]
     target_model: str
     reason: str
     complexity_score: float
@@ -120,15 +125,26 @@ class FrugalGPTCascadeEngine:
 
         return round(min(1.0, score), 3), signals
 
-    def select_initial_model(self, user_query: str, rag_context: str, routing_enabled: bool) -> RoutingDecision:
-        """Select L1 model in the FrugalGPT cascade.
+    def select_initial_model(
+        self,
+        user_query: str,
+        rag_context: str,
+        routing_enabled: bool,
+        complexity_direct_pro_threshold: Optional[float] = None,
+    ) -> RoutingDecision:
+        """Select initial model in the FrugalGPT router.
 
         When routing_enabled is False, always routes to Gemini 2.5 Pro (baseline behavior).
-        When routing_enabled is True, starts the FrugalGPT cascade at L1 (Gemini 2.5 Flash)
-        so the generation scoring function g(q, f_L1(q)) can accept reliable Flash answers
-        at ~76% lower token cost or escalate to L2 (Gemini 2.5 Pro) if g(q, f_L1(q)) < tau.
+        When routing_enabled is True and complexity_score >= COMPLEXITY_DIRECT_PRO_THRESHOLD,
+        routes directly to Gemini 2.5 Pro (PRO_DIRECT_HIGH_COMPLEXITY) with no L1 attempt.
+        Otherwise starts at L1 (Gemini 2.5 Flash) with post-generation reliability verification.
         """
         complexity_score, signals = self.analyze_query_complexity(user_query, rag_context)
+        direct_pro_threshold = (
+            complexity_direct_pro_threshold
+            if complexity_direct_pro_threshold is not None
+            else COMPLEXITY_DIRECT_PRO_THRESHOLD
+        )
 
         if not routing_enabled:
             return RoutingDecision(
@@ -140,15 +156,28 @@ class FrugalGPTCascadeEngine:
                 thinking_budget=-1,  # Default dynamic thinking on Pro
             )
 
-        # FrugalGPT Sequential Cascade always attempts L1 (Gemini 2.5 Flash) first,
-        # adjusting Flash thinking budget slightly based on query complexity.
+        if complexity_score >= direct_pro_threshold:
+            return RoutingDecision(
+                decision="PRO_DIRECT_HIGH_COMPLEXITY",
+                target_model=MODEL_PRO,
+                reason=(
+                    f"PRO_DIRECT_HIGH_COMPLEXITY: Query complexity ({complexity_score:.2f}) >= "
+                    f"direct Pro threshold ({direct_pro_threshold:.2f}). Routing straight to "
+                    f"Gemini 2.5 Pro with no L1 Flash attempt."
+                ),
+                complexity_score=complexity_score,
+                complexity_signals=signals,
+                thinking_budget=-1,
+            )
+
         thinking_budget = 0 if complexity_score < 0.55 else 64
         return RoutingDecision(
             decision="GEMINI_2_5_FLASH",
             target_model=MODEL_FLASH,
             reason=(
                 f"FrugalGPT Cascade Stage L1: Routed to Gemini 2.5 Flash "
-                f"(complexity={complexity_score:.2f}); post-generation scorer g(q, a) will verify reliability >= 0.80."
+                f"(complexity={complexity_score:.2f} < {direct_pro_threshold:.2f}); "
+                f"post-generation scorer g(q, a) will verify reliability >= 0.80."
             ),
             complexity_score=complexity_score,
             complexity_signals=signals,
@@ -170,6 +199,11 @@ class FrugalGPTCascadeEngine:
 
         # If routing wasn't enabled or initial call was already Gemini 2.5 Pro, no cascade needed
         if not routing_enabled or initial_model == MODEL_PRO:
+            mode_label = (
+                "pro_direct_high_complexity"
+                if (routing_enabled and initial_model == MODEL_PRO)
+                else "direct_pro_no_cascade"
+            )
             return CascadeEvaluationResult(
                 final_response_text=l1_text,
                 final_model_used=initial_model,
@@ -177,7 +211,11 @@ class FrugalGPTCascadeEngine:
                 escalated_to_pro=False,
                 reliability_score=1.0,
                 reliability_threshold=confidence_threshold,
-                reliability_signals={"mode": "direct_pro_no_cascade"},
+                reliability_signals={
+                    "mode": mode_label,
+                    "query_complexity_score": complexity_score,
+                    "l1_cap_reached": False,
+                },
                 escalation_reason=None,
                 l1_response_preview=None,
                 l1_usage=l1_usage,
@@ -190,14 +228,18 @@ class FrugalGPTCascadeEngine:
         first_cand = candidates[0] if candidates else {}
         finish_reason = str(first_cand.get("finishReason", "STOP"))
         avg_logprobs = first_cand.get("avgLogprobs")
+        l1_cap_reached = finish_reason == "MAX_TOKENS"
 
-        # 1. Base score from token probability or completion state
+        # 1. Base score from token probability or completion state (do not penalise reliability for MAX_TOKENS cap)
         if isinstance(avg_logprobs, (int, float)):
-            # Convert average logprob (typically in [-1.2, -0.01]) to [0, 1] probability proxy
             prob_proxy = math.exp(max(-2.5, min(0.0, float(avg_logprobs))))
             base_confidence = 0.55 + (0.43 * prob_proxy)
         else:
-            base_confidence = 0.91 if finish_reason == "STOP" and len(l1_text.split()) >= 20 else 0.65
+            base_confidence = (
+                0.91
+                if (finish_reason in ("STOP", "MAX_TOKENS") and len(l1_text.split()) >= 20)
+                else 0.65
+            )
 
         # 2. Check for hedging / impossibility / unresolved constraint tension markers in L1 output
         text_lower = l1_text.lower()
@@ -208,8 +250,6 @@ class FrugalGPTCascadeEngine:
         complexity_penalty = 0.0
         structural_notes: list[str] = []
         if complexity_score >= 0.70:
-            # High-complexity multi-constraint distributed systems / formal proof queries require
-            # rigorous invariant verification; penalize L1 Flash when complexity is >= 0.70
             has_formal_proof = any(
                 kw in text_lower for kw in ["theorem", "q.e.d", "lemma", "formal invariant proof"]
             )
@@ -219,16 +259,19 @@ class FrugalGPTCascadeEngine:
                     f"High query complexity ({complexity_score:.2f}) lacks formal invariant proof in L1 Flash output"
                 )
 
-        if finish_reason != "STOP":
+        if finish_reason not in ("STOP", "MAX_TOKENS"):
             complexity_penalty += 0.25
             structural_notes.append(f"Non-STOP finishReason ({finish_reason})")
 
         g_score = round(max(0.10, min(0.99, base_confidence - hedge_penalty - complexity_penalty)), 3)
+        low_reliability = g_score < confidence_threshold
 
         signals: dict[str, Any] = {
             "base_confidence": round(base_confidence, 3),
             "avg_logprobs": round(float(avg_logprobs), 4) if isinstance(avg_logprobs, (int, float)) else "n/a",
             "finish_reason": finish_reason,
+            "l1_cap_reached": l1_cap_reached,
+            "low_reliability": low_reliability,
             "detected_uncertainty_markers": detected_hedges,
             "hedge_penalty": round(hedge_penalty, 3),
             "complexity_risk_penalty": round(complexity_penalty, 3),
@@ -236,7 +279,7 @@ class FrugalGPTCascadeEngine:
             "query_complexity_score": complexity_score,
         }
 
-        if g_score >= confidence_threshold:
+        if not l1_cap_reached and not low_reliability:
             return CascadeEvaluationResult(
                 final_response_text=l1_text,
                 final_model_used=MODEL_FLASH,
@@ -252,17 +295,24 @@ class FrugalGPTCascadeEngine:
                 l2_latency_ms=0.0,
             )
 
-        # g(q, f_L1(q)) < tau_1 -> Escalate to L2 (Gemini 2.5 Pro)!
+        # Escalate to L2 (Gemini 2.5 Pro): report "L1 cap reached" separately from low reliability
         escalation_reasons: list[str] = []
-        if structural_notes:
-            escalation_reasons.extend(structural_notes)
-        if detected_hedges:
-            escalation_reasons.append(f"Uncertainty/constraint-conflict markers detected: {', '.join(detected_hedges[:2])}")
-        if not escalation_reasons:
-            escalation_reasons.append(
-                f"FrugalGPT scorer g(q, f_L1(q)) = {g_score:.2f} below reliability threshold tau = {confidence_threshold:.2f}"
-            )
-        reason_str = "; ".join(escalation_reasons)
+        if l1_cap_reached:
+            escalation_reasons.append("L1 cap reached (finishReason=MAX_TOKENS)")
+        if low_reliability:
+            low_rel_details: list[str] = []
+            if structural_notes:
+                low_rel_details.extend(structural_notes)
+            if detected_hedges:
+                low_rel_details.append(
+                    f"Uncertainty/constraint-conflict markers detected: {', '.join(detected_hedges[:2])}"
+                )
+            if not low_rel_details:
+                low_rel_details.append(
+                    f"FrugalGPT scorer g(q, f_L1(q)) = {g_score:.2f} below reliability threshold tau = {confidence_threshold:.2f}"
+                )
+            escalation_reasons.append("Low reliability: " + "; ".join(low_rel_details))
+        reason_str = " | ".join(escalation_reasons)
 
         # Prepare L2 payload: ensure maxOutputTokens (2048) exceeds thinkingBudget (256) so visible response is never truncated
         pro_payload = dict(vertex_payload_sent)
