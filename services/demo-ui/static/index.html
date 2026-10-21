@@ -61,6 +61,13 @@
           <div class="primary-tab-sub"><code>SemanticGovernance</code> + <code>SemanticCacheLookup/Populate</code></div>
         </div>
       </button>
+      <button class="primary-tab-btn" data-maintab="main-tab-system1-jev" type="button">
+        <span class="tab-Dot dot-blue" style="background:#8e24aa;"></span>
+        <div>
+          <div class="primary-tab-title">5. System 1 (Jev) &amp; System 2 Routing</div>
+          <div class="primary-tab-sub">TypeSafe <code>Jev</code> (<code>Choice</code>/<code>Score</code>/<code>Noul</code> Battery) + Gemini 2.5</div>
+        </div>
+      </button>
     </nav>
 
     <!-- =======================================================================
@@ -809,6 +816,183 @@
         </div>
       </section>
     </div>
+
+    <!-- =======================================================================
+         MAIN TAB 5: SYSTEM 1 (TYPESAFE JEV) & SYSTEM 2 (VERTEX AI GEMINI) ROUTING
+         ======================================================================= -->
+    <div id="main-tab-system1-jev" class="main-tab-pane" style="display: none;">
+      <section class="panel" style="margin-bottom: 20px; border-left: 4px solid #8e24aa;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <div class="masthead-kicker" style="margin-bottom: 4px; color: #8e24aa;">
+              System 1 (Fast Calibrated Judgment) + System 2 (Deep Autoregressive Reasoning) &bull; Live TypeSafe <code>Jev</code> API (<code>jev-latest</code>)
+            </div>
+            <h3 style="margin: 0 0 6px 0; font-size: 16.5px;">
+              Two-Stage Confidence-Gated Routing &amp; Decomposed 5-Head <code>Noul</code> Battery in Apigee X
+            </h3>
+            <p style="margin: 0; font-size: 12.5px; color: var(--text-secondary); max-width: 960px; line-height: 1.5;">
+              Instead of relying on brittle regexes or slow LLM-as-a-Judge calls, Apigee X invokes <strong>TypeSafe Jev</strong> (<code>POST https://api.typesafe.ai/v1/systemone</code>, <strong>$0.042 / 1M input tokens</strong>, <strong>$0.00 output tokens</strong>, ~220ms single-pass calibrated logits).
+              <strong>Stage 1 (Pre-Flight):</strong> Evaluates <code>Choice</code> (tier classification + confidence) + <code>Score</code> (complexity 0..2) + <code>Noul</code> pre-checks to route via Apigee <code>RouteRules</code> to <code>gemini-2.5-flash</code> or fast-track directly to <code>gemini-2.5-pro</code>.
+              <strong>Stage 2 (Post-Verifier):</strong> Runs a decomposed 5-head <code>Noul</code> battery with an <code>any_flag &gt; fire_threshold</code> gate to catch subtle hallucinations or missed constraints that holistic judges miss.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <span class="model-pill" style="background: #f3e5f5; color: #6a1b9a; border-color: #ce93d8;">Jev: $0.042 / 1M In &bull; $0 Out</span>
+            <span class="model-pill">Apigee Flow: <code>/v1/ai-economics/system1-routing</code></span>
+          </div>
+        </div>
+      </section>
+
+      <section class="control-grid">
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Curated System 1 (Jev) + System 2 (Gemini) Scenarios</h2>
+          </div>
+          <div id="s1-scenario-list" class="scenario-list"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h2 class="panel-title">System 1 (Jev) Gate Thresholds &amp; Cascade Controls</h2>
+          </div>
+          <div class="composer-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
+            <div>
+              <label class="field-label" for="s1-conf-threshold">
+                <span>Stage 1 <code>Choice</code> Confidence Gate</span>
+                <span>0.0 &ndash; 1.0</span>
+              </label>
+              <input id="s1-conf-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.75" />
+            </div>
+            <div>
+              <label class="field-label" for="s1-fire-threshold">
+                <span>Stage 2 <code>Noul</code> Battery Fire Threshold</span>
+                <span>Default: 0.70</span>
+              </label>
+              <input id="s1-fire-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.70" />
+            </div>
+          </div>
+          <div class="toggles-list">
+            <div class="toggle-card enabled">
+              <div class="toggle-top">
+                <span class="toggle-name">1. Stage 1 Direct System 2 Fast-Track (<code>pro_system2_direct</code>)</span>
+                <input type="checkbox" id="s1-enable-fast-track" checked />
+              </div>
+              <span class="toggle-header-tag">Apigee RouteRule: Route-VertexPro</span>
+              <p class="toggle-desc">When Jev Stage 1 detects a formal proof or deep complexity (<code>requires_formal_proof &ge; 0.70</code>), route directly to <code>gemini-2.5-pro</code> and skip a wasted L1 Flash call.</p>
+            </div>
+            <div class="toggle-card enabled">
+              <div class="toggle-top">
+                <span class="toggle-name">2. Stage 2 Decomposed 5-Head <code>Noul</code> Battery Verifier</span>
+                <input type="checkbox" id="s1-enable-verifier" checked />
+              </div>
+              <span class="toggle-header-tag">any_flag = max(nouls) &gt; fire_threshold</span>
+              <p class="toggle-desc">Audits L1 <code>gemini-2.5-flash</code> responses across 5 failure modes (<code>hallucinated_or_contradicts_context</code>, <code>missed_user_constraint</code>, etc.). Escalates to L2 Pro if any head fires.</p>
+            </div>
+            <div class="toggle-card" id="s1-card-defect" style="border-left: 3px solid var(--google-red);">
+              <div class="toggle-top">
+                <span class="toggle-name">3. Inject Subtle L1 Defect (Demo Trap for Noul Battery)</span>
+                <input type="checkbox" id="s1-simulate-defect" />
+              </div>
+              <span class="toggle-header-tag">simulate_l1_defect: bool</span>
+              <p class="toggle-desc">Deterministically injects a plausible-sounding L1 response with a subtle factual contradiction &amp; omitted bullet so you can watch Jev's <code>Noul</code> battery fire (<code>&gt; 0.70 &lt;== FIRES</code>) and trigger L2 Pro recovery.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="composer-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">Prompt &amp; RAG Context Sent Through Apigee X (<code>/v1/ai-economics/system1-routing</code>)</h2>
+        </div>
+        <div class="composer-grid" style="margin-bottom: 12px;">
+          <div>
+            <div class="field-label"><span>System Instruction</span></div>
+            <textarea id="s1-sys" class="field-textarea" rows="2"></textarea>
+          </div>
+          <div>
+            <div class="field-label"><span>Retrieved RAG Context (Audited by Jev Noul Battery)</span></div>
+            <textarea id="s1-rag" class="field-textarea" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="field-label"><span>User Query</span></div>
+        <textarea id="s1-query" class="field-textarea" rows="2"></textarea>
+        <div class="composer-footer" style="margin-top: 12px;">
+          <div style="font-family: var(--font-mono); font-size: 11.5px; color: var(--text-secondary);">
+            Apigee Flow: <strong>SC-JevPreRoute &rarr; Dynamic RouteRule (Flash vs. Pro) &rarr; SC-JevPostVerify (5-Head Noul Battery)</strong>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span id="s1-status" style="font-size: 12px; color: var(--text-secondary);"></span>
+            <button id="btn-run-s1" class="btn btn-primary" type="button">
+              Execute System 1 (Jev) + System 2 Routing Comparison
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Side-by-Side Comparison: Direct System 2 vs Apigee System 1 + System 2 -->
+      <section class="comparison-grid">
+        <article class="comparison-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Baseline: Always Call System 2 Frontier LLM</div>
+              <h3 class="card-heading">Direct to Vertex AI (<code>gemini-2.5-pro</code>)</h3>
+            </div>
+            <span class="model-pill" id="s1-direct-pill">gemini-2.5-pro</span>
+          </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Prompt: <strong id="s1-direct-prompt-tok">0</strong></span>
+            <span class="token-kv">Output+Think: <strong id="s1-direct-out-tok">0</strong></span>
+            <span class="token-kv">Total Cost: <strong id="s1-direct-cost">$0.000000</strong></span>
+            <span class="token-kv">Latency: <strong id="s1-direct-lat">0 ms</strong></span>
+          </div>
+          <div class="response-body" id="s1-direct-body">Select a scenario above and click Execute to compare always-on System 2 (Gemini 2.5 Pro) against Apigee X + TypeSafe Jev System 1 routing.</div>
+        </article>
+
+        <article class="comparison-card gateway-card">
+          <div class="card-top-bar">
+            <div>
+              <div class="card-kicker">Apigee X + TypeSafe <code>Jev</code> System 1 + Vertex AI System 2</div>
+              <h3 class="card-heading" id="s1-gw-heading">Via Apigee X Dynamic System 1/2 Cascade</h3>
+            </div>
+            <span class="model-pill" id="s1-gw-pill">READY</span>
+          </div>
+          <div class="token-breakdown-bar">
+            <span class="token-kv">Apigee Route: <strong id="s1-gw-route">&mdash;</strong></span>
+            <span class="token-kv">Jev Cost: <strong id="s1-gw-jev-cost">$0.00000000</strong></span>
+            <span class="token-kv">Total Cost: <strong id="s1-gw-total-cost">$0.000000</strong></span>
+            <span class="token-kv">Net Savings: <strong id="s1-gw-savings">&mdash;</strong></span>
+          </div>
+          <div class="response-body" id="s1-gw-body">Waiting for execution...</div>
+        </article>
+      </section>
+
+      <!-- Deep-Dive Telemetry: Stage 1 Jev Router & Stage 2 Decomposed 5-Head Noul Battery -->
+      <section class="audit-drawer" style="margin-bottom: 24px;">
+        <div class="panel-header" style="padding: 14px 20px; margin: 0; background: var(--surface-well);">
+          <h2 class="panel-title">Live TypeSafe Jev (System 1) Calibrated Telemetry: Stage 1 Pre-Router &amp; Stage 2 Decomposed <code>Noul</code> Battery</h2>
+        </div>
+        <div class="audit-content">
+          <div class="diff-grid">
+            <!-- Left: Stage 1 Pre-Flight Router -->
+            <div>
+              <div class="field-label" style="margin-bottom: 8px;">
+                <span>Stage 1: Jev Pre-Flight Router (<code>Choice</code> + <code>Score</code> + Pre-<code>Noul</code>s)</span>
+                <span id="s1-stage1-meta" style="font-family: var(--font-mono); font-size: 11px;">&mdash;</span>
+              </div>
+              <div id="s1-stage1-box" class="code-block" style="min-height: 220px;">Run a scenario to inspect Jev Stage 1 softmax probabilities, confidence score, and Apigee RouteRule selection.</div>
+            </div>
+            <!-- Right: Stage 2 Post-Verifier 5-Head Noul Battery -->
+            <div>
+              <div class="field-label" style="margin-bottom: 8px;">
+                <span>Stage 2: Jev 5-Head Decomposed <code>Noul</code> Battery vs. Holistic Judge</span>
+                <span id="s1-stage2-meta" style="font-family: var(--font-mono); font-size: 11px;">&mdash;</span>
+              </div>
+              <div id="s1-stage2-box" class="code-block" style="min-height: 220px;">Run a scenario to inspect the 5-head Noul battery probabilities (`&lt;== FIRES` when &gt; fire_threshold).</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
   </div>
 
   <!-- Architecture, Papers & Pricing ("About") Modal -->
@@ -856,11 +1040,16 @@
             <td><code>SemanticGovernance</code>, <code>SemanticCacheLookup</code>, <code>SemanticCachePopulate</code></td>
             <td>Declarative domain rule enforcement via Gemini and native Apigee XML vector caching backed by Vertex AI Vector Search (<code>SHARD_SIZE_MEDIUM</code>).</td>
           </tr>
+          <tr>
+            <td><strong>Tab 5: System 1 (Jev) + System 2</strong></td>
+            <td><code>SC-JevPreRoute</code>, <code>SC-JevPostVerify</code>, TypeSafe <code>Jev</code></td>
+            <td>Uses TypeSafe <code>jev-latest</code> (<code>Choice</code>, <code>Score</code>, and a 5-head decomposed <code>Noul</code> battery) for sub-250ms calibrated routing and SDE cascade verification.</td>
+          </tr>
         </tbody>
       </table>
 
       <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em;">
-        2. Official Vertex AI Pricing Schedule (Used for All Cost Accounting)
+        2. Official Vertex AI &amp; TypeSafe Jev Pricing Schedule (Used for All Cost Accounting)
       </h3>
       <table class="editorial-table" style="margin-bottom: 20px;">
         <thead>
@@ -873,16 +1062,22 @@
         </thead>
         <tbody>
           <tr>
-            <td><code>gemini-2.5-pro</code></td>
+            <td><code>gemini-2.5-pro</code> (System 2)</td>
             <td><code>aiplatform.googleapis.com</code> (Global)</td>
             <td><code>$1.25</code></td>
             <td><code>$10.00</code> (includes <code>thoughtsTokenCount</code>)</td>
           </tr>
           <tr>
-            <td><code>gemini-2.5-flash</code></td>
+            <td><code>gemini-2.5-flash</code> (L1 Fast)</td>
             <td><code>australia-southeast1-aiplatform.googleapis.com</code></td>
             <td><code>$0.30</code></td>
             <td><code>$2.50</code> (includes <code>thoughtsTokenCount</code>)</td>
+          </tr>
+          <tr>
+            <td><code>jev-latest</code> (TypeSafe System 1)</td>
+            <td><code>api.typesafe.ai/v1/systemone</code></td>
+            <td><code>$0.042</code> ($42 / Btok)</td>
+            <td><code>$0.00</code> (free output tokens)</td>
           </tr>
           <tr>
             <td><code>text-embedding-005</code></td>

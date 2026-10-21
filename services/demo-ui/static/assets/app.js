@@ -991,12 +991,208 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const polData = await polResp.json();
         state.policiesCatalog = polData.policies_catalog || [];
         state.policyScenarios = polData.policy_scenarios || {};
+        state.system1Scenarios = polData.system1_scenarios || [];
         renderPolicyTabs();
+        renderSystem1Tab();
       }
       refreshVectorSearchStatus();
     } catch (err) {
       elRunStatus.textContent = `Initialization error: ${err.message}`;
     }
+  }
+
+  // ===========================================================================
+  // TAB 5: SYSTEM 1 (TYPESAFE JEV) & SYSTEM 2 (VERTEX AI GEMINI) ROUTING
+  // ===========================================================================
+  function selectSystem1Scenario(scen) {
+    state.activeSystem1Scenario = scen;
+    document.getElementById("s1-sys").value = scen.system_instruction || "";
+    document.getElementById("s1-rag").value = scen.rag_context || "";
+    document.getElementById("s1-query").value = scen.user_query || "";
+    document.getElementById("s1-conf-threshold").value =
+      scen.confidence_threshold !== undefined ? scen.confidence_threshold : 0.75;
+    document.getElementById("s1-fire-threshold").value =
+      scen.fire_threshold !== undefined ? scen.fire_threshold : 0.70;
+    document.getElementById("s1-enable-fast-track").checked =
+      scen.enable_direct_pro_fast_track !== false;
+    document.getElementById("s1-enable-verifier").checked =
+      scen.enable_post_verifier !== false;
+    document.getElementById("s1-simulate-defect").checked = Boolean(scen.simulate_l1_defect);
+  }
+
+  function renderSystem1Tab() {
+    const s1List = document.getElementById("s1-scenario-list");
+    if (!s1List) return;
+    const scens = state.system1Scenarios || [];
+    s1List.innerHTML = "";
+    scens.forEach((scen, idx) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "scenario-item" + (idx === 0 ? " active" : "");
+      btn.innerHTML = `
+        <div>
+          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-sub">${escapeHtml(scen.description)}</div>
+        </div>
+        <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
+      `;
+      btn.addEventListener("click", () => {
+        s1List.querySelectorAll(".scenario-item").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        selectSystem1Scenario(scen);
+      });
+      s1List.appendChild(btn);
+    });
+    if (scens.length > 0) {
+      selectSystem1Scenario(scens[0]);
+    }
+  }
+
+  const btnRunS1 = document.getElementById("btn-run-s1");
+  if (btnRunS1) {
+    btnRunS1.addEventListener("click", async () => {
+      const statusEl = document.getElementById("s1-status");
+      btnRunS1.disabled = true;
+      statusEl.textContent = "Calling TypeSafe Jev (System 1) + Apigee X + Vertex AI Gemini...";
+      try {
+        const payload = {
+          session_id: "jev-demo-session",
+          scenario_id: (state.activeSystem1Scenario && state.activeSystem1Scenario.id) || "jev-custom",
+          system_instruction: document.getElementById("s1-sys").value,
+          rag_context: document.getElementById("s1-rag").value,
+          user_query: document.getElementById("s1-query").value,
+          confidence_threshold: Number(document.getElementById("s1-conf-threshold").value || 0.75),
+          fire_threshold: Number(document.getElementById("s1-fire-threshold").value || 0.70),
+          enable_direct_pro_fast_track: document.getElementById("s1-enable-fast-track").checked,
+          enable_post_verifier: document.getElementById("s1-enable-verifier").checked,
+          simulate_l1_defect: document.getElementById("s1-simulate-defect").checked,
+        };
+
+        const resp = await fetch(`${API_PREFIX}/api/system1/execute`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        if (!resp.ok) {
+          const errText = await resp.text();
+          throw new Error(`HTTP ${resp.status}: ${errText}`);
+        }
+        const data = await resp.json();
+        const d = data.direct_baseline || {};
+        const g = data.apigee_gateway || {};
+        const cmp = data.comparison || {};
+
+        // 1. Direct Baseline Card
+        const dTok = d.token_accounting || {};
+        const dCost = d.cost_accounting || {};
+        document.getElementById("s1-direct-prompt-tok").textContent = fmtInt(dTok.prompt_tokens);
+        document.getElementById("s1-direct-out-tok").textContent = fmtInt(
+          (dTok.candidate_tokens || 0) + (dTok.thinking_tokens || 0)
+        );
+        document.getElementById("s1-direct-cost").textContent = fmtUsd(dCost.total_cost_usd, 6);
+        document.getElementById("s1-direct-lat").textContent = `${fmtInt(d.latency_ms)} ms`;
+        document.getElementById("s1-direct-body").textContent = d.response_text || "";
+
+        // 2. Apigee X + TypeSafe Jev Card
+        const gCost = g.cost_accounting || {};
+        const pill = document.getElementById("s1-gw-pill");
+        pill.textContent = g.final_model_used || "gemini-2.5-flash";
+        pill.className = g.escalated_to_pro
+          ? "model-pill pill-deploying"
+          : "model-pill pill-allowed";
+
+        document.getElementById("s1-gw-route").textContent =
+          g.initial_routing_decision === "GEMINI_2_5_PRO"
+            ? "Direct Pro Fast-Track"
+            : g.escalated_to_pro
+            ? "L1 Flash -> Escalated L2 Pro"
+            : "L1 Flash Accepted";
+        document.getElementById("s1-gw-jev-cost").textContent = fmtUsd(
+          gCost.total_jev_system1_cost_usd,
+          8
+        );
+        document.getElementById("s1-gw-total-cost").textContent = fmtUsd(gCost.total_cost_usd, 6);
+        document.getElementById("s1-gw-savings").textContent =
+          `${cmp.cost_reduction_pct >= 0 ? "+" : ""}${cmp.cost_reduction_pct}% (${fmtUsd(cmp.cost_saved_usd, 6)})`;
+
+        let gwBodyText = g.response_text || "";
+        if (g.escalated_to_pro && g.l1_response_preview) {
+          gwBodyText =
+            `[JEV STAGE 2 NOUL BATTERY INTERCEPTED DEFECTIVE L1 FLASH RESPONSE & ESCALATED TO GEMINI 2.5 PRO]\n` +
+            `Escalation Reason: ${g.escalation_reason}\n` +
+            `Rejected L1 Flash Preview: "${g.l1_response_preview}"\n` +
+            `------------------------------------------------------------------------\n` +
+            `[RECOVERED SYSTEM 2 (GEMINI 2.5 PRO) FINAL RESPONSE]:\n` +
+            gwBodyText;
+        }
+        document.getElementById("s1-gw-body").textContent = gwBodyText;
+
+        // 3. Stage 1 Jev Telemetry Box
+        const st1 = g.stage1_jev || {};
+        const st1Usage = st1.usage || {};
+        document.getElementById("s1-stage1-meta").textContent =
+          `Model: ${st1.model || "jev-latest"} | Latency: ${st1.latency_ms || 0} ms | In: ${st1Usage.input_tokens || 0} tok (${fmtUsd(st1Usage.cost_usd, 8)})`;
+
+        const st1Lines = [
+          `=== STAGE 1: TYPESAFE JEV PRE-FLIGHT ROUTER (${st1.model || "jev-latest"}) ===`,
+          `Apigee RouteRule Selected : ${g.apigee_route_rule_taken}`,
+          `Routing Decision          : ${g.initial_routing_decision} (${g.initial_target_model})`,
+          `Routing Reason            : ${g.routing_reason}`,
+          ``,
+          `--- 1. Jev Choice Primitive (target_tier) ---`,
+          `Selected Tier             : ${st1.target_tier_choice} (Confidence: ${st1.target_tier_confidence} vs Gate: ${st1.confidence_threshold})`,
+          `Calibrated Softmax Probs  : ${JSON.stringify(st1.target_tier_probabilities || {})}`,
+          ``,
+          `--- 2. Jev Score Primitive (complexity 0..2) ---`,
+          `Expected Value E[Score]   : ${st1.complexity_score} / 2.0 (Normalized: ${st1.complexity_normalized})`,
+          `Score Level Probabilities : ${JSON.stringify(st1.complexity_probabilities || {})}`,
+          ``,
+          `--- 3. Jev Pre-Flight Noul Primitives ---`,
+          `requires_formal_proof     : ${st1.pre_nouls ? st1.pre_nouls.requires_formal_proof : 0}`,
+          `has_strict_multi_constr.  : ${st1.pre_nouls ? st1.pre_nouls.has_strict_multi_constraints : 0}`,
+        ];
+        document.getElementById("s1-stage1-box").textContent = st1Lines.join("\n");
+
+        // 4. Stage 2 Jev 5-Head Noul Battery Telemetry Box
+        const st2 = g.stage2_jev || {};
+        const st2Usage = st2.usage || {};
+        document.getElementById("s1-stage2-meta").textContent = st2.executed
+          ? `Model: ${st2.model || "jev-latest"} | Latency: ${st2.latency_ms || 0} ms | In: ${st2Usage.input_tokens || 0} tok (${fmtUsd(st2Usage.cost_usd, 8)})`
+          : `Skipped (${st2.skipped_reason || "Direct System 2 Pro Fast-Track"})`;
+
+        if (!st2.executed) {
+          document.getElementById("s1-stage2-box").textContent =
+            `Stage 2 Post-Verifier was skipped: ${st2.skipped_reason}\n\n` +
+            `Because Jev Stage 1 routed directly to System 2 (gemini-2.5-pro), Apigee X avoided a wasted L1 Flash call and returned the frontier Pro completion directly.`;
+        } else {
+          const batteryRows = (st2.noul_battery_table || []).map((row) => {
+            const pStr = Number(row.probability || 0).toFixed(4);
+            const flagStr = row.fired ? "  <== FIRES (> " + st2.fire_threshold + ")" : "";
+            return `  ${row.question.padEnd(38, " ")} : ${pStr}${flagStr}`;
+          });
+          const st2Lines = [
+            `=== STAGE 2: JEV DECOMPOSED 5-HEAD NOUL BATTERY (${st2.model || "jev-latest"}) ===`,
+            `Gate Rule (any_flag)      : max(noul_battery) = ${st2.max_noul_value} (Threshold: > ${st2.fire_threshold})`,
+            `Gate Verdict              : ${st2.any_flag_fired ? "FIRED -> ESCALATE TO GEMINI 2.5 PRO" : "ALL CLEAR -> ACCEPT L1 GEMINI 2.5 FLASH"}`,
+            `Firing Heads              : ${(st2.firing_heads || []).length > 0 ? st2.firing_heads.join(", ") : "None"}`,
+            `Holistic Single-Judge Noul: ${st2.holistic_escalate_judge} (Notice how single-question judges under-react vs decomposed battery)`,
+            `Jev Response Quality Score: ${st2.response_quality_score} / 2.0`,
+            ``,
+            `--- 5-Head Noul Battery Probabilities ---`,
+            ...batteryRows,
+            ``,
+            `Escalation Summary        : ${g.escalation_reason}`,
+          ];
+          document.getElementById("s1-stage2-box").textContent = st2Lines.join("\n");
+        }
+
+        statusEl.textContent = `Completed at ${data.timestamp_utc}`;
+      } catch (e) {
+        statusEl.textContent = `Error: ${e.message}`;
+      } finally {
+        btnRunS1.disabled = false;
+      }
+    });
   }
 
   init();

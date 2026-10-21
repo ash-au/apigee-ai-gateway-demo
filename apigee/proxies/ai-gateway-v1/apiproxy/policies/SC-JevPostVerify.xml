@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-JevPostVerify">
+    <DisplayName>SC-JevPostVerify</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="jevPostVerifyRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.jev_post_verify_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>jevPostVerifyResponse</Response>
+    <Timeout>90000</Timeout>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleIDToken>
+                <Audience>https://gateway-optimizer-1019413155504.australia-southeast1.run.app</Audience>
+            </GoogleIDToken>
+        </Authentication>
+        <URL>https://gateway-optimizer-1019413155504.australia-southeast1.run.app/v1/jev/verify-and-cascade</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>

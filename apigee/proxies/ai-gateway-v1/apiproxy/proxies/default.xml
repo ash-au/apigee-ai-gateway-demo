@@ -31,6 +31,19 @@
                 <Name>JS-PrepareNativePolicyRequest</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
             </Step>
+            <!-- Tab 5: System 1 (TypeSafe Jev) Pre-Flight Dynamic Routing (/system1-routing) -->
+            <Step>
+                <Name>JS-PrepareJevPreRoute</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-JevPreRoute</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
+            <Step>
+                <Name>JS-ProcessJevPreRoute</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
         </Request>
         <Response/>
     </PreFlow>
@@ -64,6 +77,12 @@
             <Request/>
             <Response/>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
+        </Flow>
+        <!-- Tab 5: System 1 (TypeSafe Jev) & System 2 (Vertex AI Gemini) Dynamic Routing & SDE Cascade -->
+        <Flow name="System1-Jev-Dynamic-Routing">
+            <Request/>
+            <Response/>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
         </Flow>
         <!-- Use Case Group 2: Native Token FinOps & Quotas (PromptTokenLimit + LLMTokenQuota) -->
         <Flow name="Policy-Token-Governance">
@@ -160,6 +179,19 @@
                 <Name>JS-BuildFinalResponse</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
             </Step>
+            <!-- Tab 5: System 1 (TypeSafe Jev) Stage 2 Post-Verifier & SDE Cascade -->
+            <Step>
+                <Name>JS-PrepareJevPostVerify</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-JevPostVerify</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
+            <Step>
+                <Name>JS-BuildJevFinalResponse</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
             <Step>
                 <Name>AM-CorsHeaders</Name>
             </Step>
@@ -176,7 +208,7 @@
         <TargetEndpoint>vertex-flash-au</TargetEndpoint>
     </RouteRule>
     <RouteRule name="Route-DemoUI-BFF">
-        <Condition>(not (proxy.pathsuffix MatchesPath "/chat")) and (not (proxy.pathsuffix MatchesPath "/reset")) and (not (proxy.pathsuffix MatchesPath "/policies/**"))</Condition>
+        <Condition>(not (proxy.pathsuffix MatchesPath "/chat")) and (not (proxy.pathsuffix MatchesPath "/reset")) and (not (proxy.pathsuffix MatchesPath "/policies/**")) and (not (proxy.pathsuffix MatchesPath "/system1-routing"))</Condition>
         <TargetEndpoint>demo-ui-bff</TargetEndpoint>
     </RouteRule>
     <RouteRule name="Route-CacheShortCircuit">

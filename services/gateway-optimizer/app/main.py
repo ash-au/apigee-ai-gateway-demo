@@ -21,6 +21,11 @@ from app.models import (
 )
 from app.pruner import ContextPrunerEngine
 from app.vertex_client import VertexAIClient
+from app.jev_router import (
+    JevPreRouteRequest,
+    JevSystemOneEngine,
+    JevVerifyCascadeRequest,
+)
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("gateway-optimizer")
@@ -30,6 +35,7 @@ cache_engine = SemanticCacheEngine(vertex_client=vertex_client)
 pruner_engine = ContextPrunerEngine(vertex_client=vertex_client)
 compressor_engine = LLMLinguaCompressorEngine(vertex_client=vertex_client)
 cascade_engine = FrugalGPTCascadeEngine(vertex_client=vertex_client)
+jev_engine = JevSystemOneEngine(vertex_client=vertex_client)
 
 # Keep recent query embeddings by (namespace_key, user_query) to avoid re-embedding on post-call cache store
 _recent_embeddings: dict[tuple[str, str], list[float]] = {}
@@ -314,3 +320,24 @@ def optimize_cascade(req: CascadeEvaluateRequest) -> CascadeEvaluateResponse:
     except Exception as exc:
         logger.exception("Cascade evaluation error")
         raise HTTPException(status_code=500, detail=f"Cascade evaluation failed: {exc}") from exc
+
+
+@app.post("/v1/jev/pre-route")
+def jev_pre_route(req: JevPreRouteRequest) -> dict[str, Any]:
+    """Tab 5 Stage 1: Execute TypeSafe Jev (System 1) Pre-Flight Router (Choice + Score + Noul)."""
+    try:
+        return jev_engine.pre_route(req)
+    except Exception as exc:
+        logger.exception("Jev pre-route error")
+        raise HTTPException(status_code=500, detail=f"Jev pre-route failed: {exc}") from exc
+
+
+@app.post("/v1/jev/verify-and-cascade")
+def jev_verify_and_cascade(req: JevVerifyCascadeRequest) -> dict[str, Any]:
+    """Tab 5 Stage 2: Execute TypeSafe Jev (System 1) Decomposed Noul Battery & Escalate to System 2 Pro if fired."""
+    try:
+        return jev_engine.verify_and_cascade(req)
+    except Exception as exc:
+        logger.exception("Jev verify-and-cascade error")
+        raise HTTPException(status_code=500, detail=f"Jev verify-and-cascade failed: {exc}") from exc
+

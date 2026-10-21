@@ -13,8 +13,16 @@
         <Policy>JS-PrepareNativePolicyRequest</Policy>
         <Policy>JS-PreparePreOptimize</Policy>
         <Policy>JS-ProcessPreOptimize</Policy>
+        <Policy>JS-PrepareJevPreRoute</Policy>
+        <Policy>SC-JevPreRoute</Policy>
+        <Policy>JS-ProcessJevPreRoute</Policy>
+        <Policy>JS-PrepareJevPostVerify</Policy>
+        <Policy>SC-JevPostVerify</Policy>
+        <Policy>JS-BuildJevFinalResponse</Policy>
+        <Policy>LTQ-EnforceOnly</Policy>
         <Policy>LTQ-EnforceTokenQuota</Policy>
         <Policy>PTL-EnforcePromptLimit</Policy>
+        <Policy>RF-SemanticGovernanceViolation</Policy>
         <Policy>SC-EvaluateAndCascade</Policy>
         <Policy>SC-PreOptimize</Policy>
         <Policy>SC-ResetState</Policy>
@@ -35,6 +43,10 @@
         <Resource>jsc://prepare_native_policy_request.js</Resource>
         <Resource>jsc://prepare_pre_optimize.js</Resource>
         <Resource>jsc://process_pre_optimize.js</Resource>
+        <Resource>jsc://prepare_jev_pre_route.js</Resource>
+        <Resource>jsc://process_jev_pre_route.js</Resource>
+        <Resource>jsc://prepare_jev_post_verify.js</Resource>
+        <Resource>jsc://build_jev_final_response.js</Resource>
     </Resources>
     <TargetEndpoints>
         <TargetEndpoint>demo-ui-bff</TargetEndpoint>

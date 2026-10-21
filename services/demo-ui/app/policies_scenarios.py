@@ -270,3 +270,88 @@ POLICY_SCENARIOS: Dict[str, List[Dict[str, Any]]] = {
         },
     ],
 }
+
+SYSTEM1_JEV_SCENARIOS: List[Dict[str, Any]] = [
+    {
+        "id": "jev_s1_simple_lookup",
+        "title": "1. Simple Factual Lookup -> Jev Routes to Flash & Accepts L1 (~78% Cost Savings)",
+        "badge": "STAGE 1: FLASH_FAST | STAGE 2: NOULS CLEAR",
+        "description": "Jev Stage 1 classifies `target_tier=flash_fast` with high confidence (>= 0.75) and `complexity=0.0`. Apigee routes to `gemini-2.5-flash`. Jev Stage 2 runs the 5-head Noul battery; all defect probabilities stay << 0.70, accepting L1 Flash with zero Pro escalation.",
+        "system_instruction": "You are a concise Principal Cloud Architect assistant. Answer accurately based on the provided context.",
+        "rag_context": (
+            "Enterprise Cloud Policy SEC-2026-09:\n"
+            "- Production Service Account keys: User-managed keys are prohibited unless an exception is signed by the CISO; where permitted, keys must be rotated every 30 days.\n"
+            "- Cloud KMS symmetric keys: Automatic rotation period must be set to 90 days.\n"
+            "- Apigee X Northbound TLS certificates: Managed certificates renew automatically; fallback certificates expire after 365 days."
+        ),
+        "user_query": "According to policy SEC-2026-09, what is the rotation period for Cloud KMS symmetric keys and production service account keys?",
+        "confidence_threshold": 0.75,
+        "fire_threshold": 0.70,
+        "enable_direct_pro_fast_track": True,
+        "enable_post_verifier": True,
+        "simulate_l1_defect": False,
+    },
+    {
+        "id": "jev_s2_formal_proof_fast_track",
+        "title": "2. Formal Distributed Consensus Proof -> Jev Direct System 2 Fast-Track (Skips Wasted L1 Flash Call)",
+        "badge": "STAGE 1: PRO_SYSTEM2_DIRECT (FAST-TRACK)",
+        "description": "Requires a formal distributed systems proof across FLP impossibility and Raft safety invariants. Jev Stage 1 fires `requires_formal_proof >= 0.70` and `target_tier=pro_system2_direct`, instructing Apigee's `<RouteRule name='Route-VertexPro'>` to route straight to `gemini-2.5-pro` without wasting latency or tokens on a doomed L1 Flash attempt.",
+        "system_instruction": "You are a Principal Distributed Systems Theorist. Provide rigorous, step-by-step formal reasoning.",
+        "rag_context": (
+            "Architecture Context: Multi-region active-active Spanner + Apigee X deployment across Sydney (australia-southeast1) and Melbourne (australia-southeast2) with asynchronous cross-continent replication to London."
+        ),
+        "user_query": (
+            "Provide a formal proof sketch using FLP impossibility and Raft Leader Completeness invariants explaining why an asynchronous 3-region quorum cannot simultaneously guarantee strict serializability and zero-RPO availability during a symmetric trans-Pacific network partition, and derive the exact read/write quorum intersection inequality."
+        ),
+        "confidence_threshold": 0.75,
+        "fire_threshold": 0.70,
+        "enable_direct_pro_fast_track": True,
+        "enable_post_verifier": True,
+        "simulate_l1_defect": False,
+    },
+    {
+        "id": "jev_s3_noul_battery_trap",
+        "title": "3. Subtle Hallucination / Missed Constraint Trap -> Caught by 5-Head Noul Battery & Escalated to Pro",
+        "badge": "STAGE 2: NOUL BATTERY FIRES (> 0.70) -> ESCALATES TO L2 PRO",
+        "description": "Demonstrates TypeSafe's core SDE research finding: a single holistic 'should we escalate?' judge misses subtle factual contradictions or omitted constraints (`~0.14`), whereas Jev's decomposed 5-head Noul battery (`hallucinated_or_contradicts_context`, `missed_user_constraint`) spikes `> 0.85 <== FIRES` and triggers System 2 (`gemini-2.5-pro`) recovery.",
+        "system_instruction": "You are a Cloud FinOps & Security Compliance auditor. Follow every constraint in the user prompt strictly.",
+        "rag_context": (
+            "Official Incident Post-Mortem INC-8841:\n"
+            "- Root Cause: Legacy batch ETL service `legacy-batch-etl` sent unthrottled 14,500-token prompts at 180 RPS.\n"
+            "- Financial Impact: $4,820.00 in unexpected Vertex AI Gemini 2.5 Pro spend over 45 minutes.\n"
+            "- Remediation: Enabled Apigee X `PromptTokenLimit` (250 tokens/min ceiling) and `LLMTokenQuota` (500 tokens/min per app).\n"
+            "- Data Breach Status: ZERO customer PII or PCI data was exposed; Model Armor `SanitizeUserPrompt` blocked 100% of anomalous payloads."
+        ),
+        "user_query": (
+            "Summarize Incident INC-8841 in exactly 3 bullet points: (1) exact root cause service name and token size, (2) exact dollar impact, and (3) confirm whether any customer PII was exposed."
+        ),
+        "confidence_threshold": 0.75,
+        "fire_threshold": 0.70,
+        "enable_direct_pro_fast_track": False,
+        "enable_post_verifier": True,
+        "simulate_l1_defect": True,
+    },
+    {
+        "id": "jev_s4_moderate_rag_synthesis",
+        "title": "4. Multi-Constraint RAG Synthesis (Live L1 Flash Verified by Jev Noul Battery)",
+        "badge": "STAGE 1: FLASH_WITH_VERIFIER | LIVE L1 AUDIT",
+        "description": "Routes a multi-constraint FinOps & security synthesis prompt to `gemini-2.5-flash` and runs Jev's 5-head Noul battery on the real un-modified L1 Flash completion (`simulate_l1_defect=False`). Toggle 'Simulate L1 Defect' in the UI to compare clean vs. defective L1 outputs!",
+        "system_instruction": "You are a Principal Enterprise Architect. Answer every numbered constraint precisely using the reference context.",
+        "rag_context": (
+            "Apigee X AI Gateway Benchmark Telemetry (Q3):\n"
+            "- Baseline Direct-to-Pro Cost: $18.40 per 1,000 requests.\n"
+            "- Apigee + System 1 Jev Routing Cost: $4.12 per 1,000 requests (77.6% cost reduction).\n"
+            "- Jev System 1 Inference Cost: $0.042 per 1M input tokens ($0.00 output tokens).\n"
+            "- SLA Requirement: P95 end-to-end latency must remain under 4,500 ms."
+        ),
+        "user_query": (
+            "Based on the Q3 benchmark telemetry, calculate the exact dollar savings per 1,000 requests when using Apigee + System 1 Jev Routing compared to Baseline Direct-to-Pro, state the Jev cost per 1M input tokens, and confirm the P95 latency SLA."
+        ),
+        "confidence_threshold": 0.75,
+        "fire_threshold": 0.70,
+        "enable_direct_pro_fast_track": True,
+        "enable_post_verifier": True,
+        "simulate_l1_defect": False,
+    },
+]
+

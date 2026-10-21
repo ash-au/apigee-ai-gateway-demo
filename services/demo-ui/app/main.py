@@ -16,7 +16,11 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from app.policies_scenarios import APIGEE_AI_POLICIES_CATALOG, POLICY_SCENARIOS
+from app.policies_scenarios import (
+    APIGEE_AI_POLICIES_CATALOG,
+    POLICY_SCENARIOS,
+    SYSTEM1_JEV_SCENARIOS,
+)
 from app.scenarios import PRESET_SCENARIOS, PRICING_SCHEDULE
 
 GCP_PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "apac-cs-5g-demo5")
@@ -100,6 +104,20 @@ class PolicyExecuteRequest(BaseModel):
 
 class VectorSearchToggleRequest(BaseModel):
     action: str = Field(..., description="on | off")
+
+
+class System1ExecuteRequest(BaseModel):
+    session_id: str = "jev-demo-session"
+    scenario_id: str = "jev-custom"
+    system_instruction: str = ""
+    rag_context: str = ""
+    user_query: str
+    confidence_threshold: float = 0.75
+    fire_threshold: float = 0.70
+    enable_direct_pro_fast_track: bool = True
+    enable_post_verifier: bool = True
+    simulate_l1_defect: bool = False
+
 
 
 _creds = None
@@ -533,6 +551,7 @@ async def get_policies_presets() -> Dict[str, Any]:
         "apigee_gateway_url": APIGEE_GATEWAY_URL,
         "policies_catalog": APIGEE_AI_POLICIES_CATALOG,
         "policy_scenarios": POLICY_SCENARIOS,
+        "system1_scenarios": SYSTEM1_JEV_SCENARIOS,
     }
 
 
@@ -549,6 +568,83 @@ async def execute_policy_comparison(req: PolicyExecuteRequest) -> Dict[str, Any]
         "direct_baseline": direct_res,
         "apigee_gateway": apigee_res,
     }
+
+
+async def _call_apigee_system1_routing(req: System1ExecuteRequest) -> Dict[str, Any]:
+    """Calls Apigee X System 1 (TypeSafe Jev) & System 2 Dynamic Routing flow (`POST /v1/ai-economics/system1-routing`)."""
+    t0 = time.perf_counter()
+    body = {
+        "session_id": req.session_id,
+        "scenario_id": req.scenario_id,
+        "system_instruction": req.system_instruction,
+        "rag_context": req.rag_context,
+        "user_query": req.user_query,
+        "confidence_threshold": req.confidence_threshold,
+        "fire_threshold": req.fire_threshold,
+        "enable_direct_pro_fast_track": req.enable_direct_pro_fast_track,
+        "enable_post_verifier": req.enable_post_verifier,
+        "simulate_l1_defect": req.simulate_l1_defect,
+    }
+    async with httpx.AsyncClient(timeout=110.0, verify=False) as client:
+        resp = await client.post(
+            f"{APIGEE_GATEWAY_URL}/system1-routing",
+            headers={"Content-Type": "application/json"},
+            json=body,
+        )
+    wall_ms = round((time.perf_counter() - t0) * 1000.0)
+    if resp.status_code != 200:
+        raise HTTPException(
+            status_code=502,
+            detail=f"Apigee X /system1-routing call failed ({resp.status_code}): {resp.text[:500]}",
+        )
+    data = resp.json()
+    data["client_wall_latency_ms"] = wall_ms
+    return data
+
+
+@app.post("/api/system1/execute")
+async def execute_system1_comparison(req: System1ExecuteRequest) -> Dict[str, Any]:
+    """Executes Unoptimized Direct System 2 (`gemini-2.5-pro`) vs. Apigee X + System 1 (`Jev`) & System 2 (`Flash`/`Pro`) in parallel."""
+    compare_req = CompareRequest(
+        session_id=req.session_id,
+        scenario_id=req.scenario_id,
+        system_instruction=req.system_instruction,
+        rag_context=req.rag_context,
+        user_prompt=req.user_query,
+    )
+    direct_res, apigee_res = await asyncio.gather(
+        _call_direct_vertex_pro(compare_req),
+        _call_apigee_system1_routing(req),
+    )
+
+    direct_cost = float(direct_res["cost_accounting"]["total_cost_usd"])
+    gateway_cost = float(apigee_res["cost_accounting"]["total_cost_usd"])
+    cost_saved_usd = round(direct_cost - gateway_cost, 8)
+    cost_reduction_pct = (
+        round((cost_saved_usd / direct_cost) * 100.0, 2) if direct_cost > 0 else 0.0
+    )
+
+    direct_tokens = int(direct_res["token_accounting"]["grand_total_billed_tokens"])
+    gateway_llm_tokens = int(apigee_res["token_accounting"]["total_llm_tokens"])
+    gateway_jev_tokens = int(apigee_res["token_accounting"]["total_jev_input_tokens"])
+
+    return {
+        "timestamp_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "direct_baseline": direct_res,
+        "apigee_gateway": apigee_res,
+        "comparison": {
+            "direct_cost_usd": direct_cost,
+            "gateway_cost_usd": gateway_cost,
+            "cost_saved_usd": cost_saved_usd,
+            "cost_reduction_pct": cost_reduction_pct,
+            "direct_total_tokens": direct_tokens,
+            "gateway_llm_tokens": gateway_llm_tokens,
+            "gateway_jev_input_tokens": gateway_jev_tokens,
+            "direct_latency_ms": int(direct_res["latency_ms"]),
+            "gateway_latency_ms": int(apigee_res.get("latency_ms", 0)),
+        },
+    }
+
 
 
 @app.get("/api/vector-search/status")
