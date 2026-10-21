@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional
 import google.auth
 import google.auth.transport.requests
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -36,6 +36,14 @@ OPTIMIZER_SERVICE_URL = os.environ.get(
     "OPTIMIZER_SERVICE_URL",
     "https://gateway-optimizer-1019413155504.australia-southeast1.run.app",
 )
+
+# Valid Apigee Developer App Consumer Keys (x-api-key) provisioned in Apigee X
+VALID_APIGEE_API_KEYS = {
+    "bONZ6sXjJRnAyS5iUFxZIgSbySkl2mPqFNxOxy6ZN5kSMnwL",  # jw-apigeex-0 / eval (XLB)
+    "PpSlCnhSuyVuLKDg2EA6VeQOddVLLPZjQ0doe1RW1BPt8n6E",  # apac-cs-5g-demo5 / demo
+    "demo-gold-key",
+    "demo-silver-key",
+}
 
 VECTOR_SEARCH_INDEX_ID = "8419013310438965248"
 VECTOR_SEARCH_ENDPOINT_ID = "3216599276826132480"
@@ -75,12 +83,13 @@ class TurnModel(BaseModel):
 class CompareRequest(BaseModel):
     session_id: str = "demo-session"
     scenario_id: Optional[str] = None
+    tier: Optional[str] = None
     system_instruction: str = ""
     rag_context: str = ""
     few_shot_examples: List[str] = Field(default_factory=list)
     conversation_history: List[TurnModel] = Field(default_factory=list)
-    user_prompt: str
-    toggles: TogglesModel = Field(default_factory=TogglesModel)
+    user_prompt: str = ""
+    toggles: Optional[TogglesModel] = None
     compression_target_ratio: float = 0.38
     similarity_threshold: float = 0.85
 
@@ -90,7 +99,8 @@ class PolicyExecuteRequest(BaseModel):
         ...,
         description="One of: token-governance | model-armor | semantic-governance | native-cache",
     )
-    prompt: str
+    prompt: str = ""
+    scenario_id: Optional[str] = None
     prompt_token_limit: str = "250pm"
     quota_limit: int = 500
     quota_id: str = "tier-standard-app"
@@ -111,12 +121,98 @@ class System1ExecuteRequest(BaseModel):
     scenario_id: str = "jev-custom"
     system_instruction: str = ""
     rag_context: str = ""
-    user_query: str
-    confidence_threshold: float = 0.75
-    fire_threshold: float = 0.70
-    enable_direct_pro_fast_track: bool = True
-    enable_post_verifier: bool = True
-    simulate_l1_defect: bool = False
+    user_query: str = ""
+    prompt: str = ""
+    confidence_threshold: Optional[float] = None
+    fire_threshold: Optional[float] = None
+    enable_direct_pro_fast_track: Optional[bool] = None
+    enable_post_verifier: Optional[bool] = None
+    simulate_l1_defect: Optional[bool] = None
+
+
+def _require_apigee_api_key(request: Request) -> str:
+    """Validates x-api-key header (or apikey query param) on direct gateway pass-through endpoints."""
+    key = (
+        request.headers.get("x-api-key")
+        or request.headers.get("apikey")
+        or request.query_params.get("apikey")
+        or ""
+    ).strip()
+    if not key or key not in VALID_APIGEE_API_KEYS:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "invalid_api_key",
+                "message": "Missing or invalid 'x-api-key' header for Apigee X AI Gateway.",
+                "hint": "Pass header: -H 'x-api-key: <YOUR_APIGEE_CONSUMER_KEY>'",
+            },
+        )
+    return key
+
+
+def _hydrate_system1_request(req: System1ExecuteRequest) -> System1ExecuteRequest:
+    """Hydrates preset fields from SYSTEM1_JEV_SCENARIOS when caller passes only scenario_id."""
+    preset = next(
+        (s for s in SYSTEM1_JEV_SCENARIOS if s["id"] == req.scenario_id),
+        None,
+    )
+    query = (req.user_query or req.prompt or (preset["user_query"] if preset else "")).strip()
+    if not query:
+        query = "According to policy SEC-2026-09, what is the rotation period for Cloud KMS symmetric keys and production service account keys?"
+    return System1ExecuteRequest(
+        session_id=req.session_id,
+        scenario_id=req.scenario_id,
+        system_instruction=req.system_instruction or (preset.get("system_instruction", "") if preset else ""),
+        rag_context=req.rag_context or (preset.get("rag_context", "") if preset else ""),
+        user_query=query,
+        confidence_threshold=req.confidence_threshold if req.confidence_threshold is not None else (preset.get("confidence_threshold", 0.75) if preset else 0.75),
+        fire_threshold=req.fire_threshold if req.fire_threshold is not None else (preset.get("fire_threshold", 0.70) if preset else 0.70),
+        enable_direct_pro_fast_track=req.enable_direct_pro_fast_track if req.enable_direct_pro_fast_track is not None else (preset.get("enable_direct_pro_fast_track", True) if preset else True),
+        enable_post_verifier=req.enable_post_verifier if req.enable_post_verifier is not None else (preset.get("enable_post_verifier", True) if preset else True),
+        simulate_l1_defect=req.simulate_l1_defect if req.simulate_l1_defect is not None else (preset.get("simulate_l1_defect", False) if preset else False),
+    )
+
+
+def _hydrate_compare_request(req: CompareRequest) -> CompareRequest:
+    """Hydrates preset fields from PRESET_SCENARIOS when caller passes only scenario_id."""
+    alias_map = {
+        "s1_cache_burst": "scenario-1-faq-miss",
+        "s1_cache_hit": "scenario-2-faq-hit",
+        "s2_rag_compression": "scenario-3-rag-compress",
+        "s3_cascade": "scenario-4-cascade-pro",
+        "s4_agent_prune": "scenario-5-multi-turn-prune",
+    }
+    lookup_id = alias_map.get(req.scenario_id or "", req.scenario_id or "")
+    preset = next(
+        (
+            s
+            for s in PRESET_SCENARIOS
+            if s["id"] == lookup_id or s.get("scenario_id") == lookup_id
+        ),
+        PRESET_SCENARIOS[0] if not req.user_prompt else None,
+    )
+    toggles = req.toggles or (
+        TogglesModel(**preset["recommended_toggles"])
+        if preset and "recommended_toggles" in preset
+        else TogglesModel()
+    )
+    history = req.conversation_history or (
+        [TurnModel(**t) for t in preset.get("conversation_history", [])]
+        if preset
+        else []
+    )
+    return CompareRequest(
+        session_id=req.session_id if req.session_id != "demo-session" or not preset else preset.get("session_id", req.session_id),
+        scenario_id=(preset.get("scenario_id") if preset else req.scenario_id) or "custom",
+        system_instruction=req.system_instruction or (preset.get("system_instruction", "") if preset else ""),
+        rag_context=req.rag_context or (preset.get("rag_context", "") if preset else ""),
+        few_shot_examples=req.few_shot_examples or (preset.get("few_shot_examples", []) if preset else []),
+        conversation_history=history,
+        user_prompt=req.user_prompt or (preset.get("user_prompt", "") if preset else "How do I enroll a replacement iPhone in Okta FastPass MFA?"),
+        toggles=toggles,
+        compression_target_ratio=req.compression_target_ratio,
+        similarity_threshold=req.similarity_threshold,
+    )
 
 
 
@@ -605,6 +701,7 @@ async def _call_apigee_system1_routing(req: System1ExecuteRequest) -> Dict[str, 
 @app.post("/api/system1/execute")
 async def execute_system1_comparison(req: System1ExecuteRequest) -> Dict[str, Any]:
     """Executes Unoptimized Direct System 2 (`gemini-2.5-pro`) vs. Apigee X + System 1 (`Jev`) & System 2 (`Flash`/`Pro`) in parallel."""
+    req = _hydrate_system1_request(req)
     compare_req = CompareRequest(
         session_id=req.session_id,
         scenario_id=req.scenario_id,
@@ -644,7 +741,6 @@ async def execute_system1_comparison(req: System1ExecuteRequest) -> Dict[str, An
             "gateway_latency_ms": int(apigee_res.get("latency_ms", 0)),
         },
     }
-
 
 
 @app.get("/api/vector-search/status")
@@ -738,8 +834,10 @@ async def reset_gateway() -> Dict[str, Any]:
 
 
 @app.post("/api/compare")
+@app.post("/api/demo/run")
 async def compare_side_by_side(req: CompareRequest) -> Dict[str, Any]:
     """Executes Direct Vertex AI Gemini 2.5 Pro and Apigee X Gateway in parallel."""
+    req = _hydrate_compare_request(req)
     direct_res, gateway_res = await asyncio.gather(
         _call_direct_vertex_pro(req),
         _call_apigee_gateway(req),
@@ -784,6 +882,82 @@ async def compare_side_by_side(req: CompareRequest) -> Dict[str, Any]:
             "latency_delta_ms": gateway_latency - direct_latency,
         },
     }
+
+
+# ==============================================================================
+# Direct Apigee X Gateway Pass-Through Endpoints (Protected by x-api-key)
+# Allows external CLI / curl clients hitting the Public XLB to invoke the raw
+# Apigee X Comprehensive runtime (`10.106.240.2.nip.io`) directly.
+# ==============================================================================
+
+
+@app.post("/system1-routing")
+@app.post("/v1/ai-economics/system1-routing")
+async def passthrough_system1_routing(
+    req: System1ExecuteRequest, request: Request
+) -> Dict[str, Any]:
+    api_key = _require_apigee_api_key(request)
+    hydrated = _hydrate_system1_request(req)
+    res = await _call_apigee_system1_routing(hydrated)
+    res["authenticated_via"] = "Apigee X Developer App Consumer Key (x-api-key)"
+    res["consumer_key_prefix"] = f"{api_key[:8]}..."
+    return res
+
+
+@app.post("/policies/{flow_group}")
+@app.post("/v1/ai-economics/policies/{flow_group}")
+async def passthrough_native_policies(
+    flow_group: str, request: Request
+) -> JSONResponse:
+    api_key = _require_apigee_api_key(request)
+    raw_body = await request.json()
+    # Accept either raw Vertex generateContent body (`contents`) or `{ "prompt": "..." }`
+    if "contents" in raw_body:
+        vertex_payload = raw_body
+    else:
+        prompt_text = raw_body.get("prompt") or "Explain our cloud key rotation policy."
+        vertex_payload = {
+            "contents": [{"role": "user", "parts": [{"text": prompt_text}]}],
+            "generationConfig": {"temperature": 0.2, "maxOutputTokens": 512},
+        }
+    forward_headers = {"Content-Type": "application/json", "x-api-key": api_key}
+    for h in (
+        "X-Prompt-Token-Limit",
+        "X-Quota-Limit",
+        "X-Quota-Interval",
+        "X-Quota-TimeUnit",
+        "X-Quota-Id",
+        "X-Enable-Prompt-Limit",
+        "X-Enable-Token-Quota",
+        "X-Enable-Sanitize-Prompt",
+        "X-Enable-Sanitize-Response",
+        "X-Enable-Semantic-Governance",
+        "X-Enable-Native-Cache",
+    ):
+        if h in request.headers:
+            forward_headers[h] = request.headers[h]
+
+    target_url = f"{APIGEE_GATEWAY_URL}/policies/{flow_group}"
+    async with httpx.AsyncClient(timeout=65.0, verify=False) as client:
+        resp = await client.post(target_url, headers=forward_headers, json=vertex_payload)
+    try:
+        data = resp.json()
+    except Exception:
+        data = {"status_code": resp.status_code, "raw_body": resp.text[:1000]}
+    return JSONResponse(status_code=resp.status_code, content=data)
+
+
+@app.post("/gateway/chat")
+@app.post("/v1/ai-economics/chat")
+async def passthrough_gateway_chat(
+    req: CompareRequest, request: Request
+) -> Dict[str, Any]:
+    api_key = _require_apigee_api_key(request)
+    hydrated = _hydrate_compare_request(req)
+    res = await _call_apigee_gateway(hydrated)
+    res["authenticated_via"] = "Apigee X Developer App Consumer Key (x-api-key)"
+    res["consumer_key_prefix"] = f"{api_key[:8]}..."
+    return res
 
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
