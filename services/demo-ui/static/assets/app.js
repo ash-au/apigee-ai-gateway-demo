@@ -973,6 +973,39 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     if (e.target === elModal) elModal.classList.remove("open");
   });
 
+  // Modal ("System 1 & Noul Battery Glossary")
+  const elGlossaryModal = document.getElementById("jev-glossary-modal");
+  const btnOpenGlossary = document.getElementById("btn-open-glossary");
+  const btnOpenGlossaryTab5 = document.getElementById("btn-open-glossary-tab5");
+  const btnCloseGlossary = document.getElementById("btn-close-glossary");
+  if (elGlossaryModal) {
+    if (btnOpenGlossary) {
+      btnOpenGlossary.addEventListener("click", () => elGlossaryModal.classList.add("open"));
+    }
+    if (btnOpenGlossaryTab5) {
+      btnOpenGlossaryTab5.addEventListener("click", () => elGlossaryModal.classList.add("open"));
+    }
+    if (btnCloseGlossary) {
+      btnCloseGlossary.addEventListener("click", () => elGlossaryModal.classList.remove("open"));
+    }
+    elGlossaryModal.addEventListener("click", (e) => {
+      if (e.target === elGlossaryModal) elGlossaryModal.classList.remove("open");
+    });
+    document.querySelectorAll(".glossary-tab-btn").forEach((gBtn) => {
+      gBtn.addEventListener("click", () => {
+        document.querySelectorAll(".glossary-tab-btn").forEach((b) => {
+          b.className = "btn btn-outline glossary-tab-btn";
+        });
+        gBtn.className = "btn btn-primary glossary-tab-btn";
+        const targetGTab = gBtn.dataset.gtab;
+        ["gtab-primitives", "gtab-system12", "gtab-ml-terms", "gtab-compare"].forEach((id) => {
+          const pane = document.getElementById(id);
+          if (pane) pane.style.display = id === targetGTab ? "block" : "none";
+        });
+      });
+    });
+  }
+
   // Initialize from /api/scenarios and /api/policies/presets
   async function init() {
     try {

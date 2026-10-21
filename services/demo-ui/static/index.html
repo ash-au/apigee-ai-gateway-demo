@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apigee X as an AI Gateway — Token Economics &amp; Native AI Policies</title>
-  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=5.1" />
+  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=5.2" />
 </head>
 <body>
   <div class="editorial-shell">
@@ -22,6 +22,9 @@
         </p>
       </div>
       <div class="masthead-actions">
+        <button id="btn-open-glossary" class="btn btn-primary" type="button" style="background-color: #8e24aa; border-color: #8e24aa;">
+          System 1 &amp; Noul Battery Glossary
+        </button>
         <button id="btn-open-about" class="btn btn-outline" type="button">
           Architecture, Papers &amp; Pricing
         </button>
@@ -836,9 +839,12 @@
               <strong>Stage 2 (Post-Verifier):</strong> Runs a decomposed 5-head <code>Noul</code> battery with an <code>any_flag &gt; fire_threshold</code> gate to catch subtle hallucinations or missed constraints that holistic judges miss.
             </p>
           </div>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
             <span class="model-pill" style="background: #f3e5f5; color: #6a1b9a; border-color: #ce93d8;">Jev: $0.042 / 1M In &bull; $0 Out</span>
             <span class="model-pill">Apigee Flow: <code>/v1/ai-economics/system1-routing</code></span>
+            <button id="btn-open-glossary-tab5" class="btn btn-primary" type="button" style="background-color: #8e24aa; border-color: #8e24aa; padding: 6px 14px; font-size: 12px;">
+              Explain Noul Battery, Jev Primitives &amp; ML Terms
+            </button>
           </div>
         </div>
       </section>
@@ -1090,6 +1096,387 @@
     </div>
   </div>
 
-  <script src="/v1/ai-economics/assets/app.js?v=5.1"></script>
+  <!-- System 1 (TypeSafe Jev), Noul Battery & ML Glossary Modal -->
+  <div id="jev-glossary-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="glossary-modal-title">
+    <div class="modal-card" style="max-width: 1080px; border-top: 5px solid #8e24aa;">
+      <div class="modal-header">
+        <div>
+          <div class="masthead-kicker" style="color: #8e24aa;">Interactive Technical Reference &amp; Plain-English Guide</div>
+          <h2 id="glossary-modal-title" style="margin: 0; font-size: 20px;">
+            System 1 (TypeSafe Jev), Decomposed <code>Noul</code> Battery &amp; AI Routing Glossary
+          </h2>
+        </div>
+        <button id="btn-close-glossary" class="btn btn-outline" type="button">Close</button>
+      </div>
+
+      <!-- Sub-Navigation Tabs inside Glossary Modal -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; padding-bottom: 12px; border-bottom: 1px solid var(--border-hairline);">
+        <button class="btn btn-primary glossary-tab-btn" data-gtab="gtab-primitives" type="button" style="padding: 7px 14px; font-size: 12.5px;">
+          1. Noul, Noul Battery, Choice &amp; Score
+        </button>
+        <button class="btn btn-outline glossary-tab-btn" data-gtab="gtab-system12" type="button" style="padding: 7px 14px; font-size: 12.5px;">
+          2. System 1 vs. System 2 &amp; SDE Cascade
+        </button>
+        <button class="btn btn-outline glossary-tab-btn" data-gtab="gtab-ml-terms" type="button" style="padding: 7px 14px; font-size: 12.5px;">
+          3. Plain-English ML Terms (Logits, Softmax, Calibration)
+        </button>
+        <button class="btn btn-outline glossary-tab-btn" data-gtab="gtab-compare" type="button" style="padding: 7px 14px; font-size: 12.5px;">
+          4. Jev vs. DeBERTa, RouteLLM &amp; HHEM
+        </button>
+      </div>
+
+      <!-- ===================================================================
+           GLOSSARY TAB 1: JEV PRIMITIVES & NOUL BATTERY
+           =================================================================== -->
+      <div id="gtab-primitives" class="glossary-pane" style="display: block;">
+        <div style="background: #f3e5f5; border-left: 4px solid #8e24aa; padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 16px; font-size: 13px; line-height: 1.55;">
+          <strong>Core Idea:</strong> Traditional LLMs output <em>words</em> (e.g., <code>"Yes"</code> or <code>"No"</code>), which forces your API gateway to make brittle all-or-nothing guesses. <strong>TypeSafe Jev</strong> is a non-generative System 1 model that outputs <strong>calibrated probabilities (`0.00` to `1.00`)</strong> across three structured primitives: <code>Noul</code>, <code>Choice</code>, and <code>Score</code>.
+        </div>
+
+        <table class="editorial-table" style="margin-bottom: 18px;">
+          <thead>
+            <tr>
+              <th style="width: 22%;">Term / Primitive</th>
+              <th style="width: 38%;">Plain-English Explanation</th>
+              <th style="width: 40%;">How We Use It in Apigee X (Tab 5)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong><code>Noul</code></strong><br/>
+                <span style="font-size: 11px; color: var(--text-secondary);">Soft Boolean / Calibrated Probability in $[0, 1]$</span>
+              </td>
+              <td>
+                Instead of returning a hard <code>true</code> or <code>false</code>, a <strong><code>Noul</code></strong> returns a continuous, calibrated probability between <code>0.00</code> (definitely false) and <code>1.00</code> (definitely true).<br/><br/>
+                You can optionally pass <code>criteria: {"true": "...", "false": "..."}</code> to explicitly anchor what counts as a positive vs. negative condition.
+              </td>
+              <td>
+                In Stage 1, <code>requires_formal_proof</code> returns <code>0.99</code> on the Raft/FLP theorem query and <code>0.01</code> on the KMS key rotation lookup.<br/><br/>
+                In Stage 2, each defect check returns a <code>Noul</code> probability (e.g., <code>missed_user_constraint: 0.99</code>).
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong><code>Noul Battery</code></strong><br/>
+                <span style="font-size: 11px; color: var(--text-secondary);">Decomposed Multi-Head Verification</span>
+              </td>
+              <td>
+                <strong>Why single questions fail:</strong> If you ask a model one broad holistic question—<em>"Is this response bad enough to escalate?"</em>—it averages out everything that looks polite and well-formatted, returning a deceptively low score (<code>~0.04–0.15</code>) even when one specific number was hallucinated or one bullet was skipped.<br/><br/>
+                <strong>The Battery Solution:</strong> Just like a hospital runs a <em>battery of specific blood panels</em> instead of asking "Is the patient sick?", a <strong><code>Noul Battery</code></strong> decomposes verification into <strong>5 specific, independent failure-mode heads</strong> evaluated in a single pass.
+              </td>
+              <td>
+                Our Stage 2 verifier runs 5 <code>Noul</code> heads simultaneously:<br/>
+                1. <code>hallucinated_or_contradicts_context</code><br/>
+                2. <code>missed_user_constraint</code><br/>
+                3. <code>superficial_or_unproven</code><br/>
+                4. <code>internal_contradiction</code><br/>
+                5. <code>hedging_or_refusal</code><br/>
+                Plus <code>__overall__::holistic_escalate_judge</code> for comparison.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong><code>any_flag</code> Gate</strong><br/>
+                <span style="font-size: 11px; color: var(--text-secondary);"><code>max(noul_battery) &gt; fire_threshold</code></span>
+              </td>
+              <td>
+                Because the <code>Noul Battery</code> asks 5 specific defect questions where <code>True = Defect</code>, we do <strong>not</strong> average them. Instead, we take the <strong>maximum</strong> across all 5 heads:<br/>
+                <code>any_flag = max(head_1, ..., head_5) &gt; 0.70</code>.<br/>
+                If <em>even one</em> head exceeds <code>fire_threshold</code> ( marked <code>&lt;== FIRES</code>), Apigee X rejects the cheap $L_1$ Flash response and escalates to System 2 (`gemini-2.5-pro`).
+              </td>
+              <td>
+                In <strong>Scenario 3</strong>, when $L_1$ Flash fabricates a region and skips a bullet, `missed_user_constraint` spikes to <code>0.99 &lt;== FIRES</code> and `hallucinated_or_contradicts_context` hits <code>0.89 &lt;== FIRES</code>, immediately triggering $L_2$ Pro recovery.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong><code>Choice</code></strong><br/>
+                <span style="font-size: 11px; color: var(--text-secondary);">Mutually Exclusive Classification + Confidence</span>
+              </td>
+              <td>
+                Picks one option from a mutually exclusive set of categories and returns:<br/>
+                1. <code>choice</code>: The winning label.<br/>
+                2. <code>probabilities</code>: Calibrated probability for every option (summing to <code>1.00</code>).<br/>
+                3. <code>confidence</code>: How certain Jev is (`0.00` to `1.00`), enabling <strong>confidence-gated routing</strong>.
+              </td>
+              <td>
+                In Stage 1, <code>target_tier</code> classifies the query into:<br/>
+                &bull; <code>flash_fast</code><br/>
+                &bull; <code>flash_with_verifier</code><br/>
+                &bull; <code>pro_system2_direct</code><br/>
+                Gated by <code>confidence &ge; 0.75</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong><code>Score</code></strong><br/>
+                <span style="font-size: 11px; color: var(--text-secondary);">Continuous Expected Value over Ordered Rubric</span>
+              </td>
+              <td>
+                When an LLM is asked to rate complexity on an integer scale of 0, 1, or 2, borderline prompts jitter randomly between 1 and 2.<br/><br/>
+                Jev's <code>Score</code> computes the probability of each rubric level ($P(0), P(1), P(2)$) and returns the smooth <strong>Expected Value</strong>:<br/>
+                $E[\text{Score}] = 0\cdot P(0) + 1\cdot P(1) + 2\cdot P(2) \in [0.0, 2.0]$.
+              </td>
+              <td>
+                Stage 1 measures query <code>complexity</code> ($0.00$ to $2.00$) to tune Gemini's `thinkingBudget`.<br/>
+                Stage 2 measures <code>response_quality</code> ($0.00$ to $2.00$) of the $L_1$ Flash completion.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================================================================
+           GLOSSARY TAB 2: SYSTEM 1 VS SYSTEM 2 & SDE CASCADE
+           =================================================================== -->
+      <div id="gtab-system12" class="glossary-pane" style="display: none;">
+        <table class="editorial-table" style="margin-bottom: 18px;">
+          <thead>
+            <tr>
+              <th style="width: 24%;">Concept</th>
+              <th style="width: 38%;">What It Means</th>
+              <th style="width: 38%;">Why It Matters for AI Gateway FinOps</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>System 1 Model</strong><br/>
+                (<code>jev-latest</code>)
+              </td>
+              <td>
+                Inspired by Daniel Kahneman's <em>Thinking, Fast and Slow</em>. System 1 is <strong>fast, instinctive, single-pass judgment</strong>. It does not write essays or generate chain-of-thought text; it reads the state once and outputs calibrated probabilities (`Choice`, `Score`, `Noul`) in ~190–220ms.
+              </td>
+              <td>
+                Costs <strong>$0.042 per 1M input tokens</strong> and <strong>$0.00 for output tokens</strong> (~30x cheaper on input than Gemini 2.5 Pro and free on output). Ideal for high-speed API gateway routing and verification gates.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>System 2 Model</strong><br/>
+                (<code>gemini-2.5-pro</code>)
+              </td>
+              <td>
+                System 2 is <strong>slow, deliberative, step-by-step reasoning</strong>. It generates internal thinking tokens (`thoughtsTokenCount`) and detailed autoregressive text completions to solve hard proofs or complex edge cases.
+              </td>
+              <td>
+                Costs <strong>$1.25 / 1M input</strong> and <strong>$10.00 / 1M output + thinking tokens</strong>. Calling System 2 on every simple lookup wastes 80–90% of enterprise AI budgets.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Direct System 2 Fast-Track</strong><br/>
+                (<code>pro_system2_direct</code>)
+              </td>
+              <td>
+                In standard FrugalGPT cascades, <em>every</em> query is sent to $L_1$ Flash first. But if a query asks for a formal distributed consensus proof, $L_1$ Flash is guaranteed to fail—so calling $L_1$ first just wastes 1.5 seconds and $L_1$ tokens before escalating anyway.
+              </td>
+              <td>
+                When Stage 1 Jev detects <code>choice == "pro_system2_direct"</code> (with <code>confidence &ge; 0.75</code>) or <code>requires_formal_proof &ge; 0.82</code>, Apigee X's <code>Route-VertexPro</code> routes <strong>straight to Gemini 2.5 Pro</strong>, skipping the doomed $L_1$ call.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>SDE Cascade</strong><br/>
+                (Staged Deferral &amp; Escalation)
+              </td>
+              <td>
+                For the ~85% of enterprise traffic that is simple or moderate, Stage 1 routes to $L_1$ (<code>gemini-2.5-flash</code>). Stage 2 then audits the $L_1$ answer with the 5-head <code>Noul Battery</code>. Only if a defect head fires (<code>&gt; 0.70</code>) does the gateway escalate to $L_2$ (<code>gemini-2.5-pro</code>).
+              </td>
+              <td>
+                Delivers <strong>85%–89% net cost reduction</strong> on routine traffic while preserving frontier Gemini 2.5 Pro accuracy whenever $L_1$ Flash hallucinates or misses a constraint.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================================================================
+           GLOSSARY TAB 3: PLAIN-ENGLISH ML & INFERENCE TERMS
+           =================================================================== -->
+      <div id="gtab-ml-terms" class="glossary-pane" style="display: none;">
+        <table class="editorial-table" style="margin-bottom: 18px;">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Technical Term</th>
+              <th style="width: 40%;">Plain-English Explanation (Zero Jargon)</th>
+              <th style="width: 35%;">Concrete Analogy / Gateway Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>Autoregressive Text Generation</strong>
+              </td>
+              <td>
+                How generative LLMs (like Gemini or GPT) write answers: they predict <strong>one word (token) at a time in a sequential loop</strong>. To generate 300 words, the model must run its giant neural network 300 separate times, feeding each new word back into the input.
+              </td>
+              <td>
+                <strong>Analogy:</strong> Typing a letter one character at a time on a typewriter. Because of this sequential loop, generative LLMs are slow (1–6 seconds) and charge high fees for every output/thinking token.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Single-Pass Forward Inference</strong>
+              </td>
+              <td>
+                How System 1 models (like Jev or DeBERTa) work: the model reads the entire input prompt + context <strong>all at once in a single parallel matrix operation</strong> and immediately outputs the classification/probability numbers—no word-by-word generation loop.
+              </td>
+              <td>
+                <strong>Analogy:</strong> Stamping a document in one motion instead of typing a paragraph. Takes ~190ms and has <strong>$0.00 output token cost</strong>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Logits</strong>
+              </td>
+              <td>
+                The raw, unscaled score numbers that come out of the final layer of a neural network before they are converted into percentages (for example, raw scores like <code>[-1.8, +0.4, +4.2]</code>).
+              </td>
+              <td>
+                Logits can be any negative or positive number (`-100` to `+100`), so they cannot be used directly as a `0.70` gateway threshold until converted via Softmax.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Softmax</strong>
+              </td>
+              <td>
+                A mathematical formula ($e^{z_i} / \sum e^{z_j}$) that squashes raw <strong>logits</strong> into clean positive probabilities between <code>0.00</code> and <code>1.00</code> that add up to exactly <code>1.00</code> (100%).
+              </td>
+              <td>
+                Turns raw logits into the probability breakdown you see in Tab 5: e.g., <code>{"flash_fast": 0.97, "flash_with_verifier": 0.03, "pro_system2_direct": 0.00}</code>.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Calibrated Softmax &amp; ECE (Expected Calibration Error)</strong>
+              </td>
+              <td>
+                Standard LLMs are notoriously <strong>overconfident</strong>: their raw Softmax might output <code>0.99</code> certainty even when they are wrong 40% of the time (high Calibration Error).<br/><br/>
+                A <strong>Calibrated</strong> model has its probabilities aligned with real-world accuracy: when Jev outputs a <code>Noul</code> of <code>0.80</code>, that event is empirically true ~80% of the time.
+              </td>
+              <td>
+                <strong>Why it matters:</strong> Without calibration, setting a gateway slider like <code>fire_threshold = 0.70</code> is meaningless because raw LLM scores cluster at <code>0.00</code> or <code>1.00</code>. Calibration makes numeric sliders work reliably.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Selective Prediction</strong><br/>
+                ("Abstention / Deferral")
+              </td>
+              <td>
+                A model's ability to measure its own uncertainty (`confidence`) and say <em>"I am not sure enough to make this call—defer to a safer verification path."</em>
+              </td>
+              <td>
+                If Jev's Stage 1 <code>Choice</code> confidence (`0.62`) is below your <code>Confidence Gate (0.75)</code>, the gateway refuses to trust a blind fast route and enforces mandatory Stage 2 `Noul` verification.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Bidirectional Cross-Encoder vs. Causal Decoder</strong>
+              </td>
+              <td>
+                <strong>Causal Decoder (Generative LLMs):</strong> Reads strictly left-to-right to predict the next word.<br/>
+                <strong>Cross-Encoder / System 1 Evaluator:</strong> Reads the User Query, RAG Context, and Candidate Response together, allowing every word in the response to cross-check every word in the RAG context simultaneously.
+              </td>
+              <td>
+                Makes System 1 models exceptionally fast and accurate at spotting factual contradictions (`hallucinated_or_contradicts_context`) and omitted constraints (`missed_user_constraint`).
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ===================================================================
+           GLOSSARY TAB 4: JEV VS. GCP MODEL GARDEN ALTERNATIVES
+           =================================================================== -->
+      <div id="gtab-compare" class="glossary-pane" style="display: none;">
+        <table class="editorial-table" style="margin-bottom: 18px;">
+          <thead>
+            <tr>
+              <th>Model / Approach</th>
+              <th>Architecture &amp; Hosting</th>
+              <th>Strengths</th>
+              <th>Limitations Compared to TypeSafe Jev</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <strong>TypeSafe Jev (<code>jev-latest</code>)</strong><br/>
+                <span class="model-pill" style="font-size:10px; background:#f3e5f5; color:#6a1b9a;">Active in Tab 5</span>
+              </td>
+              <td>General-purpose System 1 API (`api.typesafe.ai`) &bull; Single-pass calibrated heads (`Choice`, `Score`, `Noul`)</td>
+              <td>
+                &bull; Evaluates <strong>arbitrary custom questions &amp; multi-head `Noul` batteries</strong> in one ~200ms pass.<br/>
+                &bull; Calibrated probabilities + confidence scores.<br/>
+                &bull; $0.042/1M input, $0.00 output.
+              </td>
+              <td>External SaaS API call (requires API key in Secret Manager).</td>
+            </tr>
+            <tr>
+              <td>
+                <strong>DeBERTa-v3-NLI</strong><br/>
+                <code>cross-encoder/nli-deberta-v3-base</code>
+              </td>
+              <td>184M-param Bidirectional Cross-Encoder &bull; Self-hosted on GCP Cloud Run / Vertex AI</td>
+              <td>
+                &bull; Ultra-fast (~15–35ms in-region).<br/>
+                &bull; Great at 2-text Entailment / Contradiction checks.
+              </td>
+              <td>
+                Fixed 3-class NLI head (<code>Entailment</code>, <code>Neutral</code>, <code>Contradiction</code>). Cannot evaluate multi-question custom `Noul` batteries or rubric `Score`s in one pass.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>UC Berkeley RouteLLM</strong><br/>
+                <code>routellm/bert</code> / Matrix Factorization
+              </td>
+              <td>Pre-generation router trained on Chatbot Arena human preference data</td>
+              <td>
+                &bull; Purpose-built to estimate win-rate of Strong Model vs. Weak Model before generation (~10–25ms).
+              </td>
+              <td>
+                <strong>Pre-router only:</strong> Cannot inspect or verify the $L_1$ model's generated response for hallucinations or missed constraints (no Stage 2 post-verification).
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>Vectara HHEM-2.1</strong><br/>
+                (Hughes Hallucination Evaluation Model)
+              </td>
+              <td>DeBERTa-based RAG Hallucination Classifier &bull; Self-hosted on Vertex AI / Cloud Run</td>
+              <td>
+                &bull; Specialized at scoring whether a summary is factually consistent with a source RAG passage (`0.0–1.0`).
+              </td>
+              <td>
+                <strong>Single-purpose:</strong> Only checks RAG factual consistency. Cannot route queries pre-flight (`Choice`/`Score`) or check non-RAG constraints like formatting or tone.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>LLM-as-a-Judge</strong><br/>
+                (e.g., <code>gemini-2.5-flash</code> prompt judge)
+              </td>
+              <td>Autoregressive generative LLM prompted to output JSON scores</td>
+              <td>
+                &bull; Zero new infrastructure; understands arbitrary instructions.
+              </td>
+              <td>
+                &bull; 3x–5x slower (~600–1,200ms) due to autoregressive token generation.<br/>
+                &bull; 7x+ more expensive on input ($0.30/1M vs $0.042/1M) plus charges $2.50/1M for output tokens.<br/>
+                &bull; Uncalibrated probabilities.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="/v1/ai-economics/assets/app.js?v=5.2"></script>
 </body>
 </html>
