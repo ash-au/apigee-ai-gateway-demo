@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apigee X as an AI Gateway — Token Economics &amp; Native AI Policies</title>
-  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css" />
+  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=5.1" />
 </head>
 <body>
   <div class="editorial-shell">
@@ -855,7 +855,7 @@
           <div class="panel-header">
             <h2 class="panel-title">System 1 (Jev) Gate Thresholds &amp; Cascade Controls</h2>
           </div>
-          <div class="composer-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
+          <div class="composer-fields" style="grid-template-columns: 1fr 1fr; margin-bottom: 12px;">
             <div>
               <label class="field-label" for="s1-conf-threshold">
                 <span>Stage 1 <code>Choice</code> Confidence Gate</span>
@@ -888,7 +888,7 @@
               <span class="toggle-header-tag">any_flag = max(nouls) &gt; fire_threshold</span>
               <p class="toggle-desc">Audits L1 <code>gemini-2.5-flash</code> responses across 5 failure modes (<code>hallucinated_or_contradicts_context</code>, <code>missed_user_constraint</code>, etc.). Escalates to L2 Pro if any head fires.</p>
             </div>
-            <div class="toggle-card" id="s1-card-defect" style="border-left: 3px solid var(--google-red);">
+            <div class="toggle-card" id="s1-card-defect" style="border-left: 3px solid var(--google-red); grid-column: span 2;">
               <div class="toggle-top">
                 <span class="toggle-name">3. Inject Subtle L1 Defect (Demo Trap for Noul Battery)</span>
                 <input type="checkbox" id="s1-simulate-defect" />
@@ -904,7 +904,7 @@
         <div class="panel-header">
           <h2 class="panel-title">Prompt &amp; RAG Context Sent Through Apigee X (<code>/v1/ai-economics/system1-routing</code>)</h2>
         </div>
-        <div class="composer-grid" style="margin-bottom: 12px;">
+        <div class="composer-fields" style="margin-bottom: 12px;">
           <div>
             <div class="field-label"><span>System Instruction</span></div>
             <textarea id="s1-sys" class="field-textarea" rows="2"></textarea>
@@ -1090,6 +1090,6 @@
     </div>
   </div>
 
-  <script src="/v1/ai-economics/assets/app.js"></script>
+  <script src="/v1/ai-economics/assets/app.js?v=5.1"></script>
 </body>
 </html>

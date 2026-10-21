@@ -83,6 +83,7 @@
         "main-tab-token-finops",
         "main-tab-model-armor",
         "main-tab-semantic-gov",
+        "main-tab-system1-jev",
       ].forEach((id) => {
         const el = document.getElementById(id);
         if (el) el.style.display = id === targetId ? "block" : "none";
