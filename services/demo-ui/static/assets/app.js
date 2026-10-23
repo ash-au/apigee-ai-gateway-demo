@@ -9,6 +9,37 @@
   const API_PREFIX = window.location.pathname.startsWith("/v1/ai-economics")
     ? "/v1/ai-economics"
     : "";
+  const PUBLIC_XLB_BASE = "https://eval-group.34-120-155-152.nip.io/v1/ai-economics";
+  let usePublicXlbFallback = false;
+
+  async function apiFetch(endpointPath, options = {}) {
+    if (!usePublicXlbFallback) {
+      try {
+        const primaryResp = await fetch(`${API_PREFIX}${endpointPath}`, {
+          credentials: "same-origin",
+          ...options,
+        });
+        if (primaryResp.status !== 401 && primaryResp.status !== 403) {
+          return primaryResp;
+        }
+        console.warn(
+          `[Apigee Demo UI] Primary endpoint returned HTTP ${primaryResp.status} (IAP token expired/missing); switching to Public Apigee X XLB.`
+        );
+        usePublicXlbFallback = true;
+      } catch (primaryErr) {
+        console.warn(
+          "[Apigee Demo UI] Primary endpoint network error; switching to Public Apigee X XLB:",
+          primaryErr
+        );
+        usePublicXlbFallback = true;
+      }
+    }
+    return fetch(`${PUBLIC_XLB_BASE}${endpointPath}`, {
+      mode: "cors",
+      credentials: "omit",
+      ...options,
+    });
+  }
 
   const state = {
     scenarios: [],
@@ -239,7 +270,7 @@
     };
 
     try {
-      const resp = await fetch(`${API_PREFIX}/api/compare`, {
+      const resp = await apiFetch(`/api/compare`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -497,7 +528,7 @@
     elBtnReset.disabled = true;
     elRunStatus.textContent = "Resetting Apigee X semantic cache & session summaries...";
     try {
-      await fetch(`${API_PREFIX}/api/reset`, { method: "POST" });
+      await apiFetch(`/api/reset`, { method: "POST" });
       state.sessionLedger = {
         runs: 0,
         directTokens: 0,
@@ -673,7 +704,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     btn.disabled = true;
     statusEl.textContent = "Executing Direct Vertex AI vs. Apigee X Token Governance...";
     try {
-      const resp = await fetch(`${API_PREFIX}/api/policies/execute`, {
+      const resp = await apiFetch(`/api/policies/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -735,7 +766,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     btn.disabled = true;
     statusEl.textContent = "Executing Direct Vertex AI vs. Apigee X + Model Armor...";
     try {
-      const resp = await fetch(`${API_PREFIX}/api/policies/execute`, {
+      const resp = await apiFetch(`/api/policies/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -802,7 +833,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     btn.disabled = true;
     statusEl.textContent = `Executing Apigee X (${state.tab4Submode})...`;
     try {
-      const resp = await fetch(`${API_PREFIX}/api/policies/execute`, {
+      const resp = await apiFetch(`/api/policies/execute`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -858,7 +889,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   // Vector Search Node Status & Toggle Controls
   async function refreshVectorSearchStatus() {
     try {
-      const resp = await fetch(`${API_PREFIX}/api/vector-search/status`);
+      const resp = await apiFetch(`/api/vector-search/status`);
       const st = await resp.json();
       renderVectorSearchState(st);
     } catch (e) {
@@ -896,7 +927,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     const btn = document.getElementById("btn-vs-wake");
     btn.disabled = true;
     try {
-      const resp = await fetch(`${API_PREFIX}/api/vector-search/toggle`, {
+      const resp = await apiFetch(`/api/vector-search/toggle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "on" }),
@@ -911,7 +942,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     const btn = document.getElementById("btn-vs-suspend");
     btn.disabled = true;
     try {
-      const resp = await fetch(`${API_PREFIX}/api/vector-search/toggle`, {
+      const resp = await apiFetch(`/api/vector-search/toggle`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "off" }),
@@ -1010,8 +1041,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   async function init() {
     try {
       const [scenResp, polResp] = await Promise.all([
-        fetch(`${API_PREFIX}/api/scenarios`),
-        fetch(`${API_PREFIX}/api/policies/presets`),
+        apiFetch(`/api/scenarios`),
+        apiFetch(`/api/policies/presets`),
       ]);
       const data = await scenResp.json();
       state.scenarios = data.scenarios || [];
@@ -1102,7 +1133,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           simulate_l1_defect: document.getElementById("s1-simulate-defect").checked,
         };
 
-        const resp = await fetch(`${API_PREFIX}/api/system1/execute`, {
+        const resp = await apiFetch(`/api/system1/execute`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
