@@ -65,6 +65,7 @@
   const elInputHistory = document.getElementById("input-history");
   const elInputRag = document.getElementById("input-rag");
   const elInputPrompt = document.getElementById("input-prompt");
+  const elMetaSystemLen = document.getElementById("meta-system-len");
   const elMetaHistoryTurns = document.getElementById("meta-history-turns");
   const elMetaRagLen = document.getElementById("meta-rag-len");
 
@@ -103,11 +104,66 @@
       .replace(/>/g, "&gt;");
   }
 
+  function setDeltaClass(el, isPositiveSavings) {
+    if (!el) return;
+    el.classList.remove("savings-number", "cost-increase");
+    if (isPositiveSavings === true) {
+      el.classList.add("savings-number");
+    } else if (isPositiveSavings === false) {
+      el.classList.add("cost-increase");
+    }
+  }
+
+  function updateComposerCounters() {
+    if (elMetaSystemLen) {
+      const len = (elInputSystem.value || "").length;
+      elMetaSystemLen.textContent = len > 0 ? `${fmtInt(len)} chars` : "None";
+    }
+    if (elMetaRagLen) {
+      const len = (elInputRag.value || "").length;
+      elMetaRagLen.textContent = len > 0 ? `${fmtInt(len)} chars` : "None";
+    }
+    if (elMetaHistoryTurns) {
+      try {
+        const parsed = JSON.parse(elInputHistory.value || "[]");
+        const turns = Array.isArray(parsed) ? parsed.length : 0;
+        elMetaHistoryTurns.textContent = `${fmtInt(turns)} prior turn${turns === 1 ? "" : "s"}`;
+      } catch (e) {
+        elMetaHistoryTurns.textContent = "Invalid JSON";
+      }
+    }
+  }
+
+  function wireTablistKeyboardNav() {
+    document.querySelectorAll('[role="tablist"]').forEach((tablist) => {
+      tablist.addEventListener("keydown", (e) => {
+        const tabs = Array.from(tablist.querySelectorAll('[role="tab"]'));
+        if (!tabs.length) return;
+        const idx = tabs.indexOf(document.activeElement);
+        if (idx === -1) return;
+        let nextIdx = -1;
+        if (e.key === "ArrowRight") nextIdx = (idx + 1) % tabs.length;
+        else if (e.key === "ArrowLeft") nextIdx = (idx - 1 + tabs.length) % tabs.length;
+        else if (e.key === "Home") nextIdx = 0;
+        else if (e.key === "End") nextIdx = tabs.length - 1;
+        if (nextIdx !== -1) {
+          e.preventDefault();
+          tabs[nextIdx].focus();
+          tabs[nextIdx].click();
+        }
+      });
+    });
+  }
+
   // Primary Multi-Tab Navigation
   document.querySelectorAll(".primary-tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
-      document.querySelectorAll(".primary-tab-btn").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".primary-tab-btn").forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
       btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
       const targetId = btn.dataset.maintab;
       [
         "main-tab-economics",
@@ -125,7 +181,7 @@
     });
   });
 
-  // Sync toggle cards & header tags (Tab 1)
+  // Sync toggle cards & header tags (Tabs 1, 3, and 5)
   function syncToggleUI() {
     const map = [
       { input: elToggleCache, cardId: "card-toggle-cache", header: "X-Opt-Cache" },
@@ -135,11 +191,38 @@
     ];
     map.forEach((item) => {
       const card = document.getElementById(item.cardId);
+      if (!card || !item.input) return;
       const tag = card.querySelector(".toggle-header-tag");
       const on = item.input.checked;
       card.classList.toggle("enabled", on);
-      tag.textContent = `${item.header}: ${on ? "true" : "false"}`;
+      if (tag) tag.textContent = `${item.header}: ${on ? "true" : "false"}`;
     });
+  }
+
+  function syncPolicySwitches() {
+    const pairs = [
+      { inputId: "ma-enable-prompt", cardId: "card-ma-prompt" },
+      { inputId: "ma-enable-response", cardId: "card-ma-response" },
+      { inputId: "s1-enable-fast-track", cardId: "s1-card-fast-track" },
+      { inputId: "s1-enable-verifier", cardId: "s1-card-verifier" },
+    ];
+    pairs.forEach(({ inputId, cardId }) => {
+      const input = document.getElementById(inputId);
+      const card = document.getElementById(cardId);
+      if (input && card) {
+        card.classList.toggle("enabled", input.checked);
+      }
+    });
+
+    const defectInput = document.getElementById("s1-simulate-defect");
+    const defectCard = document.getElementById("s1-card-defect");
+    if (defectInput && defectCard) {
+      const active = defectInput.checked;
+      defectCard.classList.toggle("enabled", active);
+      defectCard.classList.toggle("toggle-card-danger", active);
+      const tag = defectCard.querySelector(".toggle-header-tag");
+      if (tag) tag.textContent = `simulate_l1_defect: ${active ? "true" : "false"}`;
+    }
   }
 
   // Update Cumulative Session Ledger & Enterprise Scale Projection
@@ -155,17 +238,21 @@
 
     const tokSaved = L.directTokens - L.gatewayTokens;
     const tokPct = L.directTokens > 0 ? ((tokSaved / L.directTokens) * 100).toFixed(1) : null;
-    document.getElementById("ledger-token-pct").textContent =
+    const elLedgerTokPct = document.getElementById("ledger-token-pct");
+    elLedgerTokPct.textContent =
       tokPct !== null ? `${tokSaved >= 0 ? "-" : "+"}${Math.abs(tokPct)}%` : "—";
+    setDeltaClass(elLedgerTokPct, tokPct === null ? null : tokSaved >= 0);
     document.getElementById("ledger-tokens-saved").textContent =
-      `${fmtInt(tokSaved)} net tokens saved`;
+      `${fmtInt(Math.abs(tokSaved))} net tokens ${tokSaved >= 0 ? "saved" : "added"}`;
 
     const costSaved = L.directCostUsd - L.gatewayCostUsd;
     const costPct = L.directCostUsd > 0 ? ((costSaved / L.directCostUsd) * 100).toFixed(1) : null;
-    document.getElementById("ledger-cost-pct").textContent =
+    const elLedgerCostPct = document.getElementById("ledger-cost-pct");
+    elLedgerCostPct.textContent =
       costPct !== null ? `${costSaved >= 0 ? "-" : "+"}${Math.abs(costPct)}%` : "—";
+    setDeltaClass(elLedgerCostPct, costPct === null ? null : costSaved >= 0);
     document.getElementById("ledger-cost-saved").textContent =
-      `${fmtUsd(costSaved, 6)} net saved`;
+      `${fmtUsd(Math.abs(costSaved), 6)} net ${costSaved >= 0 ? "saved" : "added"}`;
 
     updateAnnualProjectionUI();
   }
@@ -176,21 +263,25 @@
       `At ${millionsPerMonth}M requests/month (${millionsPerMonth * 12}M/yr)`;
 
     const L = state.sessionLedger;
+    const elAnnual = document.getElementById("ledger-annual-savings");
     if (L.runs === 0) {
-      document.getElementById("ledger-annual-savings").textContent = "$0 / yr";
+      elAnnual.textContent = "$0 / yr";
+      setDeltaClass(elAnnual, null);
       return;
     }
     const avgSavedPerReq = (L.directCostUsd - L.gatewayCostUsd) / L.runs;
     const annualSaved = avgSavedPerReq * (millionsPerMonth * 1_000_000) * 12;
-    document.getElementById("ledger-annual-savings").textContent =
-      `${fmtCurrencyLarge(annualSaved)} / yr`;
+    elAnnual.textContent = `${annualSaved < 0 ? "-" : ""}${fmtCurrencyLarge(Math.abs(annualSaved))} / yr`;
+    setDeltaClass(elAnnual, annualSaved >= 0);
   }
 
   // Select a preset scenario (Tab 1)
   function selectScenario(scen) {
     state.activeScenario = scen;
     document.querySelectorAll("#scenario-list .scenario-item").forEach((el) => {
-      el.classList.toggle("active", el.dataset.id === scen.id);
+      const isSelected = el.dataset.id === scen.id;
+      el.classList.toggle("active", isSelected);
+      el.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
 
     elActiveScenarioMeta.textContent = `${scen.title} • Session: ${scen.session_id}`;
@@ -201,9 +292,7 @@
     elInputHistory.value = JSON.stringify(scen.conversation_history || [], null, 2);
     elInputPrompt.value = scen.user_prompt || "";
 
-    const turns = (scen.conversation_history || []).length;
-    elMetaHistoryTurns.textContent = `${turns} prior turn${turns === 1 ? "" : "s"}`;
-    elMetaRagLen.textContent = scen.rag_context ? `${scen.rag_context.length} chars` : "None";
+    updateComposerCounters();
 
     elToggleCache.checked = Boolean(scen.recommended_toggles.semantic_cache);
     elToggleCompress.checked = Boolean(scen.recommended_toggles.prompt_compression);
@@ -218,6 +307,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "scenario-item";
+      btn.setAttribute("aria-pressed", "false");
       btn.dataset.id = scen.id;
       btn.innerHTML = `
         <div>
@@ -335,16 +425,20 @@
     );
 
     const tokSign = cmp.tokens_saved >= 0 ? "-" : "+";
-    document.getElementById("gateway-token-delta").textContent =
-      `${tokSign}${Math.abs(cmp.token_reduction_pct)}% (${fmtInt(cmp.tokens_saved)} saved)`;
+    const elGwTokDelta = document.getElementById("gateway-token-delta");
+    elGwTokDelta.textContent =
+      `${tokSign}${Math.abs(cmp.token_reduction_pct)}% (${fmtInt(Math.abs(cmp.tokens_saved))} ${cmp.tokens_saved >= 0 ? "saved" : "added"})`;
+    setDeltaClass(elGwTokDelta, cmp.tokens_saved >= 0);
 
     document.getElementById("gateway-total-cost").textContent = fmtUsd(
       gw.cost_accounting.total_cost_usd,
       6
     );
     const costSign = cmp.cost_saved_usd >= 0 ? "-" : "+";
-    document.getElementById("gateway-cost-delta").textContent =
-      `${costSign}${Math.abs(cmp.cost_reduction_pct)}% (${fmtUsd(cmp.cost_saved_usd, 6)} saved)`;
+    const elGwCostDelta = document.getElementById("gateway-cost-delta");
+    elGwCostDelta.textContent =
+      `${costSign}${Math.abs(cmp.cost_reduction_pct)}% (${fmtUsd(Math.abs(cmp.cost_saved_usd), 6)} ${cmp.cost_saved_usd >= 0 ? "saved" : "added"})`;
+    setDeltaClass(elGwCostDelta, cmp.cost_saved_usd >= 0);
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
@@ -480,7 +574,7 @@
               Cosine Similarity: <code>${sc.similarity_score !== null ? sc.similarity_score : "N/A (No prior match)"}</code> (Threshold &ge; <code>0.85</code>)<br/>
               Matched Cached Query: <code>${escapeHtml(sc.matched_query || "—")}</code><br/>
               Embedding Tokens Billed: <code>${fmtInt(sc.embedding_tokens)}</code> (${fmtUsd(gw.cost_accounting.embedding_lookup_cost_usd, 8)}) &bull;
-              Lookup Latency: <code>${sc.latency_ms} ms</code>
+              Lookup Latency: <code>${fmtInt(sc.latency_ms)} ms</code>
             </td>
           </tr>
           <tr>
@@ -495,7 +589,7 @@
               Summarizer Overhead: <code>${fmtInt(cp.summarizer_overhead_tokens)} tokens</code> (${fmtUsd(gw.cost_accounting.pruning_summarizer_cost_usd, 7)})<br/>
               ${
                 cp.summary_generated
-                  ? `<div style="margin-top:8px;"><strong>Generated Rolling State Summary:</strong><div class="code-block" style="margin-top:4px;max-height:140px;">${escapeHtml(cp.summary_generated)}</div></div>`
+                  ? `<div class="summary-preview-wrap"><strong>Generated Rolling State Summary:</strong><div class="code-block code-block-compact">${escapeHtml(cp.summary_generated)}</div></div>`
                   : "<em>No multi-turn summarization required for this turn count.</em>"
               }
             </td>
@@ -528,7 +622,11 @@
     elBtnReset.disabled = true;
     elRunStatus.textContent = "Resetting Apigee X semantic cache & session summaries...";
     try {
-      await apiFetch(`/api/reset`, { method: "POST" });
+      const resp = await apiFetch(`/api/reset`, { method: "POST" });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       state.sessionLedger = {
         runs: 0,
         directTokens: 0,
@@ -564,6 +662,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "scenario-item" + (idx === 0 ? " active" : "");
+      btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
           <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
@@ -572,8 +671,12 @@
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
       `;
       btn.addEventListener("click", () => {
-        tgList.querySelectorAll(".scenario-item").forEach((b) => b.classList.remove("active"));
+        tgList.querySelectorAll(".scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
         document.getElementById("tg-prompt").value = scen.prompt;
         document.getElementById("tg-prompt-limit").value = scen.prompt_token_limit;
         document.getElementById("tg-quota-limit").value = scen.quota_limit;
@@ -600,6 +703,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "scenario-item" + (idx === 0 ? " active" : "");
+      btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
           <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
@@ -608,16 +712,24 @@
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
       `;
       btn.addEventListener("click", () => {
-        maList.querySelectorAll(".scenario-item").forEach((b) => b.classList.remove("active"));
+        maList.querySelectorAll(".scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
         document.getElementById("ma-prompt").value = scen.prompt;
-        document.getElementById("ma-enable-prompt").checked = scen.enable_sanitize_prompt;
-        document.getElementById("ma-enable-response").checked = scen.enable_sanitize_response;
+        document.getElementById("ma-enable-prompt").checked = scen.enable_sanitize_prompt !== false;
+        document.getElementById("ma-enable-response").checked = scen.enable_sanitize_response !== false;
+        syncPolicySwitches();
       });
       maList.appendChild(btn);
     });
     if (maScens.length > 0) {
       document.getElementById("ma-prompt").value = maScens[0].prompt;
+      document.getElementById("ma-enable-prompt").checked = maScens[0].enable_sanitize_prompt !== false;
+      document.getElementById("ma-enable-response").checked = maScens[0].enable_sanitize_response !== false;
+      syncPolicySwitches();
     }
     document.getElementById("ma-xml-box").textContent = getPolicyXmlByIds([
       "SanitizeUserPrompt",
@@ -632,8 +744,11 @@
     const mode = state.tab4Submode;
     const btnSg = document.getElementById("btn-submode-sg");
     const btnNc = document.getElementById("btn-submode-nc");
-    btnSg.className = mode === "semantic-governance" ? "btn btn-primary" : "btn btn-outline";
-    btnNc.className = mode === "native-cache" ? "btn btn-primary" : "btn btn-outline";
+    const isSg = mode === "semantic-governance";
+    btnSg.className = isSg ? "btn btn-segmented btn-compact active" : "btn btn-segmented btn-compact";
+    btnSg.setAttribute("aria-pressed", isSg ? "true" : "false");
+    btnNc.className = !isSg ? "btn btn-segmented btn-compact active" : "btn btn-segmented btn-compact";
+    btnNc.setAttribute("aria-pressed", !isSg ? "true" : "false");
 
     const sgList = document.getElementById("sg-scenario-list");
     const scens = state.policyScenarios[mode] || [];
@@ -642,6 +757,7 @@
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "scenario-item" + (idx === 0 ? " active" : "");
+      btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
           <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
@@ -650,8 +766,12 @@
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
       `;
       btn.addEventListener("click", () => {
-        sgList.querySelectorAll(".scenario-item").forEach((b) => b.classList.remove("active"));
+        sgList.querySelectorAll(".scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
         document.getElementById("sg-prompt").value = scen.prompt;
       });
       sgList.appendChild(btn);
@@ -668,11 +788,11 @@
       document.getElementById("sg-gw-heading").textContent = "Via Apigee X Semantic Governance";
       document.getElementById("sg-xml-box").textContent = getPolicyXmlByIds(["SemanticGovernance"]);
       document.getElementById("sg-policy-explanation").innerHTML = `
-        <p style="margin-top: 0;">
-          <strong><code>SG-EnforceEnterpriseDomain</code> (<code>&lt;SemanticGovernance&gt;</code>):</strong>
-          Uses Vertex AI Gemini (<code>gemini-2.5-flash</code>) natively inside the Apigee Response Flow to verify that model completions strictly adhere to declarative domain rules:
+        <p>
+          <strong><code>SG-EnforceEnterpriseDomain</code> (<code>enterprise-domain-guardrail</code>):</strong>
+          Enforces declarative enterprise domain rules inside the Apigee Response Flow so unauthorized off-topic completions return HTTP <code>422</code>:
         </p>
-        <div class="code-block" style="max-height: 140px;">Rule id="enterprise-domain-guardrail":
+        <div class="code-block code-block-compact">Rule id="enterprise-domain-guardrail":
 "The response must only provide enterprise cloud architecture, cybersecurity, FinOps, software engineering, or API management guidance. It must NOT provide personal stock trading recommendations, cryptocurrency speculation, medical diagnoses, creative fiction/poetry, or competitor disparagement."</div>
       `;
     } else {
@@ -686,11 +806,11 @@
         "SemanticCachePopulate",
       ]);
       document.getElementById("sg-policy-explanation").innerHTML = `
-        <p style="margin-top: 0;">
+        <p>
           <strong><code>SCL-NativeSemanticCacheLookup</code> &amp; <code>SCP-NativeSemanticCachePopulate</code>:</strong>
           Zero-code native Apigee X XML policies backed by <code>text-embedding-005</code> and Vertex AI Vector Search (<code>SHARD_SIZE_MEDIUM</code> / <code>e2-standard-16</code>).
         </p>
-        <div class="code-block" style="max-height: 140px;">Index: projects/1019413155504/locations/australia-southeast1/indexes/8419013310438965248
+        <div class="code-block code-block-compact">Index: projects/1019413155504/locations/australia-southeast1/indexes/8419013310438965248
 IndexEndpoint: projects/1019413155504/locations/australia-southeast1/indexEndpoints/3216599276826132480
 Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</div>
       `;
@@ -717,11 +837,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           enable_token_quota: document.getElementById("tg-enable-ltq").checked,
         }),
       });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const data = await resp.json();
       const d = data.direct_baseline || {};
       const g = data.apigee_gateway || {};
       const fv = g.apigee_flow_variables || {};
 
+      document.getElementById("tg-direct-pill").textContent = `HTTP ${d.http_status_code || 200}`;
       document.getElementById("tg-direct-prompt-tok").textContent = fmtInt((d.token_usage || {}).prompt_tokens);
       document.getElementById("tg-direct-total-tok").textContent = fmtInt((d.token_usage || {}).total_tokens);
       document.getElementById("tg-direct-cost").textContent = fmtUsd(d.cost_usd, 6);
@@ -729,10 +854,14 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("tg-direct-body").textContent = d.response_text || "";
 
       const pill = document.getElementById("tg-gw-pill");
+      const verdictEl = document.getElementById("tg-gw-verdict");
+      const verdictSubEl = document.getElementById("tg-gw-verdict-sub");
       if (g.blocked) {
         pill.textContent = `BLOCKED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-blocked";
-        document.getElementById("tg-gw-verdict").textContent = `BLOCKED (${g.fault_name || "RateLimit"})`;
+        verdictEl.textContent = "BLOCKED";
+        setDeltaClass(verdictEl, false);
+        verdictSubEl.textContent = g.fault_name || "RateLimit";
         document.getElementById("tg-gw-body").textContent =
           `[APIGEE X POLICY CIRCUIT BREAKER TRIGGERED]\n` +
           `HTTP Status: ${g.http_status_code}\n` +
@@ -742,11 +871,17 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       } else {
         pill.textContent = `ALLOWED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-allowed";
-        document.getElementById("tg-gw-verdict").textContent = "ALLOWED";
+        verdictEl.textContent = "ALLOWED";
+        setDeltaClass(verdictEl, true);
+        verdictSubEl.textContent = "Within limits";
         document.getElementById("tg-gw-body").textContent = g.response_text || "";
       }
-      document.getElementById("tg-gw-quota-used").textContent =
-        `${fv.ltq_used_count !== null && fv.ltq_used_count !== undefined ? fv.ltq_used_count : "—"} / ${fv.ltq_allowed_count || document.getElementById("tg-quota-limit").value}`;
+      const usedStr =
+        fv.ltq_used_count !== null && fv.ltq_used_count !== undefined
+          ? fmtInt(fv.ltq_used_count)
+          : "—";
+      const allowedVal = fv.ltq_allowed_count || document.getElementById("tg-quota-limit").value;
+      document.getElementById("tg-gw-quota-used").textContent = `${usedStr} / ${fmtInt(allowedVal)}`;
       document.getElementById("tg-gw-quota-rem").textContent =
         fv.ltq_available_count !== null && fv.ltq_available_count !== undefined ? fmtInt(fv.ltq_available_count) : "—";
       document.getElementById("tg-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
@@ -776,10 +911,15 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           enable_sanitize_response: document.getElementById("ma-enable-response").checked,
         }),
       });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const data = await resp.json();
       const d = data.direct_baseline || {};
       const g = data.apigee_gateway || {};
 
+      document.getElementById("ma-direct-pill").textContent = `HTTP ${d.http_status_code || 200}`;
       document.getElementById("ma-direct-prompt-tok").textContent = fmtInt((d.token_usage || {}).prompt_tokens);
       document.getElementById("ma-direct-total-tok").textContent = fmtInt((d.token_usage || {}).total_tokens);
       document.getElementById("ma-direct-cost").textContent = fmtUsd(d.cost_usd, 6);
@@ -787,11 +927,23 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("ma-direct-body").textContent = d.response_text || "";
 
       const pill = document.getElementById("ma-gw-pill");
+      const verdictEl = document.getElementById("ma-gw-verdict");
+      const verdictSubEl = document.getElementById("ma-gw-verdict-sub");
+      const faultEl = document.getElementById("ma-gw-fault");
+      const faultSubEl = document.getElementById("ma-gw-fault-sub");
       if (g.blocked) {
-        pill.textContent = `BLOCKED BY MODEL ARMOR (HTTP ${g.http_status_code})`;
+        pill.textContent = `BLOCKED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-blocked";
-        document.getElementById("ma-gw-verdict").textContent = "BLOCKED AT GATEWAY";
-        document.getElementById("ma-gw-fault").textContent = g.fault_name || "ModelArmorViolation";
+        verdictEl.textContent = "BLOCKED";
+        setDeltaClass(verdictEl, false);
+        verdictSubEl.textContent = "Stopped at gateway";
+        const faultStr = String(g.fault_name || "ModelArmorViolation");
+        faultEl.textContent = faultStr.toLowerCase().includes("response")
+          ? "Response"
+          : faultStr.toLowerCase().includes("prompt")
+          ? "Prompt"
+          : "Violation";
+        faultSubEl.textContent = faultStr;
         document.getElementById("ma-gw-body").textContent =
           `[BLOCKED BY APIGEE X + GOOGLE CLOUD MODEL ARMOR]\n` +
           `Template: projects/apac-cs-5g-demo5/locations/us-central1/templates/apigee-ai-safety-template\n` +
@@ -800,10 +952,13 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           `Message: ${g.error_message}\n\n` +
           `Details: ${JSON.stringify(g.error_details || {}, null, 2)}`;
       } else {
-        pill.textContent = `PASSED MODEL ARMOR (HTTP ${g.http_status_code})`;
+        pill.textContent = `PASSED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-allowed";
-        document.getElementById("ma-gw-verdict").textContent = "SANITIZED & ALLOWED";
-        document.getElementById("ma-gw-fault").textContent = "None (Clean)";
+        verdictEl.textContent = "ALLOWED";
+        setDeltaClass(verdictEl, true);
+        verdictSubEl.textContent = "Sanitized response";
+        faultEl.textContent = "Clean";
+        faultSubEl.textContent = "No violations";
         document.getElementById("ma-gw-body").textContent = g.response_text || "";
       }
       document.getElementById("ma-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
@@ -841,11 +996,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           prompt: document.getElementById("sg-prompt").value,
         }),
       });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const data = await resp.json();
       const d = data.direct_baseline || {};
       const g = data.apigee_gateway || {};
       const fv = g.apigee_flow_variables || {};
 
+      document.getElementById("sg-direct-pill").textContent = `HTTP ${d.http_status_code || 200}`;
       document.getElementById("sg-direct-prompt-tok").textContent = fmtInt((d.token_usage || {}).prompt_tokens);
       document.getElementById("sg-direct-total-tok").textContent = fmtInt((d.token_usage || {}).total_tokens);
       document.getElementById("sg-direct-cost").textContent = fmtUsd(d.cost_usd, 6);
@@ -853,11 +1013,18 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("sg-direct-body").textContent = d.response_text || "";
 
       const pill = document.getElementById("sg-gw-pill");
+      const verdictEl = document.getElementById("sg-gw-verdict");
+      const verdictSubEl = document.getElementById("sg-gw-verdict-sub");
+      const faultEl = document.getElementById("sg-gw-fault");
+      const faultSubEl = document.getElementById("sg-gw-fault-sub");
       if (g.blocked) {
         pill.textContent = `BLOCKED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-blocked";
-        document.getElementById("sg-gw-verdict").textContent = "BLOCKED BY POLICY";
-        document.getElementById("sg-gw-fault").textContent = g.fault_name || "PolicyViolation";
+        verdictEl.textContent = "BLOCKED";
+        setDeltaClass(verdictEl, false);
+        verdictSubEl.textContent = "Intercepted by policy";
+        faultEl.textContent = "Violation";
+        faultSubEl.textContent = g.fault_name || "PolicyViolation";
         document.getElementById("sg-gw-body").textContent =
           `[APIGEE X NATIVE POLICY INTERCEPTED REQUEST/RESPONSE]\n` +
           `Policy Flow: /v1/ai-economics/policies/${state.tab4Submode}\n` +
@@ -868,11 +1035,17 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       } else {
         pill.textContent = `ALLOWED (HTTP ${g.http_status_code})`;
         pill.className = "model-pill pill-allowed";
-        document.getElementById("sg-gw-verdict").textContent = "ALLOWED";
-        document.getElementById("sg-gw-fault").textContent =
-          state.tab4Submode === "native-cache"
-            ? `Native Cache Hit: ${fv.scl_cache_hit || false}`
-            : "Rule Verified (Compliant)";
+        verdictEl.textContent = "ALLOWED";
+        setDeltaClass(verdictEl, true);
+        verdictSubEl.textContent = "Policy passed";
+        if (state.tab4Submode === "native-cache") {
+          const hit = Boolean(fv.scl_cache_hit);
+          faultEl.textContent = hit ? "Cache HIT" : "Cache MISS";
+          faultSubEl.textContent = hit ? "Vector short-circuit" : "Populated vector index";
+        } else {
+          faultEl.textContent = "Compliant";
+          faultSubEl.textContent = "Domain rule verified";
+        }
         document.getElementById("sg-gw-body").textContent = g.response_text || "";
       }
       document.getElementById("sg-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
@@ -890,6 +1063,10 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   async function refreshVectorSearchStatus() {
     try {
       const resp = await apiFetch(`/api/vector-search/status`);
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const st = await resp.json();
       renderVectorSearchState(st);
     } catch (e) {
@@ -932,8 +1109,14 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "on" }),
       });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const res = await resp.json();
       renderVectorSearchState(res.state);
+    } catch (e) {
+      document.getElementById("vs-resource-details").textContent = `Wake node error: ${e.message}`;
     } finally {
       btn.disabled = false;
     }
@@ -947,17 +1130,41 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "off" }),
       });
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`HTTP ${resp.status}: ${errText}`);
+      }
       const res = await resp.json();
       renderVectorSearchState(res.state);
+    } catch (e) {
+      document.getElementById("vs-resource-details").textContent = `Suspend node error: ${e.message}`;
     } finally {
       btn.disabled = false;
     }
   });
 
-  // Wire Event Listeners (Tab 1)
+  // Wire Event Listeners (Tab 1, 3, and 5 switches + live composer counters)
   [elToggleCache, elToggleCompress, elToggleRoute, elTogglePrune].forEach((input) => {
-    input.addEventListener("change", syncToggleUI);
+    if (input) input.addEventListener("change", syncToggleUI);
   });
+
+  [
+    "ma-enable-prompt",
+    "ma-enable-response",
+    "s1-enable-fast-track",
+    "s1-enable-verifier",
+    "s1-simulate-defect",
+  ].forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) input.addEventListener("change", syncPolicySwitches);
+  });
+
+  [elInputSystem, elInputRag, elInputHistory].forEach((el) => {
+    if (el) el.addEventListener("input", updateComposerCounters);
+  });
+
+  wireTablistKeyboardNav();
+  syncPolicySwitches();
 
   document.getElementById("btn-toggles-all-on").addEventListener("click", () => {
     elToggleCache.checked = true;
@@ -983,8 +1190,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   // Audit Drawer Tabs (Tab 1)
   document.querySelectorAll(".audit-tab").forEach((tabBtn) => {
     tabBtn.addEventListener("click", () => {
-      document.querySelectorAll(".audit-tab").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll(".audit-tab").forEach((b) => {
+        b.classList.remove("active");
+        b.setAttribute("aria-selected", "false");
+      });
       tabBtn.classList.add("active");
+      tabBtn.setAttribute("aria-selected", "true");
       const targetId = tabBtn.dataset.tab;
       ["tab-compression", "tab-cascade", "tab-cache-prune", "tab-headers-raw"].forEach((id) => {
         document.getElementById(id).style.display = id === targetId ? "block" : "none";
@@ -992,16 +1203,31 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     });
   });
 
-  // Modal ("About")
+  // Modals with Focus Management
+  let lastModalTrigger = null;
+  function openModal(modalEl, focusTargetEl) {
+    if (!modalEl) return;
+    lastModalTrigger = document.activeElement;
+    modalEl.classList.add("open");
+    if (focusTargetEl) focusTargetEl.focus();
+  }
+  function closeModal(modalEl) {
+    if (!modalEl || !modalEl.classList.contains("open")) return;
+    modalEl.classList.remove("open");
+    if (lastModalTrigger && typeof lastModalTrigger.focus === "function") {
+      lastModalTrigger.focus();
+      lastModalTrigger = null;
+    }
+  }
+
   const elModal = document.getElementById("about-modal");
+  const btnCloseAbout = document.getElementById("btn-close-about");
   document.getElementById("btn-open-about").addEventListener("click", () => {
-    elModal.classList.add("open");
+    openModal(elModal, btnCloseAbout);
   });
-  document.getElementById("btn-close-about").addEventListener("click", () => {
-    elModal.classList.remove("open");
-  });
+  btnCloseAbout.addEventListener("click", () => closeModal(elModal));
   elModal.addEventListener("click", (e) => {
-    if (e.target === elModal) elModal.classList.remove("open");
+    if (e.target === elModal) closeModal(elModal);
   });
 
   // Modal ("System 1 & Noul Battery Glossary")
@@ -1011,23 +1237,25 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   const btnCloseGlossary = document.getElementById("btn-close-glossary");
   if (elGlossaryModal) {
     if (btnOpenGlossary) {
-      btnOpenGlossary.addEventListener("click", () => elGlossaryModal.classList.add("open"));
+      btnOpenGlossary.addEventListener("click", () => openModal(elGlossaryModal, btnCloseGlossary));
     }
     if (btnOpenGlossaryTab5) {
-      btnOpenGlossaryTab5.addEventListener("click", () => elGlossaryModal.classList.add("open"));
+      btnOpenGlossaryTab5.addEventListener("click", () => openModal(elGlossaryModal, btnCloseGlossary));
     }
     if (btnCloseGlossary) {
-      btnCloseGlossary.addEventListener("click", () => elGlossaryModal.classList.remove("open"));
+      btnCloseGlossary.addEventListener("click", () => closeModal(elGlossaryModal));
     }
     elGlossaryModal.addEventListener("click", (e) => {
-      if (e.target === elGlossaryModal) elGlossaryModal.classList.remove("open");
+      if (e.target === elGlossaryModal) closeModal(elGlossaryModal);
     });
     document.querySelectorAll(".glossary-tab-btn").forEach((gBtn) => {
       gBtn.addEventListener("click", () => {
         document.querySelectorAll(".glossary-tab-btn").forEach((b) => {
-          b.className = "btn btn-outline glossary-tab-btn";
+          b.className = "btn btn-segmented btn-compact glossary-tab-btn";
+          b.setAttribute("aria-selected", "false");
         });
-        gBtn.className = "btn btn-primary glossary-tab-btn";
+        gBtn.className = "btn btn-segmented btn-compact active glossary-tab-btn";
+        gBtn.setAttribute("aria-selected", "true");
         const targetGTab = gBtn.dataset.gtab;
         ["gtab-primitives", "gtab-system12", "gtab-ml-terms", "gtab-compare"].forEach((id) => {
           const pane = document.getElementById(id);
@@ -1037,6 +1265,13 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     });
   }
 
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeModal(elModal);
+      closeModal(elGlossaryModal);
+    }
+  });
+
   // Initialize from /api/scenarios and /api/policies/presets
   async function init() {
     try {
@@ -1044,6 +1279,10 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         apiFetch(`/api/scenarios`),
         apiFetch(`/api/policies/presets`),
       ]);
+      if (!scenResp.ok) {
+        const errText = await scenResp.text();
+        throw new Error(`HTTP ${scenResp.status}: ${errText}`);
+      }
       const data = await scenResp.json();
       state.scenarios = data.scenarios || [];
       if (data.apigee_gateway_url) {
@@ -1083,6 +1322,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     document.getElementById("s1-enable-verifier").checked =
       scen.enable_post_verifier !== false;
     document.getElementById("s1-simulate-defect").checked = Boolean(scen.simulate_l1_defect);
+    syncPolicySwitches();
   }
 
   function renderSystem1Tab() {
@@ -1094,6 +1334,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "scenario-item" + (idx === 0 ? " active" : "");
+      btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
           <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
@@ -1102,8 +1343,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
       `;
       btn.addEventListener("click", () => {
-        s1List.querySelectorAll(".scenario-item").forEach((b) => b.classList.remove("active"));
+        s1List.querySelectorAll(".scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
         btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
         selectSystem1Scenario(scen);
       });
       s1List.appendChild(btn);
@@ -1166,19 +1411,31 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           ? "model-pill pill-deploying"
           : "model-pill pill-allowed";
 
-        document.getElementById("s1-gw-route").textContent =
-          g.initial_routing_decision === "GEMINI_2_5_PRO"
-            ? "Direct Pro Fast-Track"
-            : g.escalated_to_pro
-            ? "L1 Flash -> Escalated L2 Pro"
-            : "L1 Flash Accepted";
+        const isDirectPro = g.initial_routing_decision === "GEMINI_2_5_PRO";
+        document.getElementById("s1-gw-route").textContent = isDirectPro
+          ? "Direct Pro"
+          : g.escalated_to_pro
+          ? "L1 → L2 Pro"
+          : "L1 Flash";
+        document.getElementById("s1-gw-route-sub").textContent = isDirectPro
+          ? "Stage 1 fast-track"
+          : g.escalated_to_pro
+          ? "Noul battery escalated"
+          : "Accepted at L1";
         document.getElementById("s1-gw-jev-cost").textContent = fmtUsd(
           gCost.total_jev_system1_cost_usd,
           8
         );
         document.getElementById("s1-gw-total-cost").textContent = fmtUsd(gCost.total_cost_usd, 6);
-        document.getElementById("s1-gw-savings").textContent =
-          `${cmp.cost_reduction_pct >= 0 ? "+" : ""}${cmp.cost_reduction_pct}% (${fmtUsd(cmp.cost_saved_usd, 6)})`;
+
+        const costSaved = Number(cmp.cost_saved_usd || 0);
+        const isSavings = costSaved >= 0;
+        const elS1Savings = document.getElementById("s1-gw-savings");
+        const elS1SavingsSub = document.getElementById("s1-gw-savings-sub");
+        elS1Savings.textContent = `${isSavings ? "-" : "+"}${Math.abs(Number(cmp.cost_reduction_pct || 0))}%`;
+        elS1SavingsSub.textContent = `${fmtUsd(Math.abs(costSaved), 6)} ${isSavings ? "saved" : "added"}`;
+        setDeltaClass(elS1Savings, isSavings);
+        setDeltaClass(elS1SavingsSub, isSavings);
 
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {
@@ -1196,7 +1453,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const st1 = g.stage1_jev || {};
         const st1Usage = st1.usage || {};
         document.getElementById("s1-stage1-meta").textContent =
-          `Model: ${st1.model || "jev-latest"} | Latency: ${st1.latency_ms || 0} ms | In: ${st1Usage.input_tokens || 0} tok (${fmtUsd(st1Usage.cost_usd, 8)})`;
+          `Model: ${st1.model || "jev-latest"} | Latency: ${fmtInt(st1.latency_ms)} ms | In: ${fmtInt(st1Usage.input_tokens)} tok (${fmtUsd(st1Usage.cost_usd, 8)})`;
 
         const st1Lines = [
           `=== STAGE 1: TYPESAFE JEV PRE-FLIGHT ROUTER (${st1.model || "jev-latest"}) ===`,
@@ -1222,7 +1479,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const st2 = g.stage2_jev || {};
         const st2Usage = st2.usage || {};
         document.getElementById("s1-stage2-meta").textContent = st2.executed
-          ? `Model: ${st2.model || "jev-latest"} | Latency: ${st2.latency_ms || 0} ms | In: ${st2Usage.input_tokens || 0} tok (${fmtUsd(st2Usage.cost_usd, 8)})`
+          ? `Model: ${st2.model || "jev-latest"} | Latency: ${fmtInt(st2.latency_ms)} ms | In: ${fmtInt(st2Usage.input_tokens)} tok (${fmtUsd(st2Usage.cost_usd, 8)})`
           : `Skipped (${st2.skipped_reason || "Direct System 2 Pro Fast-Track"})`;
 
         if (!st2.executed) {
