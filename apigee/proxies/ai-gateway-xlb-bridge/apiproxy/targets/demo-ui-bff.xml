@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="demo-ui-bff">
+    <Description>Southbound Cloud Run Target for Demo UI and Side-by-Side BFF in australia-southeast1</Description>
+    <PreFlow name="PreFlow">
+        <Request/>
+        <Response/>
+    </PreFlow>
+    <Flows/>
+    <PostFlow name="PostFlow">
+        <Request/>
+        <Response/>
+    </PostFlow>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleIDToken>
+                <Audience>https://apigee-ai-economics-bff-1019413155504.australia-southeast1.run.app</Audience>
+            </GoogleIDToken>
+        </Authentication>
+        <Properties>
+            <Property name="io.timeout.millis">110000</Property>
+            <Property name="connect.timeout.millis">10000</Property>
+        </Properties>
+        <URL>https://apigee-ai-economics-bff-1019413155504.australia-southeast1.run.app</URL>
+    </HTTPTargetConnection>
+</TargetEndpoint>

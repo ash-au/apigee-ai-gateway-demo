@@ -37,12 +37,11 @@ OPTIMIZER_SERVICE_URL = os.environ.get(
     "https://gateway-optimizer-1019413155504.australia-southeast1.run.app",
 )
 
-# Valid Apigee Developer App Consumer Keys (x-api-key) provisioned in Apigee X
+# Valid Apigee Developer App Consumer Keys (x-api-key) loaded from Secret Manager / env
 VALID_APIGEE_API_KEYS = {
-    "bONZ6sXjJRnAyS5iUFxZIgSbySkl2mPqFNxOxy6ZN5kSMnwL",  # jw-apigeex-0 / eval (XLB)
-    "PpSlCnhSuyVuLKDg2EA6VeQOddVLLPZjQ0doe1RW1BPt8n6E",  # apac-cs-5g-demo5 / demo
-    "demo-gold-key",
-    "demo-silver-key",
+    k.strip()
+    for k in os.environ.get("VALID_APIGEE_API_KEYS", "").split(",")
+    if k.strip()
 }
 
 VECTOR_SEARCH_INDEX_ID = "8419013310438965248"

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage continueOnError="false" enabled="true" name="AM-CorsHeaders">
+    <DisplayName>AM-CorsHeaders</DisplayName>
+    <Set>
+        <Headers>
+            <Header name="Access-Control-Allow-Origin">*</Header>
+            <Header name="Access-Control-Allow-Headers">Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Opt-Cache, X-Opt-Compress, X-Opt-Route, X-Opt-Prune, X-Session-Id, X-Scenario-Id</Header>
+            <Header name="Access-Control-Allow-Methods">GET, POST, OPTIONS</Header>
+            <Header name="Access-Control-Expose-Headers">X-AI-Gateway-Cache-Status, X-AI-Gateway-Model-Used, X-AI-Gateway-Cascade-Escalated, X-AI-Gateway-Tokens-Before, X-AI-Gateway-Tokens-After, X-AI-Gateway-Total-Cost-USD, X-AI-Gateway-Total-Latency-Ms</Header>
+            <Header name="X-AI-Gateway-Cache-Status">{ai.hdr_cache_status}</Header>
+            <Header name="X-AI-Gateway-Model-Used">{ai.hdr_model_used}</Header>
+            <Header name="X-AI-Gateway-Cascade-Escalated">{ai.hdr_cascade_escalated}</Header>
+            <Header name="X-AI-Gateway-Tokens-Before">{ai.hdr_tokens_before}</Header>
+            <Header name="X-AI-Gateway-Tokens-After">{ai.hdr_tokens_after}</Header>
+            <Header name="X-AI-Gateway-Total-Cost-USD">{ai.hdr_total_cost_usd}</Header>
+            <Header name="X-AI-Gateway-Total-Latency-Ms">{ai.hdr_total_latency_ms}</Header>
+        </Headers>
+    </Set>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>

@@ -37,6 +37,7 @@ gcloud beta run deploy "${SERVICE_NAME}" \
   --max-instances=5 \
   --timeout=120 \
   --set-env-vars="GCP_PROJECT_ID=${PROJECT_ID},GCP_REGION=${REGION},APIGEE_ORG=${APIGEE_ORG},APIGEE_ENV=${APIGEE_ENV},APIGEE_GATEWAY_URL=${APIGEE_GATEWAY_URL},OPTIMIZER_SERVICE_URL=${OPTIMIZER_SERVICE_URL}" \
+  --set-secrets="VALID_APIGEE_API_KEYS=apigee-gateway-api-keys:latest" \
   --quiet
 
 gcloud iap web add-iam-policy-binding \
@@ -73,6 +74,7 @@ gcloud run deploy "${BFF_SERVICE_NAME}" \
   --max-instances=5 \
   --timeout=120 \
   --set-env-vars="GCP_PROJECT_ID=${PROJECT_ID},GCP_REGION=${REGION},APIGEE_ORG=${APIGEE_ORG},APIGEE_ENV=${APIGEE_ENV},APIGEE_GATEWAY_URL=${APIGEE_GATEWAY_URL},OPTIMIZER_SERVICE_URL=${OPTIMIZER_SERVICE_URL}" \
+  --set-secrets="VALID_APIGEE_API_KEYS=apigee-gateway-api-keys:latest" \
   --quiet
 
 for SA in "apigee-ai-gw-sa@${PROJECT_ID}.iam.gserviceaccount.com" "ai-gateway-sa@jw-apigeex-0.iam.gserviceaccount.com"; do

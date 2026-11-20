@@ -1,0 +1,33 @@
+<APIProxy revision="10" name="ai-gateway-v1">
+    <DisplayName>Apigee X AI Economics Gateway</DisplayName>
+    <Description>Operationalizes FrugalGPT (arXiv:2305.05176) and LLMLingua (arXiv:2310.05736) at the Apigee X gateway layer with Semantic Caching, Coarse-to-Fine Prompt Compression, Model Routing/Cascade, and Multi-Turn Context Pruning.</Description>
+    <CreatedAt>1792578211278</CreatedAt>
+    <LastModifiedAt>1792578211278</LastModifiedAt>
+    <BasePaths>/v1/ai-economics</BasePaths>
+    <Policies>
+        <Policy>SC-ResetState</Policy>
+        <Policy>SC-EvaluateAndCascade</Policy>
+        <Policy>AM-DisablePathSuffix</Policy>
+        <Policy>JS-PrepareCascadeEval</Policy>
+        <Policy>AM-ResetResponse</Policy>
+        <Policy>JS-BuildFinalResponse</Policy>
+        <Policy>AM-CorsHeaders</Policy>
+        <Policy>SC-PreOptimize</Policy>
+        <Policy>JS-PreparePreOptimize</Policy>
+        <Policy>JS-ProcessPreOptimize</Policy>
+    </Policies>
+    <ProxyEndpoints>
+        <ProxyEndpoint>default</ProxyEndpoint>
+    </ProxyEndpoints>
+    <Resources>
+        <Resource>jsc://prepare_cascade_eval.js</Resource>
+        <Resource>jsc://process_pre_optimize.js</Resource>
+        <Resource>jsc://build_final_response.js</Resource>
+        <Resource>jsc://prepare_pre_optimize.js</Resource>
+    </Resources>
+    <TargetEndpoints>
+        <TargetEndpoint>demo-ui-bff</TargetEndpoint>
+        <TargetEndpoint>vertex-flash-au</TargetEndpoint>
+        <TargetEndpoint>vertex-pro-global</TargetEndpoint>
+    </TargetEndpoints>
+</APIProxy>

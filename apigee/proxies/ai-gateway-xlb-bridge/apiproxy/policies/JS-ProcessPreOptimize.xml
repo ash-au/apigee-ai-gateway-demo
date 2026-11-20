@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Javascript continueOnError="false" enabled="true" timeLimit="2000" name="JS-ProcessPreOptimize">
+    <DisplayName>JS-ProcessPreOptimize</DisplayName>
+    <ResourceURL>jsc://process_pre_optimize.js</ResourceURL>
+</Javascript>

@@ -28,7 +28,6 @@
         <Policy>SC-ResetState</Policy>
         <Policy>SCL-NativeSemanticCacheLookup</Policy>
         <Policy>SCP-NativeSemanticCachePopulate</Policy>
-        <Policy>SG-EnforceEnterpriseDomain</Policy>
         <Policy>SMR-SanitizeModelResponse</Policy>
         <Policy>SUP-SanitizeUserPrompt</Policy>
     </Policies>

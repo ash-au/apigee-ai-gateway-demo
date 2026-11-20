@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-ResetState">
+    <DisplayName>SC-ResetState</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="resetStateRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>resetStateResponse</Response>
+    <Timeout>15000</Timeout>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleIDToken>
+                <Audience>https://gateway-optimizer-1019413155504.australia-southeast1.run.app</Audience>
+            </GoogleIDToken>
+        </Authentication>
+        <URL>https://gateway-optimizer-1019413155504.australia-southeast1.run.app/v1/state/reset</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>

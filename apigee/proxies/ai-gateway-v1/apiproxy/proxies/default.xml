@@ -126,14 +126,14 @@
             </Response>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/model-armor")</Condition>
         </Flow>
-        <!-- Use Case Group 4a: Native Semantic Governance (SemanticGovernance) -->
+        <!-- Use Case Group 4a: Semantic Governance (enterprise-domain-guardrail)
+             Note: Native <SemanticGovernance> XML (reference-policies/SG-EnforceEnterpriseDomain.xml)
+             is temporarily parked due to Apigee X runtime 1-18-0-apigee-10 NoClassDefFoundError
+             (com/apigee/consecaengine/llm/AsyncLlmClient). JS-EnrichPolicyTelemetry + RF-SemanticGovernanceViolation
+             enforce the identical guardrail & fault contract until patched. -->
         <Flow name="Policy-Semantic-Governance">
             <Request/>
             <Response>
-                <Step>
-                    <Name>SG-EnforceEnterpriseDomain</Name>
-                    <Condition>request.header.X-Enable-Semantic-Governance != "false"</Condition>
-                </Step>
                 <Step>
                     <Name>JS-EnrichPolicyTelemetry</Name>
                 </Step>

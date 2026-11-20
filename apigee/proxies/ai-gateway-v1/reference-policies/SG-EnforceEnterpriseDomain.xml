@@ -1,4 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Reference native <SemanticGovernance> policy XML.
+  Temporarily parked outside apiproxy/policies/ because Apigee X runtime 1-18-0-apigee-10
+  throws java.lang.NoClassDefFoundError (com/apigee/consecaengine/llm/AsyncLlmClient) when
+  loading SemanticGovernanceStepDefinition on startup. Re-attach in default.xml and
+  ai-gateway-v1.xml once Apigee X patches the 1-18-0-apigee-10 classpath regression.
+-->
 <SemanticGovernance continueOnError="false" enabled="true" name="SG-EnforceEnterpriseDomain">
     <DisplayName>SG-EnforceEnterpriseDomain</DisplayName>
     <EnforcementMode>ENFORCE</EnforcementMode>
