@@ -55,6 +55,7 @@
     policiesCatalog: [],
     policyScenarios: {},
     tab4Submode: "semantic-governance", // "semantic-governance" | "native-cache"
+    system1Provider: "gemini_decision_1", // "gemini_decision_1" | "typesafe_jev"
   };
 
   // DOM Elements (Tab 1)
@@ -707,7 +708,9 @@
       setNodeState("t5-node-stage2", "state-savings", "t5-sub-stage2", st2.executed ? "All 5 clear" : "Fast lane");
       setNodeState("t5-node-pro", "state-bypass", "t5-sub-pro", "Not invoked");
       if (statusPill) {
-        statusPill.textContent = "L1 FLASH ACCEPTED VIA JEV";
+        const shortEngine =
+          g.system1_provider === "gemini_decision_1" ? "GEMINI DECISION 1" : "TYPESAFE JEV";
+        statusPill.textContent = `L1 FLASH ACCEPTED VIA ${shortEngine}`;
         statusPill.className = "model-pill pill-allowed";
       }
     }
@@ -1953,8 +1956,124 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   }
 
   // ===========================================================================
-  // TAB 5: SYSTEM 1 (TYPESAFE JEV) & SYSTEM 2 (VERTEX AI GEMINI) ROUTING
+  // TAB 5: SYSTEM 1 (GEMINI DECISION 1 / TYPESAFE JEV) & SYSTEM 2 (VERTEX AI)
   // ===========================================================================
+  const SYSTEM1_PROVIDER_META = {
+    gemini_decision_1: {
+      id: "gemini_decision_1",
+      shortName: "Gemini Decision 1",
+      displayName: "Google Gemini Decision 1",
+      model: "gemini-decision-1",
+      endpoint: "generativelanguage.googleapis.com/v1beta/decisions",
+      pricePill: "Gemini Decision 1: $0.10/1M In · $0 Out",
+      rateSub: "$0.10/1M in · $0 out",
+      totalSub: "Decision 1 + Gemini",
+      costLabel: "Decision 1 Cost",
+      svgStage1: "Stage 1: Decision 1",
+      bannerDescHtml:
+        'Apigee X invokes <strong>Google Gemini Decision 1</strong> (<code>$0.10/1M</code> input, <code>$0.00</code> output, 256K multimodal context, single-pass calibrated logits). ' +
+        '<strong>Stage 1</strong> evaluates <code>Choice</code>, <code>Score</code>, and pre-<code>Noul</code>s to route via Apigee <code>RouteRules</code> to Flash or fast-track directly to Pro. ' +
+        '<strong>Stage 2</strong> runs a decomposed 5-head <code>Noul</code> battery (<code>max(nouls) &gt; fire_threshold</code>) to escalate subtle L<sub>1</sub> defects to System 2 Pro.',
+      gwSubtitleHtml: "Google <code>gemini-decision-1</code> System 1 + Vertex AI System 2",
+      bannerHeadingHtml:
+        'Two-Stage Confidence-Gated Routing &amp; 5-Head <code>Noul</code> Battery (Google <code>gemini-decision-1</code>)',
+      ctaText: "Execute Gemini Decision 1 + System 2 Routing Comparison",
+    },
+    typesafe_jev: {
+      id: "typesafe_jev",
+      shortName: "TypeSafe Jev",
+      displayName: "TypeSafe Jev",
+      model: "jev-latest",
+      endpoint: "api.typesafe.ai/v1/systemone",
+      pricePill: "Jev: $0.042/1M In · $0 Out",
+      rateSub: "$0.042/1M in · $0 out",
+      totalSub: "Jev + Gemini total",
+      costLabel: "Jev S1 Cost",
+      svgStage1: "Stage 1: Jev Router",
+      bannerDescHtml:
+        'Apigee X invokes <strong>TypeSafe Jev</strong> (<code>$0.042/1M</code> input, <code>$0.00</code> output, ~200ms single-pass calibrated logits). ' +
+        '<strong>Stage 1</strong> evaluates <code>Choice</code>, <code>Score</code>, and pre-<code>Noul</code>s to route via Apigee <code>RouteRules</code> to Flash or fast-track directly to Pro. ' +
+        '<strong>Stage 2</strong> runs a decomposed 5-head <code>Noul</code> battery (<code>max(nouls) &gt; fire_threshold</code>) to escalate subtle L<sub>1</sub> defects to System 2 Pro.',
+      gwSubtitleHtml: "TypeSafe <code>jev-latest</code> System 1 + Vertex AI System 2",
+      bannerHeadingHtml:
+        'Two-Stage Confidence-Gated Routing &amp; 5-Head <code>Noul</code> Battery (TypeSafe <code>jev-latest</code>)',
+      ctaText: "Execute TypeSafe Jev + System 2 Routing Comparison",
+    },
+  };
+
+  function syncSystem1ProviderUI() {
+    const providerKey =
+      state.system1Provider === "typesafe_jev" ? "typesafe_jev" : "gemini_decision_1";
+    const meta = SYSTEM1_PROVIDER_META[providerKey];
+
+    const btnGemini = document.getElementById("btn-s1-provider-gemini");
+    const btnJev = document.getElementById("btn-s1-provider-jev");
+    if (btnGemini) {
+      const active = providerKey === "gemini_decision_1";
+      btnGemini.classList.toggle("active", active);
+      btnGemini.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+    if (btnJev) {
+      const active = providerKey === "typesafe_jev";
+      btnJev.classList.toggle("active", active);
+      btnJev.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+
+    const setHtml = (id, html) => {
+      const el = document.getElementById(id);
+      if (el) el.innerHTML = html;
+    };
+    const setText = (id, text) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+
+    setHtml("s1-banner-heading", meta.bannerHeadingHtml);
+    setHtml("s1-banner-desc", meta.bannerDescHtml);
+    setText("s1-provider-price-pill", meta.pricePill);
+    setHtml("s1-provider-endpoint-meta", `Endpoint: <code>${escapeHtml(meta.endpoint)}</code>`);
+    setText("btn-run-s1", meta.ctaText);
+    setHtml(
+      "s1-pipeline-title",
+      `Live System 1 (${escapeHtml(meta.displayName)}) &rarr; System 2 (Vertex AI) Cascade Flow`
+    );
+    setText("t5-title-stage1", meta.svgStage1);
+    setHtml("s1-gw-subtitle", meta.gwSubtitleHtml);
+    setText("s1-cost-label", meta.costLabel);
+    setText("s1-cost-rate-sub", meta.rateSub);
+    setText("s1-total-cost-sub", meta.totalSub);
+    setText("s1-viz-title", `System 2 Direct vs. Apigee X + ${meta.shortName} Cascade Cost`);
+    setText(
+      "s1-viz-gw-name",
+      `Via Apigee X + ${meta.displayName} Cascade (incl. System 1 Cost)`
+    );
+    setHtml(
+      "s1-audit-title",
+      `Live ${escapeHtml(meta.displayName)} (System 1) Calibrated Telemetry: Stage 1 Pre-Router &amp; Stage 2 5-Head <code>Noul</code> Battery`
+    );
+    setHtml(
+      "s1-stage1-title",
+      `Stage 1: ${escapeHtml(meta.shortName)} Pre-Flight Router (<code>Choice</code> + <code>Score</code> + Pre-<code>Noul</code>s)`
+    );
+    setHtml(
+      "s1-stage2-title",
+      `Stage 2: ${escapeHtml(meta.shortName)} 5-Head Decomposed <code>Noul</code> Battery vs. Holistic Judge`
+    );
+  }
+
+  ["btn-s1-provider-gemini", "btn-s1-provider-jev"].forEach((btnId) => {
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    btn.addEventListener("click", () => {
+      const nextProvider = btn.dataset.s1provider;
+      if (nextProvider && SYSTEM1_PROVIDER_META[nextProvider]) {
+        state.system1Provider = nextProvider;
+        syncSystem1ProviderUI();
+      }
+    });
+  });
+  syncSystem1ProviderUI();
+
   function selectSystem1Scenario(scen) {
     state.activeSystem1Scenario = scen;
     document.getElementById("s1-sys").value = scen.system_instruction || "";
@@ -2010,13 +2129,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   if (btnRunS1) {
     btnRunS1.addEventListener("click", async () => {
       const statusEl = document.getElementById("s1-status");
+      const activeMeta =
+        SYSTEM1_PROVIDER_META[state.system1Provider] || SYSTEM1_PROVIDER_META.gemini_decision_1;
       btnRunS1.disabled = true;
       setPipeRunning("t5-pipeline-svg", true);
-      statusEl.textContent = "Calling TypeSafe Jev (System 1) + Apigee X + Vertex AI Gemini...";
+      statusEl.textContent = `Calling ${activeMeta.displayName} (System 1) + Apigee X + Vertex AI Gemini...`;
       try {
         const payload = {
           session_id: "jev-demo-session",
           scenario_id: (state.activeSystem1Scenario && state.activeSystem1Scenario.id) || "jev-custom",
+          system1_provider: state.system1Provider,
           system_instruction: document.getElementById("s1-sys").value,
           rag_context: document.getElementById("s1-rag").value,
           user_query: document.getElementById("s1-query").value,
@@ -2040,6 +2162,11 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const d = data.direct_baseline || {};
         const g = data.apigee_gateway || {};
         const cmp = data.comparison || {};
+        const respProviderKey = g.system1_provider || state.system1Provider;
+        const respMeta =
+          SYSTEM1_PROVIDER_META[respProviderKey] || activeMeta;
+        const providerLabel = g.system1_provider_label || respMeta.displayName;
+        const providerUpper = providerLabel.toUpperCase();
 
         // 1. Direct Baseline Card
         const dTok = d.token_accounting || {};
@@ -2052,7 +2179,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         document.getElementById("s1-direct-lat").textContent = `${fmtInt(d.latency_ms)} ms`;
         document.getElementById("s1-direct-body").textContent = d.response_text || "";
 
-        // 2. Apigee X + TypeSafe Jev Card
+        // 2. Apigee X + System 1 Card
         const gCost = g.cost_accounting || {};
         const pill = document.getElementById("s1-gw-pill");
         pill.textContent = g.final_model_used || "gemini-2.5-flash";
@@ -2089,7 +2216,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {
           gwBodyText =
-            `[JEV STAGE 2 NOUL BATTERY INTERCEPTED DEFECTIVE L1 FLASH RESPONSE & ESCALATED TO GEMINI 2.5 PRO]\n` +
+            `[${providerUpper} STAGE 2 NOUL BATTERY INTERCEPTED DEFECTIVE L1 FLASH RESPONSE & ESCALATED TO GEMINI 2.5 PRO]\n` +
             `Escalation Reason: ${g.escalation_reason}\n` +
             `Rejected L1 Flash Preview: "${g.l1_response_preview}"\n` +
             `------------------------------------------------------------------------\n` +
@@ -2098,43 +2225,46 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         }
         document.getElementById("s1-gw-body").textContent = gwBodyText;
 
-        // 3. Stage 1 Jev Telemetry Box
+        // 3. Stage 1 System 1 Telemetry Box
         const st1 = g.stage1_jev || {};
         const st1Usage = st1.usage || {};
+        const st1Model = st1.model || respMeta.model;
         document.getElementById("s1-stage1-meta").textContent =
-          `Model: ${st1.model || "jev-latest"} | Latency: ${fmtInt(st1.latency_ms)} ms | In: ${fmtInt(st1Usage.input_tokens)} tok (${fmtUsd(st1Usage.cost_usd, 8)})`;
+          `Model: ${st1Model} | Latency: ${fmtInt(st1.latency_ms)} ms | In: ${fmtInt(st1Usage.input_tokens)} tok (${fmtUsd(st1Usage.cost_usd, 8)})`;
 
         const st1Lines = [
-          `=== STAGE 1: TYPESAFE JEV PRE-FLIGHT ROUTER (${st1.model || "jev-latest"}) ===`,
+          `=== STAGE 1: ${providerUpper} PRE-FLIGHT ROUTER (${st1Model}) ===`,
+          `System 1 Endpoint         : ${st1.endpoint || respMeta.endpoint}`,
           `Apigee RouteRule Selected : ${g.apigee_route_rule_taken}`,
           `Routing Decision          : ${g.initial_routing_decision} (${g.initial_target_model})`,
           `Routing Reason            : ${g.routing_reason}`,
           ``,
-          `--- 1. Jev Choice Primitive (target_tier) ---`,
+          `--- 1. Choice Primitive (target_tier) ---`,
           `Selected Tier             : ${st1.target_tier_choice} (Confidence: ${st1.target_tier_confidence} vs Gate: ${st1.confidence_threshold})`,
           `Calibrated Softmax Probs  : ${JSON.stringify(st1.target_tier_probabilities || {})}`,
           ``,
-          `--- 2. Jev Score Primitive (complexity 0..2) ---`,
+          `--- 2. Score Primitive (complexity 0..2) ---`,
           `Expected Value E[Score]   : ${st1.complexity_score} / 2.0 (Normalized: ${st1.complexity_normalized})`,
           `Score Level Probabilities : ${JSON.stringify(st1.complexity_probabilities || {})}`,
           ``,
-          `--- 3. Jev Pre-Flight Noul Primitives ---`,
+          `--- 3. Pre-Flight Noul Primitives ---`,
           `requires_formal_proof     : ${st1.pre_nouls ? st1.pre_nouls.requires_formal_proof : 0}`,
           `has_strict_multi_constr.  : ${st1.pre_nouls ? st1.pre_nouls.has_strict_multi_constraints : 0}`,
         ];
         document.getElementById("s1-stage1-box").textContent = st1Lines.join("\n");
 
-        // 4. Stage 2 Jev 5-Head Noul Battery Telemetry Box
+        // 4. Stage 2 System 1 5-Head Noul Battery Telemetry Box
         const st2 = g.stage2_jev || {};
         const st2Usage = st2.usage || {};
+        const st2Model = st2.model || respMeta.model;
         document.getElementById("s1-stage2-meta").textContent = st2.executed
-          ? `Model: ${st2.model || "jev-latest"} | Latency: ${fmtInt(st2.latency_ms)} ms | In: ${fmtInt(st2Usage.input_tokens)} tok (${fmtUsd(st2Usage.cost_usd, 8)})`
+          ? `Model: ${st2Model} | Latency: ${fmtInt(st2.latency_ms)} ms | In: ${fmtInt(st2Usage.input_tokens)} tok (${fmtUsd(st2Usage.cost_usd, 8)})`
           : `Skipped (${st2.skipped_reason || "Direct System 2 Pro Fast-Track"})`;
 
         if (!st2.executed) {
           document.getElementById("s1-stage2-box").textContent =
             `Stage 2 Post-Verifier was skipped: ${st2.skipped_reason}\n\n` +
-            `Because Jev Stage 1 routed directly to System 2 (gemini-2.5-pro), Apigee X avoided a wasted L1 Flash call and returned the frontier Pro completion directly.`;
+            `Because ${providerLabel} Stage 1 routed directly to System 2 (gemini-2.5-pro), Apigee X avoided a wasted L1 Flash call and returned the frontier Pro completion directly.`;
         } else {
           const batteryRows = (st2.noul_battery_table || []).map((row) => {
             const pStr = Number(row.probability || 0).toFixed(4);
@@ -2142,12 +2272,13 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
             return `  ${row.question.padEnd(38, " ")} : ${pStr}${flagStr}`;
           });
           const st2Lines = [
-            `=== STAGE 2: JEV DECOMPOSED 5-HEAD NOUL BATTERY (${st2.model || "jev-latest"}) ===`,
+            `=== STAGE 2: ${providerUpper} DECOMPOSED 5-HEAD NOUL BATTERY (${st2Model}) ===`,
+            `System 1 Endpoint         : ${st2.endpoint || respMeta.endpoint}`,
             `Gate Rule (any_flag)      : max(noul_battery) = ${st2.max_noul_value} (Threshold: > ${st2.fire_threshold})`,
             `Gate Verdict              : ${st2.any_flag_fired ? "FIRED -> ESCALATE TO GEMINI 2.5 PRO" : "ALL CLEAR -> ACCEPT L1 GEMINI 2.5 FLASH"}`,
             `Firing Heads              : ${(st2.firing_heads || []).length > 0 ? st2.firing_heads.join(", ") : "None"}`,
             `Holistic Single-Judge Noul: ${st2.holistic_escalate_judge} (Notice how single-question judges under-react vs decomposed battery)`,
-            `Jev Response Quality Score: ${st2.response_quality_score} / 2.0`,
+            `Response Quality Score    : ${st2.response_quality_score} / 2.0`,
             ``,
             `--- 5-Head Noul Battery Probabilities ---`,
             ...batteryRows,
@@ -2158,7 +2289,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         }
 
         updateTab5Visuals(data, payload.fire_threshold);
-        statusEl.textContent = `Completed at ${data.timestamp_utc}`;
+        statusEl.textContent = `Completed via ${providerLabel} at ${data.timestamp_utc}`;
       } catch (e) {
         statusEl.textContent = `Error: ${e.message}`;
       } finally {

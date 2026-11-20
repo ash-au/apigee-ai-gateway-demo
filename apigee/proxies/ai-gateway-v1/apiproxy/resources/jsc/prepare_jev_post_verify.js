@@ -26,6 +26,7 @@ try {
 }
 
 var verifyPayload = {
+    system1_provider: context.getVariable("ai.system1_provider") || "typesafe_jev",
     user_query: context.getVariable("ai.jev_user_query") || "",
     system_instruction: context.getVariable("ai.jev_system_instruction") || "",
     rag_context: context.getVariable("ai.jev_rag_context") || "",

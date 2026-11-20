@@ -61,8 +61,16 @@ var routingDecision = context.getVariable("ai.routing_decision") || "GEMINI_2_5_
 
 var tierObj = jPre.target_tier || {};
 var compObj = jPre.complexity || {};
+var resolvedProvider = preData.system1_provider || jPre.provider || context.getVariable("ai.system1_provider") || "typesafe_jev";
+var resolvedProviderLabel = preData.system1_provider_label || jPre.provider_label || (resolvedProvider === "gemini_decision_1" ? "Google Gemini Decision 1" : "TypeSafe Jev");
+var defaultS1Model = resolvedProvider === "gemini_decision_1" ? "gemini-decision-1" : "jev-latest";
+
 var stage1Normalized = {
-    model: jPre.model || "jev-latest",
+    provider: resolvedProvider,
+    provider_label: resolvedProviderLabel,
+    endpoint: jPre.endpoint || "",
+    pricing_per_million_usd: Number(jPre.pricing_per_million_usd || (resolvedProvider === "gemini_decision_1" ? 0.10 : 0.042)),
+    model: jPre.model || defaultS1Model,
     latency_ms: Number(jPre.latency_ms || 0),
     confidence_threshold: Number(jPre.confidence_threshold || 0.75),
     target_tier_choice: tierObj.choice || "flash_with_verifier",
@@ -106,9 +114,11 @@ if (jPost && jPost.noul_battery) {
 }
 
 var stage2Normalized = {
+    provider: resolvedProvider,
+    provider_label: resolvedProviderLabel,
     executed: Boolean(verifyData.post_verifier_executed),
     skipped_reason: verifyData.direct_to_pro ? "Direct System 2 Pro Fast-Track (No L1 Flash call)" : (!verifyData.post_verifier_executed ? "Post-Verifier Disabled" : null),
-    model: (jPost && jPost.model) || "jev-latest",
+    model: (jPost && jPost.model) || defaultS1Model,
     latency_ms: Number((jPost && jPost.latency_ms) || 0),
     fire_threshold: Number((jPost && jPost.fire_threshold) || 0.70),
     max_noul_value: Number((jPost && jPost.max_defect_noul) || 0),
@@ -128,6 +138,9 @@ var finalEnvelope = {
     gateway: "Apigee X (" + apigeeOrgName + " / env: " + apigeeEnvName + " / australia-southeast1)",
     apigee_organization: apigeeOrgName,
     apigee_environment: apigeeEnvName,
+    system1_provider: resolvedProvider,
+    system1_provider_label: resolvedProviderLabel,
+    system1_model: stage1Normalized.model,
     response_text: verifyData.final_response_text || "",
     final_model_used: verifyData.final_model_used || preData.target_model || "gemini-2.5-flash",
     route_path: verifyData.route_path || "",

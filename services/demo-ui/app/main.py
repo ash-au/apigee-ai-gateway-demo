@@ -118,6 +118,7 @@ class VectorSearchToggleRequest(BaseModel):
 class System1ExecuteRequest(BaseModel):
     session_id: str = "jev-demo-session"
     scenario_id: str = "jev-custom"
+    system1_provider: str = "gemini_decision_1"
     system_instruction: str = ""
     rag_context: str = ""
     user_query: str = ""
@@ -161,6 +162,7 @@ def _hydrate_system1_request(req: System1ExecuteRequest) -> System1ExecuteReques
     return System1ExecuteRequest(
         session_id=req.session_id,
         scenario_id=req.scenario_id,
+        system1_provider=req.system1_provider or "gemini_decision_1",
         system_instruction=req.system_instruction or (preset.get("system_instruction", "") if preset else ""),
         rag_context=req.rag_context or (preset.get("rag_context", "") if preset else ""),
         user_query=query,
@@ -671,6 +673,7 @@ async def _call_apigee_system1_routing(req: System1ExecuteRequest) -> Dict[str, 
     body = {
         "session_id": req.session_id,
         "scenario_id": req.scenario_id,
+        "system1_provider": req.system1_provider,
         "system_instruction": req.system_instruction,
         "rag_context": req.rag_context,
         "user_query": req.user_query,

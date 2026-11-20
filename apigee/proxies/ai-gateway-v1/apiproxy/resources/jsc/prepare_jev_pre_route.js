@@ -11,6 +11,7 @@ try {
 }
 
 var userQuery = body.user_query || body.user_prompt || body.prompt || "Hello";
+var system1Provider = body.system1_provider || "typesafe_jev";
 var sysInstruction = body.system_instruction || "";
 var ragContext = body.rag_context || "";
 var confidenceThreshold = body.confidence_threshold !== undefined ? Number(body.confidence_threshold) : 0.75;
@@ -22,6 +23,7 @@ var simulateL1Defect = body.simulate_l1_defect !== undefined ? Boolean(body.simu
 var jevPreRoutePayload = {
     session_id: body.session_id || "jev-demo-session",
     scenario_id: body.scenario_id || "jev-custom",
+    system1_provider: system1Provider,
     system_instruction: sysInstruction,
     rag_context: ragContext,
     user_query: userQuery,
@@ -32,6 +34,7 @@ var jevPreRoutePayload = {
     simulate_l1_defect: simulateL1Defect
 };
 
+context.setVariable("ai.system1_provider", system1Provider);
 context.setVariable("ai.jev_user_query", userQuery);
 context.setVariable("ai.jev_system_instruction", sysInstruction);
 context.setVariable("ai.jev_rag_context", ragContext);

@@ -29,6 +29,20 @@ PRICING_SCHEDULE: Dict[str, Any] = {
             "output_per_1m_usd": 0.0,
             "note": "768-dimensional embeddings used for FrugalGPT Semantic Completion Cache.",
         },
+        "gemini-decision-1": {
+            "display_name": "Google Gemini Decision 1 (System 1)",
+            "endpoint": "generativelanguage.googleapis.com/v1beta/decisions",
+            "input_per_1m_usd": 0.10,
+            "output_per_1m_usd": 0.0,
+            "note": "Google's non-generative single-pass System 1 Decisions API (Choice, Score, Noul; 256K multimodal context; free output tokens).",
+        },
+        "jev-latest": {
+            "display_name": "TypeSafe Jev (System 1)",
+            "endpoint": "api.typesafe.ai/v1/systemone",
+            "input_per_1m_usd": 0.042,
+            "output_per_1m_usd": 0.0,
+            "note": "TypeSafe single-pass calibrated System 1 model ($42/Btok input, free output tokens).",
+        },
     },
     "papers": [
         {
