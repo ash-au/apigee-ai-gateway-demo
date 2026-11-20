@@ -4,29 +4,76 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Apigee X as an AI Gateway — Token Economics &amp; Native AI Policies</title>
-  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=6.1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,600;6..72,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" />
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem("apigee-demo-theme");
+        if (saved === "light" || saved === "dark") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=7.0" />
 </head>
 <body>
   <div class="editorial-shell">
-    <!-- Top Editorial Masthead (Open Canvas — Clear Action Hierarchy) -->
+    <!-- Top Editorial Masthead (Open Canvas + Bespoke Emblem + Theme Toggle) -->
     <header class="masthead">
       <div class="masthead-lead">
-        <h1 class="masthead-title">
-          Apigee X as an AI Gateway: Token Economics &amp; Enterprise AI Governance
-        </h1>
-        <p class="masthead-subtitle">
-          Live side-by-side proof comparing direct Vertex AI calls against <strong>Apigee X</strong> &mdash; combining <strong>FrugalGPT</strong>, <strong>LLMLingua-2</strong>, native Apigee AI policies, and <strong>TypeSafe Jev</strong> System 1 routing.
-        </p>
-        <div class="masthead-meta tabular-nums">
-          <span class="status-dot" aria-hidden="true"></span>
-          <span>apac-cs-5g-demo5</span>
-          <span>&middot;</span>
-          <span>env: demo</span>
-          <span>&middot;</span>
-          <span>australia-southeast1 (Sydney)</span>
+        <div class="masthead-emblem" id="masthead-emblem" aria-hidden="true">
+          <!-- impeccable-source-prompt: Bespoke 40x40 architectural dual-node gateway prism & archival FinOps ledger seal -->
+          <svg viewBox="0 0 40 40" width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 8.5 2.5 H 31.5 L 37.5 8.5 V 31.5 L 31.5 37.5 H 8.5 L 2.5 31.5 V 8.5 Z" stroke="currentColor" stroke-opacity="0.48" stroke-width="1.25" stroke-linejoin="miter" />
+            <path d="M 20 3.125 V 6.25 M 20 33.75 V 36.875" stroke="currentColor" stroke-opacity="0.34" stroke-width="1.25" stroke-linecap="butt" />
+            <circle cx="7.5" cy="20" r="1.65" stroke="currentColor" stroke-width="1.25" />
+            <path d="M 9.15 20 H 12.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="butt" />
+            <path d="M 23.75 23.75 L 26.5 26.5 H 30.75" stroke="currentColor" stroke-opacity="0.56" stroke-width="1.25" stroke-linecap="butt" stroke-linejoin="miter" />
+            <path d="M 23.5 16.5 L 26.5 13.5 H 31" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="butt" stroke-linejoin="miter" />
+            <path d="M 20 13.5 L 26.5 20 L 20 26.5 L 13.5 20 Z" fill="var(--accent-primary)" fill-opacity="0.12" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linejoin="miter" />
+            <path d="M 20 17.75 L 22.25 20 L 20 22.25 L 17.75 20 Z" fill="var(--accent-primary)" />
+            <path d="M 32.5 11.25 L 34.75 13.5 L 32.5 15.75 L 30.25 13.5 Z" fill="var(--accent-primary)" />
+            <circle cx="32.5" cy="26.5" r="2.25" fill="var(--accent-amber)" />
+          </svg>
+        </div>
+        <div class="masthead-copy">
+          <h1 class="masthead-title">
+            Apigee X as an AI Gateway: Token Economics &amp; Enterprise AI Governance
+          </h1>
+          <p class="masthead-subtitle">
+            Live side-by-side proof comparing direct Vertex AI calls against <strong>Apigee X</strong> &mdash; combining <strong>FrugalGPT</strong>, <strong>LLMLingua-2</strong>, native Apigee AI policies, and <strong>TypeSafe Jev</strong> System 1 routing.
+          </p>
+          <div class="masthead-meta tabular-nums">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span>apac-cs-5g-demo5</span>
+            <span>&middot;</span>
+            <span>env: demo</span>
+            <span>&middot;</span>
+            <span>australia-southeast1 (Sydney)</span>
+          </div>
         </div>
       </div>
       <div class="masthead-actions">
+        <button id="btn-theme-toggle" class="btn btn-outline btn-theme-toggle" type="button" aria-label="Toggle light or dark archival theme" aria-pressed="false">
+          <svg id="theme-icon-moon" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+          <svg id="theme-icon-sun" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+            <circle cx="12" cy="12" r="4" />
+            <line x1="12" y1="2" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+            <line x1="4.22" y1="4.22" x2="6.34" y2="6.34" />
+            <line x1="17.66" y1="17.66" x2="19.78" y2="19.78" />
+            <line x1="2" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="22" y2="12" />
+            <line x1="4.22" y1="19.78" x2="6.34" y2="17.66" />
+            <line x1="17.66" y1="6.34" x2="19.78" y2="4.22" />
+          </svg>
+          <span id="theme-toggle-label">Obsidian Dark</span>
+        </button>
         <button id="btn-open-glossary" class="btn btn-outline" type="button">
           System 1 &amp; Noul Glossary
         </button>
@@ -105,7 +152,7 @@
             <div class="ledger-value savings-number tabular-nums" id="ledger-cost-pct">&mdash;</div>
             <div class="ledger-sub tabular-nums" id="ledger-cost-saved">$0.000000 net saved</div>
           </div>
-          <div class="ledger-cell">
+          <div class="ledger-cell" id="ledger-annual-cell">
             <div class="ledger-label">Annualized Enterprise Savings</div>
             <div class="ledger-value savings-number tabular-nums" id="ledger-annual-savings">$0 / yr</div>
             <div class="scale-slider-wrap">
@@ -271,6 +318,60 @@
           </div>
         </section>
 
+        <!-- Live SVG Apigee X Request Pipeline (Tab 1) -->
+        <section class="pipeline-card" aria-label="Live Apigee X Execution Path">
+          <div class="pipeline-header">
+            <h2 class="pipeline-title">Live Apigee X Execution Path (<code>/v1/ai-economics/chat</code>)</h2>
+            <span class="model-pill" id="t1-pipe-status">READY &mdash; Run a scenario to illuminate active hops</span>
+          </div>
+          <div class="pipeline-svg-wrap">
+            <svg id="t1-pipeline-svg" class="pipeline-svg" viewBox="0 0 960 136" role="img" aria-label="Apigee X AI Gateway execution pipeline showing Semantic Cache, LLMLingua-2 Compression, Context Pruning, Complexity Router, and Vertex AI Gemini models">
+              <!-- Cache Short-Circuit Top Bypass Arc (apex y=33.5, caption above at y=18) -->
+              <path id="t1-edge-shortcircuit" class="pipe-edge pipe-edge-dashed" d="M 218 62 C 218 24, 886 24, 886 62" />
+              <text x="552" y="18" text-anchor="middle" class="pipe-node-sub" id="t1-shortcircuit-label">Cache Hit Short-Circuit (0 LLM tokens)</text>
+
+              <!-- Linear Main Hop Connectors -->
+              <line id="t1-edge-1" class="pipe-edge" x1="120" y1="92" x2="148" y2="92" />
+              <line id="t1-edge-2" class="pipe-edge" x1="288" y1="92" x2="316" y2="92" />
+              <line id="t1-edge-3" class="pipe-edge" x1="456" y1="92" x2="484" y2="92" />
+              <line id="t1-edge-4" class="pipe-edge" x1="624" y1="92" x2="652" y2="92" />
+              <line id="t1-edge-5" class="pipe-edge" x1="792" y1="92" x2="820" y2="92" />
+
+              <!-- Nodes -->
+              <g id="t1-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="8" y="62" width="112" height="60" rx="6" />
+                <text class="pipe-node-title" x="64" y="86" text-anchor="middle">Client App</text>
+                <text class="pipe-node-sub" x="64" y="106" text-anchor="middle">Apigee X</text>
+              </g>
+              <g id="t1-node-cache" class="pipe-node">
+                <rect class="pipe-node-box" x="148" y="62" width="140" height="60" rx="6" />
+                <text class="pipe-node-title" x="218" y="86" text-anchor="middle">1. Semantic Cache</text>
+                <text class="pipe-node-sub" id="t1-sub-cache" x="218" y="106" text-anchor="middle">cos &ge; 0.85</text>
+              </g>
+              <g id="t1-node-compress" class="pipe-node">
+                <rect class="pipe-node-box" x="316" y="62" width="140" height="60" rx="6" />
+                <text class="pipe-node-title" x="386" y="86" text-anchor="middle">2. LLMLingua-2</text>
+                <text class="pipe-node-sub" id="t1-sub-compress" x="386" y="106" text-anchor="middle">ratio 0.55</text>
+              </g>
+              <g id="t1-node-prune" class="pipe-node">
+                <rect class="pipe-node-box" x="484" y="62" width="140" height="60" rx="6" />
+                <text class="pipe-node-title" x="554" y="86" text-anchor="middle">4. Context Prune</text>
+                <text class="pipe-node-sub" id="t1-sub-prune" x="554" y="106" text-anchor="middle">&ge; 800 tok</text>
+              </g>
+              <g id="t1-node-router" class="pipe-node">
+                <rect class="pipe-node-box" x="652" y="62" width="140" height="60" rx="6" />
+                <text class="pipe-node-title" x="722" y="86" text-anchor="middle">3. Route &amp; g(q,a)</text>
+                <text class="pipe-node-sub" id="t1-sub-router" x="722" y="106" text-anchor="middle">score &ge; 0.55</text>
+              </g>
+              <g id="t1-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="820" y="62" width="132" height="60" rx="6" />
+                <text class="pipe-node-title" x="886" y="86" text-anchor="middle">Vertex AI</text>
+                <text class="pipe-node-sub" id="t1-sub-llm" x="886" y="106" text-anchor="middle">Gemini 2.5</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
         <!-- Side-by-Side Comparison Arena (Tab 1) -->
         <section class="comparison-grid" aria-label="Side-by-Side Comparison Results">
           <article class="comparison-card">
@@ -356,6 +457,81 @@
 
             <div class="response-body" id="gateway-response-body">Waiting for execution...</div>
           </article>
+        </section>
+
+        <!-- Visual Economics & Stacked Token Composition Charts (Tab 1) -->
+        <section class="viz-panel" id="t1-viz-panel" aria-label="Visual Cost and Token Composition">
+          <div class="viz-grid-2">
+            <div>
+              <h2 class="viz-block-title">
+                <span>Cost Per Request Comparison</span>
+                <span class="model-pill tabular-nums" id="viz-cost-delta-pill">Awaiting run</span>
+              </h2>
+              <div class="viz-bar-row">
+                <div class="viz-bar-meta">
+                  <span class="viz-bar-name">Direct Vertex AI (Gemini 2.5 Pro)</span>
+                  <span class="viz-val tabular-nums" id="viz-cost-direct-val">&mdash;</span>
+                </div>
+                <div class="viz-track">
+                  <div class="viz-fill viz-fill-scale viz-fill-baseline" id="viz-cost-direct-bar"></div>
+                </div>
+              </div>
+              <div class="viz-bar-row">
+                <div class="viz-bar-meta">
+                  <span class="viz-bar-name">Via Apigee X AI Gateway (incl. Overhead)</span>
+                  <span class="viz-val tabular-nums" id="viz-cost-gw-val">&mdash;</span>
+                </div>
+                <div class="viz-track">
+                  <div class="viz-fill viz-fill-scale viz-fill-savings" id="viz-cost-gw-bar"></div>
+                </div>
+              </div>
+              <div class="viz-bar-row">
+                <div class="viz-bar-meta">
+                  <span class="viz-bar-name">LLMLingua-2 Prompt Footprint (After vs. Before)</span>
+                  <span class="viz-val tabular-nums" id="viz-comp-val">&mdash;</span>
+                </div>
+                <div class="viz-track">
+                  <div class="viz-fill viz-fill-scale viz-fill-teal" id="viz-comp-bar"></div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h2 class="viz-block-title">
+                <span>Stacked Billed Token Composition</span>
+                <span class="meta-mono tabular-nums" id="viz-tok-ratio-note">Prompt &middot; Output &middot; Thoughts &middot; Overhead</span>
+              </h2>
+              <div class="viz-bar-row">
+                <div class="viz-bar-meta">
+                  <span class="viz-bar-name">Direct Baseline Tokens</span>
+                  <span class="viz-val tabular-nums" id="viz-tok-direct-val">&mdash;</span>
+                </div>
+                <div class="viz-track">
+                  <div class="viz-fill viz-fill-teal" id="viz-tok-direct-prompt" title="Prompt tokens"></div>
+                  <div class="viz-fill viz-fill-savings" id="viz-tok-direct-out" title="Output tokens"></div>
+                  <div class="viz-fill viz-fill-amber" id="viz-tok-direct-think" title="Thinking tokens"></div>
+                </div>
+              </div>
+              <div class="viz-bar-row">
+                <div class="viz-bar-meta">
+                  <span class="viz-bar-name">Apigee X Total Billed Tokens</span>
+                  <span class="viz-val tabular-nums" id="viz-tok-gw-val">&mdash;</span>
+                </div>
+                <div class="viz-track">
+                  <div class="viz-fill viz-fill-teal" id="viz-tok-gw-prompt" title="Prompt tokens"></div>
+                  <div class="viz-fill viz-fill-savings" id="viz-tok-gw-out" title="Output tokens"></div>
+                  <div class="viz-fill viz-fill-amber" id="viz-tok-gw-think" title="Thinking tokens"></div>
+                  <div class="viz-fill viz-fill-jev" id="viz-tok-gw-overhead" title="Embedding + Summarizer overhead"></div>
+                </div>
+              </div>
+              <div class="chart-legend" aria-label="Token composition legend">
+                <span class="legend-item"><span class="legend-swatch viz-fill-teal" aria-hidden="true"></span>Prompt</span>
+                <span class="legend-item"><span class="legend-swatch viz-fill-savings" aria-hidden="true"></span>Output</span>
+                <span class="legend-item"><span class="legend-swatch viz-fill-amber" aria-hidden="true"></span>Thoughts (@ $10/1M Pro)</span>
+                <span class="legend-item"><span class="legend-swatch viz-fill-jev" aria-hidden="true"></span>Embed + Pruner Overhead</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <!-- Staff Engineer Deep Inspection Drawer -->
@@ -501,6 +677,59 @@
                 Execute Token Governance Test (Direct vs. Apigee X)
               </button>
             </div>
+          </div>
+        </section>
+
+        <!-- Live Token FinOps Policy Flow Pipeline (Full-Width, Tab 2) -->
+        <section class="pipeline-card" aria-label="Token FinOps Policy Flow Pipeline">
+          <div class="pipeline-header">
+            <h2 class="pipeline-title">Live Token FinOps Policy Flow (<code>/policies/token-governance</code>)</h2>
+            <span class="model-pill" id="t2-pipe-status">READY &mdash; Run a scenario to trace rate &amp; quota enforcement</span>
+          </div>
+          <div class="pipeline-svg-wrap">
+            <svg id="t2-pipeline-svg" class="pipeline-svg" viewBox="0 0 960 88" role="img" aria-label="Token FinOps pipeline: Client to PromptTokenLimit to Vertex AI Flash to LLMTokenQuota">
+              <line id="t2-edge-1" class="pipe-edge" x1="168" y1="44" x2="224" y2="44" />
+              <line id="t2-edge-2" class="pipe-edge" x1="444" y1="44" x2="500" y2="44" />
+              <line id="t2-edge-3" class="pipe-edge" x1="676" y1="44" x2="732" y2="44" />
+              <g id="t2-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="8" y="14" width="160" height="60" rx="6" />
+                <text class="pipe-node-title" x="88" y="38" text-anchor="middle">Client App</text>
+                <text class="pipe-node-sub" x="88" y="58" text-anchor="middle">Apigee X</text>
+              </g>
+              <g id="t2-node-ptl" class="pipe-node">
+                <rect class="pipe-node-box" x="224" y="14" width="220" height="60" rx="6" />
+                <text class="pipe-node-title" x="334" y="38" text-anchor="middle">PTL-PromptTokenLimit</text>
+                <text class="pipe-node-sub" id="t2-sub-ptl" x="334" y="58" text-anchor="middle">Pre-flight arrest</text>
+              </g>
+              <g id="t2-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="500" y="14" width="176" height="60" rx="6" />
+                <text class="pipe-node-title" x="588" y="38" text-anchor="middle">Vertex AI Flash</text>
+                <text class="pipe-node-sub" id="t2-sub-llm" x="588" y="58" text-anchor="middle">LLM inference</text>
+              </g>
+              <g id="t2-node-ltq" class="pipe-node">
+                <rect class="pipe-node-box" x="732" y="14" width="220" height="60" rx="6" />
+                <text class="pipe-node-title" x="842" y="38" text-anchor="middle">LTQ-LLMTokenQuota</text>
+                <text class="pipe-node-sub" id="t2-sub-ltq" x="842" y="58" text-anchor="middle">Rolling 1m budget</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
+        <!-- Rolling 1-Minute Token Quota Fuel Gauge (Tab 2) -->
+        <section class="viz-panel" aria-label="Rolling Token Quota Fuel Gauge">
+          <div class="quota-gauge-wrap">
+            <h2 class="viz-block-title">
+              <span>Rolling 1-Minute Token Quota Fuel Gauge</span>
+              <span class="model-pill tabular-nums" id="t2-quota-pct">&mdash;</span>
+            </h2>
+            <div class="quota-track" role="progressbar" aria-label="Rolling token quota consumption" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="t2-quota-progressbar">
+              <div class="quota-fill" id="t2-quota-fill"></div>
+            </div>
+            <div class="quota-readout">
+              <span id="t2-quota-used-label">Consumed: &mdash;</span>
+              <span id="t2-quota-rem-label">Remaining: &mdash;</span>
+            </div>
+            <span class="field-help">Turns amber at &ge; 75% utilization and crimson on HTTP <code>429</code> quota exhaustion.</span>
           </div>
         </section>
 
@@ -657,6 +886,48 @@
                 Execute Model Armor Safety Test (Direct vs. Apigee X)
               </button>
             </div>
+          </div>
+        </section>
+
+        <!-- Live Model Armor Security Inspection Pipeline (Tab 3) -->
+        <section class="pipeline-card" aria-label="Model Armor Inspection Pipeline">
+          <div class="pipeline-header">
+            <h2 class="pipeline-title">Live Model Armor Inspection Pipeline (<code>/policies/model-armor</code>)</h2>
+            <span class="model-pill" id="t3-pipe-status">READY &mdash; Run a red-team test to trace interception</span>
+          </div>
+          <div class="pipeline-svg-wrap">
+            <svg id="t3-pipeline-svg" class="pipeline-svg" viewBox="0 0 960 88" role="img" aria-label="Model Armor pipeline: Client to SanitizeUserPrompt to Vertex AI Flash to SanitizeModelResponse to Caller">
+              <line id="t3-edge-1" class="pipe-edge" x1="136" y1="44" x2="176" y2="44" />
+              <line id="t3-edge-2" class="pipe-edge" x1="376" y1="44" x2="416" y2="44" />
+              <line id="t3-edge-3" class="pipe-edge" x1="564" y1="44" x2="604" y2="44" />
+              <line id="t3-edge-4" class="pipe-edge" x1="804" y1="44" x2="840" y2="44" />
+
+              <g id="t3-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="8" y="14" width="128" height="60" rx="6" />
+                <text class="pipe-node-title" x="72" y="38" text-anchor="middle">Inbound Prompt</text>
+                <text class="pipe-node-sub" x="72" y="58" text-anchor="middle">User / Agent</text>
+              </g>
+              <g id="t3-node-sup" class="pipe-node">
+                <rect class="pipe-node-box" x="176" y="14" width="200" height="60" rx="6" />
+                <text class="pipe-node-title" x="276" y="38" text-anchor="middle">SUP-SanitizeUserPrompt</text>
+                <text class="pipe-node-sub" id="t3-sub-sup" x="276" y="58" text-anchor="middle">Injection / PII / RAI</text>
+              </g>
+              <g id="t3-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="416" y="14" width="148" height="60" rx="6" />
+                <text class="pipe-node-title" x="490" y="38" text-anchor="middle">Vertex AI Flash</text>
+                <text class="pipe-node-sub" id="t3-sub-llm" x="490" y="58" text-anchor="middle">LLM Inference</text>
+              </g>
+              <g id="t3-node-smr" class="pipe-node">
+                <rect class="pipe-node-box" x="604" y="14" width="200" height="60" rx="6" />
+                <text class="pipe-node-title" x="704" y="38" text-anchor="middle">SMR-SanitizeResponse</text>
+                <text class="pipe-node-sub" id="t3-sub-smr" x="704" y="58" text-anchor="middle">Phishing / Leak check</text>
+              </g>
+              <g id="t3-node-out" class="pipe-node">
+                <rect class="pipe-node-box" x="840" y="14" width="112" height="60" rx="6" />
+                <text class="pipe-node-title" x="896" y="38" text-anchor="middle">Caller</text>
+                <text class="pipe-node-sub" id="t3-sub-out" x="896" y="58" text-anchor="middle">Safe Reply</text>
+              </g>
+            </svg>
           </div>
         </section>
 
@@ -829,6 +1100,51 @@
                 Execute Policy Test (Direct vs. Apigee X)
               </button>
             </div>
+          </div>
+        </section>
+
+        <!-- Live Semantic Governance / Native Vector Cache Pipeline (Tab 4) -->
+        <section class="pipeline-card" aria-label="Semantic Governance and Native Cache Pipeline">
+          <div class="pipeline-header">
+            <h2 class="pipeline-title">Live Policy &amp; Vector Search Path</h2>
+            <span class="model-pill" id="t4-pipe-status">READY &mdash; Select mode and run a test</span>
+          </div>
+          <div class="pipeline-svg-wrap">
+            <svg id="t4-pipeline-svg" class="pipeline-svg" viewBox="0 0 960 136" role="img" aria-label="Semantic Governance and Native Semantic Cache pipeline with Vector Search lookup, Vertex AI Flash, and Response guardrail or cache populate">
+              <path id="t4-edge-hit" class="pipe-edge pipe-edge-dashed" d="M 276 60 C 276 22, 896 22, 896 60" />
+              <text x="586" y="18" text-anchor="middle" class="pipe-node-sub" id="t4-hit-label">Vector Search Cache HIT (0 LLM tokens)</text>
+
+              <line id="t4-edge-1" class="pipe-edge" x1="136" y1="90" x2="176" y2="90" />
+              <line id="t4-edge-2" class="pipe-edge" x1="376" y1="90" x2="416" y2="90" />
+              <line id="t4-edge-3" class="pipe-edge" x1="564" y1="90" x2="604" y2="90" />
+              <line id="t4-edge-4" class="pipe-edge" x1="804" y1="90" x2="840" y2="90" />
+
+              <g id="t4-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="8" y="60" width="128" height="60" rx="6" />
+                <text class="pipe-node-title" x="72" y="84" text-anchor="middle">Client Prompt</text>
+                <text class="pipe-node-sub" x="72" y="104" text-anchor="middle">Apigee X</text>
+              </g>
+              <g id="t4-node-pre" class="pipe-node">
+                <rect class="pipe-node-box" x="176" y="60" width="200" height="60" rx="6" />
+                <text class="pipe-node-title" id="t4-title-pre" x="276" y="84" text-anchor="middle">PreFlow Request</text>
+                <text class="pipe-node-sub" id="t4-sub-pre" x="276" y="104" text-anchor="middle">Domain / Vector Check</text>
+              </g>
+              <g id="t4-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="416" y="60" width="148" height="60" rx="6" />
+                <text class="pipe-node-title" x="490" y="84" text-anchor="middle">Vertex AI Flash</text>
+                <text class="pipe-node-sub" id="t4-sub-llm" x="490" y="104" text-anchor="middle">Completion</text>
+              </g>
+              <g id="t4-node-post" class="pipe-node">
+                <rect class="pipe-node-box" x="604" y="60" width="200" height="60" rx="6" />
+                <text class="pipe-node-title" id="t4-title-post" x="704" y="84" text-anchor="middle">SG-EnterpriseDomain</text>
+                <text class="pipe-node-sub" id="t4-sub-post" x="704" y="104" text-anchor="middle">Guardrail / Populate</text>
+              </g>
+              <g id="t4-node-out" class="pipe-node">
+                <rect class="pipe-node-box" x="840" y="60" width="112" height="60" rx="6" />
+                <text class="pipe-node-title" x="896" y="84" text-anchor="middle">Response</text>
+                <text class="pipe-node-sub" id="t4-sub-out" x="896" y="104" text-anchor="middle">Governed</text>
+              </g>
+            </svg>
           </div>
         </section>
 
@@ -1048,6 +1364,53 @@
           </div>
         </section>
 
+        <!-- Live System 1 (Jev) + System 2 (Gemini) Cascade Pipeline (Tab 5) -->
+        <section class="pipeline-card" aria-label="System 1 Jev and System 2 Gemini Cascade Pipeline">
+          <div class="pipeline-header">
+            <h2 class="pipeline-title">Live System 1 (TypeSafe Jev) &rarr; System 2 (Vertex AI) Cascade Flow</h2>
+            <span class="model-pill pill-jev" id="t5-pipe-status">READY &mdash; Run a scenario to trace Stage 1 &amp; Stage 2</span>
+          </div>
+          <div class="pipeline-svg-wrap">
+            <svg id="t5-pipeline-svg" class="pipeline-svg" viewBox="0 0 960 138" role="img" aria-label="Two-stage System 1 Jev and System 2 Gemini cascade flow with Direct Pro Fast-Track and Stage 2 5-Head Noul Battery Escalation">
+              <!-- Bottom Fast-Track Arc (apex y=103, caption cleanly below at y=126) -->
+              <path id="t5-edge-fasttrack" class="pipe-edge pipe-edge-dashed" d="M 244 76 C 244 112, 878 112, 878 76" />
+              <text x="561" y="126" text-anchor="middle" class="pipe-node-sub" id="t5-fasttrack-label">Stage 1 Fast-Track: Route-VertexPro (skips L1 Flash)</text>
+
+              <!-- Main Upper Lane -->
+              <line id="t5-edge-1" class="pipe-edge" x1="116" y1="46" x2="152" y2="46" />
+              <line id="t5-edge-2" class="pipe-edge" x1="336" y1="46" x2="376" y2="46" />
+              <line id="t5-edge-3" class="pipe-edge" x1="536" y1="46" x2="576" y2="46" />
+              <line id="t5-edge-4" class="pipe-edge" x1="764" y1="46" x2="804" y2="46" />
+
+              <g id="t5-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="8" y="16" width="108" height="60" rx="6" />
+                <text class="pipe-node-title" x="62" y="40" text-anchor="middle">Query + RAG</text>
+                <text class="pipe-node-sub" x="62" y="60" text-anchor="middle">Apigee X</text>
+              </g>
+              <g id="t5-node-stage1" class="pipe-node">
+                <rect class="pipe-node-box" x="152" y="16" width="184" height="60" rx="6" />
+                <text class="pipe-node-title" x="244" y="40" text-anchor="middle">Stage 1: Jev Router</text>
+                <text class="pipe-node-sub" id="t5-sub-stage1" x="244" y="60" text-anchor="middle">Choice + Score</text>
+              </g>
+              <g id="t5-node-flash" class="pipe-node">
+                <rect class="pipe-node-box" x="376" y="16" width="160" height="60" rx="6" />
+                <text class="pipe-node-title" x="456" y="40" text-anchor="middle">L1: Gemini Flash</text>
+                <text class="pipe-node-sub" id="t5-sub-flash" x="456" y="60" text-anchor="middle">Fast candidate</text>
+              </g>
+              <g id="t5-node-stage2" class="pipe-node">
+                <rect class="pipe-node-box" x="576" y="16" width="188" height="60" rx="6" />
+                <text class="pipe-node-title" x="670" y="40" text-anchor="middle">Stage 2: 5-Head Noul</text>
+                <text class="pipe-node-sub" id="t5-sub-stage2" x="670" y="60" text-anchor="middle">max(nouls) &gt; 0.70</text>
+              </g>
+              <g id="t5-node-pro" class="pipe-node">
+                <rect class="pipe-node-box" x="804" y="16" width="148" height="60" rx="6" />
+                <text class="pipe-node-title" x="878" y="40" text-anchor="middle">L2: Gemini Pro</text>
+                <text class="pipe-node-sub" id="t5-sub-pro" x="878" y="60" text-anchor="middle">System 2 Recovery</text>
+              </g>
+            </svg>
+          </div>
+        </section>
+
         <!-- Side-by-Side Comparison: Direct System 2 vs Apigee System 1 + System 2 -->
         <section class="comparison-grid" aria-label="System 1 and System 2 Comparison">
           <article class="comparison-card">
@@ -1115,6 +1478,87 @@
             </div>
             <div class="response-body" id="s1-gw-body">Waiting for execution...</div>
           </article>
+        </section>
+
+        <!-- Visual 5-Head Noul Battery Probability Meter & Cost Bar (Tab 5) -->
+        <section class="noul-meter-panel" id="noul-meter-panel" aria-label="Visual 5-Head Noul Battery Probability Meter">
+          <div class="noul-meter-header">
+            <div>
+              <h2 class="panel-title">Stage 2 Decomposed 5-Head <code>Noul</code> Battery vs. Holistic Single-Judge</h2>
+              <p class="card-subtitle">Calibrated probabilities on <code>0.00&ndash;1.00</code> scale &middot; dashed vertical line marks live <code>fire_threshold</code> gate</p>
+            </div>
+            <div class="btn-group">
+              <span class="model-pill pill-jev tabular-nums" id="noul-gate-badge">Gate &gt; 0.70</span>
+              <span class="model-pill" id="noul-verdict-pill">AWAITING RUN</span>
+            </div>
+          </div>
+
+          <div class="noul-scale-row" aria-hidden="true">
+            <span>Defect Failure-Mode Head</span>
+            <div class="noul-scale-ticks">
+              <span>0.00</span>
+              <span>0.25</span>
+              <span>0.50</span>
+              <span>0.75</span>
+              <span>1.00</span>
+            </div>
+            <span>Probability</span>
+          </div>
+
+          <div class="noul-rows" id="noul-bars-container">
+            <div class="noul-row">
+              <div class="noul-head-label">1. Context Contradiction<span class="noul-head-code">hallucinated_or_contradicts_context</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val">&mdash;</span><span class="noul-tag">IDLE</span></div>
+            </div>
+            <div class="noul-row">
+              <div class="noul-head-label">2. Missed User Constraint<span class="noul-head-code">missed_user_constraint</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val">&mdash;</span><span class="noul-tag">IDLE</span></div>
+            </div>
+            <div class="noul-row">
+              <div class="noul-head-label">3. Superficial / Unproven<span class="noul-head-code">superficial_or_unproven</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val">&mdash;</span><span class="noul-tag">IDLE</span></div>
+            </div>
+            <div class="noul-row">
+              <div class="noul-head-label">4. Internal Contradiction<span class="noul-head-code">internal_contradiction</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val">&mdash;</span><span class="noul-tag">IDLE</span></div>
+            </div>
+            <div class="noul-row">
+              <div class="noul-head-label">5. Hedging or Refusal<span class="noul-head-code">hedging_or_refusal</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val">&mdash;</span><span class="noul-tag">IDLE</span></div>
+            </div>
+            <div class="noul-row noul-row-holistic" id="noul-holistic-row">
+              <div class="noul-head-label">Holistic Single-Judge (Reference)<span class="noul-head-code">__overall__::holistic_escalate_judge</span></div>
+              <div class="noul-bar-track"><div class="noul-bar-fill is-holistic" id="noul-holistic-fill"></div><div class="noul-threshold-line"></div></div>
+              <div class="noul-prob-cell"><span class="noul-prob-val" id="noul-holistic-val">&mdash;</span><span class="noul-tag" id="noul-holistic-tag">REF</span></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Visual Direct Pro vs. System 1/2 Cascade Cost Bar (Tab 5) -->
+        <section class="viz-panel" aria-label="System 1 and System 2 Cost Comparison">
+          <h2 class="viz-block-title">
+            <span>System 2 Direct vs. Apigee X + Jev Cascade Cost</span>
+            <span class="model-pill tabular-nums" id="s1-viz-delta-pill">Awaiting run</span>
+          </h2>
+          <div class="viz-bar-row">
+            <div class="viz-bar-meta">
+              <span class="viz-bar-name">Direct System 2 (Always-on Gemini 2.5 Pro)</span>
+              <span class="viz-val tabular-nums" id="s1-viz-direct-val">&mdash;</span>
+            </div>
+            <div class="viz-track"><div class="viz-fill viz-fill-scale viz-fill-baseline" id="s1-viz-direct-bar"></div></div>
+          </div>
+          <div class="viz-bar-row">
+            <div class="viz-bar-meta">
+              <span class="viz-bar-name">Via Apigee X + TypeSafe Jev Cascade (incl. Jev System 1 Cost)</span>
+              <span class="viz-val tabular-nums" id="s1-viz-gw-val">&mdash;</span>
+            </div>
+            <div class="viz-track"><div class="viz-fill viz-fill-scale viz-fill-savings" id="s1-viz-gw-bar"></div></div>
+          </div>
         </section>
 
         <!-- Deep-Dive Telemetry: Stage 1 Jev Router & Stage 2 Decomposed 5-Head Noul Battery -->
@@ -1482,6 +1926,6 @@
     </div>
   </div>
 
-  <script src="/v1/ai-economics/assets/app.js?v=6.1"></script>
+  <script src="/v1/ai-economics/assets/app.js?v=7.0"></script>
 </body>
 </html>

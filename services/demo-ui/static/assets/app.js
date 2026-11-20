@@ -155,6 +155,585 @@
     });
   }
 
+  // Theme Switcher (Archival Paper Light <-> Carbon Obsidian Dark)
+  function initThemeSwitcher() {
+    const btn = document.getElementById("btn-theme-toggle");
+    if (!btn) return;
+    const label = document.getElementById("theme-toggle-label");
+    const iconMoon = document.getElementById("theme-icon-moon");
+    const iconSun = document.getElementById("theme-icon-sun");
+
+    function getCurrentTheme() {
+      const explicit = document.documentElement.getAttribute("data-theme");
+      if (explicit === "light" || explicit === "dark") return explicit;
+      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    function applyThemeUI(theme) {
+      const isDark = theme === "dark";
+      btn.setAttribute("aria-pressed", isDark ? "true" : "false");
+      if (label) label.textContent = isDark ? "Archival Light" : "Obsidian Dark";
+      if (iconMoon) iconMoon.style.display = isDark ? "none" : "block";
+      if (iconSun) iconSun.style.display = isDark ? "block" : "none";
+    }
+
+    applyThemeUI(getCurrentTheme());
+
+    btn.addEventListener("click", () => {
+      const nextTheme = getCurrentTheme() === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", nextTheme);
+      try {
+        localStorage.setItem("apigee-demo-theme", nextTheme);
+      } catch (e) {}
+      applyThemeUI(nextTheme);
+    });
+  }
+
+  // Live SVG Pipeline Helpers
+  function setPipeRunning(svgId, running) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    svg.classList.toggle("is-running", Boolean(running));
+  }
+
+  function resetPipeSvg(svgId) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    svg.querySelectorAll(".pipe-node").forEach((el) => {
+      el.classList.remove(
+        "state-active",
+        "state-savings",
+        "state-alert",
+        "state-amber",
+        "state-jev",
+        "state-bypass"
+      );
+    });
+    svg.querySelectorAll(".pipe-edge").forEach((el) => {
+      el.classList.remove("edge-active", "edge-savings", "edge-alert", "edge-amber", "edge-jev");
+    });
+  }
+
+  function setNodeState(nodeId, stateClass, subId, subText) {
+    const node = document.getElementById(nodeId);
+    if (node && stateClass) node.classList.add(stateClass);
+    if (subId && subText !== undefined) {
+      const sub = document.getElementById(subId);
+      if (sub) sub.textContent = subText;
+    }
+  }
+
+  function setEdgeState(edgeId, edgeClass) {
+    const edge = document.getElementById(edgeId);
+    if (edge && edgeClass) edge.classList.add(edgeClass);
+  }
+
+  function updateTab1Pipeline(gw) {
+    resetPipeSvg("t1-pipeline-svg");
+    const sc = (gw.optimizations || {}).semantic_cache || {};
+    const comp = (gw.optimizations || {}).prompt_compression || {};
+    const cp = (gw.optimizations || {}).context_pruning || {};
+    const rc = (gw.optimizations || {}).model_routing_cascade || {};
+    const statusPill = document.getElementById("t1-pipe-status");
+
+    setNodeState("t1-node-client", "state-active");
+    setEdgeState("t1-edge-1", "edge-active");
+
+    if (sc.hit) {
+      const simFmt = sc.similarity_score !== null && sc.similarity_score !== undefined ? Number(sc.similarity_score).toFixed(2) : "—";
+      setNodeState("t1-node-cache", "state-savings", "t1-sub-cache", `HIT (${simFmt})`);
+      setEdgeState("t1-edge-shortcircuit", "edge-savings");
+      setNodeState("t1-node-compress", "state-bypass", "t1-sub-compress", "Short-circuited");
+      setNodeState("t1-node-prune", "state-bypass", "t1-sub-prune", "Short-circuited");
+      setNodeState("t1-node-router", "state-bypass", "t1-sub-router", "Short-circuited");
+      setNodeState("t1-node-llm", "state-savings", "t1-sub-llm", "0 LLM tokens");
+      if (statusPill) {
+        statusPill.textContent = `CACHE SHORT-CIRCUIT (sim=${simFmt})`;
+        statusPill.className = "model-pill pill-allowed";
+      }
+      return;
+    }
+
+    setNodeState(
+      "t1-node-cache",
+      sc.enabled ? "state-active" : "state-bypass",
+      "t1-sub-cache",
+      sc.enabled ? "MISS (indexed)" : "Bypassed"
+    );
+    setEdgeState("t1-edge-2", "edge-active");
+
+    const compReduced = Number(comp.tokens_before || 0) > Number(comp.tokens_after || 0);
+    const compPct =
+      comp.tokens_before > 0
+        ? (((comp.tokens_before - comp.tokens_after) / comp.tokens_before) * 100).toFixed(0)
+        : "0";
+    setNodeState(
+      "t1-node-compress",
+      compReduced ? "state-savings" : comp.enabled ? "state-active" : "state-bypass",
+      "t1-sub-compress",
+      compReduced ? `-${compPct}% pruned` : comp.enabled ? "0% delta" : "Disabled"
+    );
+    setEdgeState("t1-edge-3", "edge-active");
+
+    setNodeState(
+      "t1-node-prune",
+      cp.applied ? "state-savings" : cp.enabled ? "state-active" : "state-bypass",
+      "t1-sub-prune",
+      cp.applied ? `${cp.turns_before}→${cp.turns_after} turns` : cp.enabled ? "Under 800 tok" : "Disabled"
+    );
+    setEdgeState("t1-edge-4", "edge-active");
+
+    const isDirectPro = rc.initial_decision === "PRO_DIRECT_HIGH_COMPLEXITY" || !rc.enabled;
+    const cxFmt = rc.complexity_score !== null && rc.complexity_score !== undefined ? Number(rc.complexity_score).toFixed(2) : "—";
+    if (rc.escalated_to_pro) {
+      setNodeState("t1-node-router", "state-amber", "t1-sub-router", "L1→L2 Escalated");
+      setEdgeState("t1-edge-5", "edge-amber");
+      setNodeState("t1-node-llm", "state-amber", "t1-sub-llm", "Flash + Pro");
+      if (statusPill) {
+        statusPill.textContent = "ESCALATED TO L2 PRO (BOTH BILLED)";
+        statusPill.className = "model-pill pill-deploying";
+      }
+    } else if (isDirectPro || String(gw.model_used || "").includes("pro")) {
+      setNodeState("t1-node-router", "state-amber", "t1-sub-router", `Direct Pro (${cxFmt})`);
+      setEdgeState("t1-edge-5", "edge-amber");
+      setNodeState("t1-node-llm", "state-amber", "t1-sub-llm", "gemini-2.5-pro");
+      if (statusPill) {
+        statusPill.textContent = rc.enabled ? "PRO DIRECT (HIGH COMPLEXITY)" : "ROUTING OFF (PRO)";
+        statusPill.className = "model-pill pill-deploying";
+      }
+    } else {
+      setNodeState("t1-node-router", "state-savings", "t1-sub-router", `Flash (${cxFmt})`);
+      setEdgeState("t1-edge-5", "edge-savings");
+      setNodeState("t1-node-llm", "state-savings", "t1-sub-llm", "gemini-2.5-flash");
+      if (statusPill) {
+        statusPill.textContent = "OPTIMIZED ON L1 FLASH";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    }
+  }
+
+  function updateTab1Visuals(data) {
+    const direct = data.direct_baseline;
+    const gw = data.apigee_gateway;
+    const cmp = data.comparison;
+    const comp = (gw.optimizations || {}).prompt_compression || {};
+    const sc = (gw.optimizations || {}).semantic_cache || {};
+
+    const dCost = Number(direct.cost_accounting.total_cost_usd || 0);
+    const gCost = Number(gw.cost_accounting.total_cost_usd || 0);
+    const maxCost = Math.max(dCost, gCost, 0.000001);
+
+    document.getElementById("viz-cost-direct-val").textContent = fmtUsd(dCost, 6);
+    document.getElementById("viz-cost-gw-val").textContent = fmtUsd(gCost, 6);
+    document.getElementById("viz-cost-direct-bar").style.transform = `scaleX(${Math.max(dCost > 0 ? 0.02 : 0, dCost / maxCost).toFixed(4)})`;
+
+    const gwBar = document.getElementById("viz-cost-gw-bar");
+    gwBar.style.transform = `scaleX(${Math.max(gCost > 0 ? 0.02 : 0, gCost / maxCost).toFixed(4)})`;
+    gwBar.className = `viz-fill viz-fill-scale ${cmp.cost_saved_usd >= 0 ? "viz-fill-savings" : "viz-fill-alert"}`;
+
+    const deltaPill = document.getElementById("viz-cost-delta-pill");
+    const isSavings = cmp.cost_saved_usd >= 0;
+    deltaPill.textContent = `${isSavings ? "-" : "+"}${Math.abs(cmp.cost_reduction_pct)}% ${isSavings ? "saved" : "added"}`;
+    deltaPill.className = `model-pill tabular-nums ${isSavings ? "pill-allowed" : "pill-blocked"}`;
+
+    // Compression ratio bar
+    const compBar = document.getElementById("viz-comp-bar");
+    const compVal = document.getElementById("viz-comp-val");
+    if (sc.hit) {
+      compBar.style.transform = "scaleX(0)";
+      compVal.textContent = "0 tok (Cache hit short-circuit)";
+    } else if (Number(comp.tokens_before || 0) > 0) {
+      const keptFrac = Math.min(1, comp.tokens_after / comp.tokens_before);
+      const dropPct = ((1 - keptFrac) * 100).toFixed(1);
+      compBar.style.transform = `scaleX(${keptFrac.toFixed(4)})`;
+      compVal.textContent = `${fmtInt(comp.tokens_after)} / ${fmtInt(comp.tokens_before)} tok (-${dropPct}%)`;
+    } else {
+      compBar.style.transform = "scaleX(1)";
+      compVal.textContent = "Not compressed";
+    }
+
+    // Stacked Token Composition Bars
+    const dTok = direct.token_accounting;
+    const gTok = gw.token_accounting;
+    const dGrand = Number(dTok.grand_total_billed_tokens || 0);
+    const gGrand = Number(gTok.grand_total_billed_tokens || 0);
+    const maxTok = Math.max(dGrand, gGrand, 1);
+
+    const overheadTok =
+      Number(gTok.embedding_overhead_tokens || 0) +
+      Number(gTok.pruning_summarizer_overhead_tokens || 0);
+
+    document.getElementById("viz-tok-direct-val").textContent = `${fmtInt(dGrand)} tokens`;
+    document.getElementById("viz-tok-gw-val").textContent = `${fmtInt(gGrand)} tokens`;
+
+    const pct = (v) => `${Math.max(0, (Number(v || 0) / maxTok) * 100).toFixed(2)}%`;
+    document.getElementById("viz-tok-direct-prompt").style.width = pct(dTok.prompt_tokens);
+    document.getElementById("viz-tok-direct-out").style.width = pct(dTok.candidate_tokens);
+    document.getElementById("viz-tok-direct-think").style.width = pct(dTok.thinking_tokens);
+
+    document.getElementById("viz-tok-gw-prompt").style.width = pct(gTok.prompt_tokens);
+    document.getElementById("viz-tok-gw-out").style.width = pct(gTok.candidate_tokens);
+    document.getElementById("viz-tok-gw-think").style.width = pct(gTok.thinking_tokens);
+    document.getElementById("viz-tok-gw-overhead").style.width = pct(overheadTok);
+  }
+
+  function updateTab2Visuals(g, fv) {
+    resetPipeSvg("t2-pipeline-svg");
+    const statusPill = document.getElementById("t2-pipe-status");
+    const faultLow = String(g.fault_name || "").toLowerCase();
+    const blockedAtPtl = g.blocked && (faultLow.includes("prompt") || Number((g.token_usage || {}).total_tokens || 0) === 0);
+
+    setNodeState("t2-node-client", "state-active");
+    setEdgeState("t2-edge-1", blockedAtPtl ? "edge-alert" : "edge-active");
+
+    if (blockedAtPtl) {
+      setNodeState("t2-node-ptl", "state-alert", "t2-sub-ptl", `BLOCKED ${g.http_status_code}`);
+      setNodeState("t2-node-llm", "state-bypass", "t2-sub-llm", "Skipped (0 tok)");
+      setNodeState("t2-node-ltq", "state-bypass", "t2-sub-ltq", "Skipped");
+      if (statusPill) {
+        statusPill.textContent = "ARRESTED AT PRE-FLIGHT (PTL)";
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else if (g.blocked) {
+      setNodeState("t2-node-ptl", "state-savings", "t2-sub-ptl", "Passed");
+      setEdgeState("t2-edge-2", "edge-active");
+      setNodeState("t2-node-llm", "state-amber", "t2-sub-llm", "Ran inference");
+      setEdgeState("t2-edge-3", "edge-alert");
+      setNodeState("t2-node-ltq", "state-alert", "t2-sub-ltq", `QUOTA ${g.http_status_code}`);
+      if (statusPill) {
+        statusPill.textContent = "BLOCKED BY QUOTA (LTQ)";
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else {
+      setNodeState("t2-node-ptl", "state-savings", "t2-sub-ptl", "Within spike cap");
+      setEdgeState("t2-edge-2", "edge-savings");
+      setNodeState("t2-node-llm", "state-savings", "t2-sub-llm", `${fmtInt((g.token_usage || {}).total_tokens || 0)} tok`);
+      setEdgeState("t2-edge-3", "edge-savings");
+      setNodeState("t2-node-ltq", "state-savings", "t2-sub-ltq", "Within budget");
+      if (statusPill) {
+        statusPill.textContent = "ALLOWED (WITHIN LIMITS)";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    }
+
+    // Rolling Quota Fuel Gauge
+    const used = fv.ltq_used_count !== null && fv.ltq_used_count !== undefined ? Number(fv.ltq_used_count) : null;
+    const allowed = Number(fv.ltq_allowed_count || document.getElementById("tg-quota-limit").value || 500);
+    const rem = fv.ltq_available_count !== null && fv.ltq_available_count !== undefined ? Number(fv.ltq_available_count) : null;
+    const pct = used !== null && allowed > 0 ? Math.min(100, (used / allowed) * 100) : g.blocked && !blockedAtPtl ? 100 : 0;
+
+    const fillEl = document.getElementById("t2-quota-fill");
+    const pctEl = document.getElementById("t2-quota-pct");
+    const pbEl = document.getElementById("t2-quota-progressbar");
+    if (fillEl) {
+      fillEl.style.transform = `scaleX(${(pct / 100).toFixed(4)})`;
+      fillEl.className = "quota-fill" + (pct >= 100 || (g.blocked && !blockedAtPtl) ? " level-alert" : pct >= 75 ? " level-warn" : "");
+    }
+    if (pbEl) pbEl.setAttribute("aria-valuenow", String(Math.round(pct)));
+    if (pctEl) {
+      pctEl.textContent = used !== null ? `${pct.toFixed(0)}% used` : blockedAtPtl ? "Pre-flight block" : "—";
+      pctEl.className = `model-pill tabular-nums ${pct >= 100 || g.blocked ? "pill-blocked" : pct >= 75 ? "pill-deploying" : "pill-allowed"}`;
+    }
+    document.getElementById("t2-quota-used-label").textContent =
+      `Consumed: ${used !== null ? fmtInt(used) : "—"} / ${fmtInt(allowed)} tokens`;
+    document.getElementById("t2-quota-rem-label").textContent =
+      `Remaining: ${rem !== null ? fmtInt(rem) : "—"} tokens`;
+  }
+
+  function updateTab3Pipeline(g) {
+    resetPipeSvg("t3-pipeline-svg");
+    const statusPill = document.getElementById("t3-pipe-status");
+    const faultLow = String(g.fault_name || "").toLowerCase();
+    const blockedPost = g.blocked && (faultLow.includes("response") || Number((g.token_usage || {}).total_tokens || 0) > 0);
+    const blockedPre = g.blocked && !blockedPost;
+
+    setNodeState("t3-node-client", "state-active");
+    if (blockedPre) {
+      setEdgeState("t3-edge-1", "edge-alert");
+      setNodeState("t3-node-sup", "state-alert", "t3-sub-sup", `BLOCKED ${g.http_status_code}`);
+      setNodeState("t3-node-llm", "state-bypass", "t3-sub-llm", "0 LLM tokens");
+      setNodeState("t3-node-smr", "state-bypass", "t3-sub-smr", "Skipped");
+      setNodeState("t3-node-out", "state-bypass", "t3-sub-out", "Protected");
+      if (statusPill) {
+        statusPill.textContent = "BLOCKED PRE-INFERENCE (0 LLM TOKENS)";
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else if (blockedPost) {
+      setEdgeState("t3-edge-1", "edge-savings");
+      setNodeState("t3-node-sup", "state-savings", "t3-sub-sup", "Prompt clean");
+      setEdgeState("t3-edge-2", "edge-active");
+      setNodeState("t3-node-llm", "state-amber", "t3-sub-llm", "Unsafe reply");
+      setEdgeState("t3-edge-3", "edge-alert");
+      setNodeState("t3-node-smr", "state-alert", "t3-sub-smr", `BLOCKED ${g.http_status_code}`);
+      setNodeState("t3-node-out", "state-bypass", "t3-sub-out", "Redacted");
+      if (statusPill) {
+        statusPill.textContent = "BLOCKED OUTBOUND BY SMR";
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else {
+      setEdgeState("t3-edge-1", "edge-savings");
+      setNodeState("t3-node-sup", "state-savings", "t3-sub-sup", "Prompt clean");
+      setEdgeState("t3-edge-2", "edge-savings");
+      setNodeState("t3-node-llm", "state-savings", "t3-sub-llm", `${fmtInt((g.token_usage || {}).total_tokens || 0)} tok`);
+      setEdgeState("t3-edge-3", "edge-savings");
+      setNodeState("t3-node-smr", "state-savings", "t3-sub-smr", "Response clean");
+      setEdgeState("t3-edge-4", "edge-savings");
+      setNodeState("t3-node-out", "state-savings", "t3-sub-out", "HTTP 200");
+      if (statusPill) {
+        statusPill.textContent = "PASSED MODEL ARMOR";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    }
+  }
+
+  function syncTab4PipelineLabels() {
+    resetPipeSvg("t4-pipeline-svg");
+    const isNc = state.tab4Submode === "native-cache";
+    const tPre = document.getElementById("t4-title-pre");
+    const sPre = document.getElementById("t4-sub-pre");
+    const tPost = document.getElementById("t4-title-post");
+    const sPost = document.getElementById("t4-sub-post");
+    if (tPre) tPre.textContent = isNc ? "SCL-CacheLookup" : "PreFlow Passthrough";
+    if (sPre) sPre.textContent = isNc ? "Vector Search cos" : "Enterprise route";
+    if (tPost) tPost.textContent = isNc ? "SCP-CachePopulate" : "SG-EnterpriseDomain";
+    if (sPost) sPost.textContent = isNc ? "Index embedding" : "Domain rule check";
+    const statusPill = document.getElementById("t4-pipe-status");
+    if (statusPill) {
+      statusPill.textContent = isNc ? "READY — Native Vector Cache mode" : "READY — Semantic Governance mode";
+      statusPill.className = "model-pill";
+    }
+  }
+
+  function updateTab4Pipeline(g, fv) {
+    resetPipeSvg("t4-pipeline-svg");
+    const statusPill = document.getElementById("t4-pipe-status");
+    const isNc = state.tab4Submode === "native-cache";
+    const cacheHit = isNc && !g.blocked && Boolean(fv.scl_cache_hit);
+
+    setNodeState("t4-node-client", "state-active");
+    setEdgeState("t4-edge-1", "edge-active");
+
+    if (cacheHit) {
+      setNodeState("t4-node-pre", "state-savings", "t4-sub-pre", "CACHE HIT");
+      setEdgeState("t4-edge-hit", "edge-savings");
+      setNodeState("t4-node-llm", "state-bypass", "t4-sub-llm", "Short-circuited");
+      setNodeState("t4-node-post", "state-bypass", "t4-sub-post", "Skipped");
+      setNodeState("t4-node-out", "state-savings", "t4-sub-out", "0 LLM tokens");
+      if (statusPill) {
+        statusPill.textContent = "NATIVE VECTOR CACHE HIT";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    } else if (g.blocked) {
+      setNodeState("t4-node-pre", "state-active", "t4-sub-pre", "Forwarded");
+      setEdgeState("t4-edge-2", "edge-active");
+      setNodeState("t4-node-llm", "state-amber", "t4-sub-llm", "Off-domain reply");
+      setEdgeState("t4-edge-3", "edge-alert");
+      setNodeState("t4-node-post", "state-alert", "t4-sub-post", `BLOCKED ${g.http_status_code}`);
+      setNodeState("t4-node-out", "state-bypass", "t4-sub-out", "Intercepted");
+      if (statusPill) {
+        statusPill.textContent = `BLOCKED BY POLICY (HTTP ${g.http_status_code})`;
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else {
+      setNodeState("t4-node-pre", "state-active", "t4-sub-pre", isNc ? "Cache MISS" : "Forwarded");
+      setEdgeState("t4-edge-2", "edge-active");
+      setNodeState("t4-node-llm", "state-savings", "t4-sub-llm", `${fmtInt((g.token_usage || {}).total_tokens || 0)} tok`);
+      setEdgeState("t4-edge-3", "edge-savings");
+      setNodeState("t4-node-post", "state-savings", "t4-sub-post", isNc ? "Indexed vector" : "Compliant");
+      setEdgeState("t4-edge-4", "edge-savings");
+      setNodeState("t4-node-out", "state-savings", "t4-sub-out", "HTTP 200");
+      if (statusPill) {
+        statusPill.textContent = isNc ? "CACHE MISS → INDEXED" : "COMPLIANT (ALLOWED)";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    }
+  }
+
+  const NOUL_HEAD_TITLES = {
+    hallucinated_or_contradicts_context: "1. Context Contradiction",
+    missed_user_constraint: "2. Missed User Constraint",
+    superficial_or_unproven: "3. Superficial / Unproven",
+    internal_contradiction: "4. Internal Contradiction",
+    hedging_or_refusal: "5. Hedging or Refusal",
+  };
+
+  function syncNoulThresholdLines() {
+    const input = document.getElementById("s1-fire-threshold");
+    const thresh = Math.min(0.99, Math.max(0.05, Number((input && input.value) || 0.70)));
+    const pct = `${(thresh * 100).toFixed(1)}%`;
+    document.querySelectorAll("#noul-bars-container .noul-threshold-line").forEach((line) => {
+      line.style.left = pct;
+    });
+    const badge = document.getElementById("noul-gate-badge");
+    if (badge) badge.textContent = `Gate > ${thresh.toFixed(2)}`;
+    const sub = document.getElementById("t5-sub-stage2");
+    if (sub && sub.textContent.startsWith("max(nouls)")) {
+      sub.textContent = `max(nouls) > ${thresh.toFixed(2)}`;
+    }
+  }
+
+  function renderNoulBatteryMeter(st2, fallbackThreshold) {
+    const container = document.getElementById("noul-bars-container");
+    const verdictPill = document.getElementById("noul-verdict-pill");
+    const gateBadge = document.getElementById("noul-gate-badge");
+    if (!container) return;
+
+    const thresh = Number(st2.fire_threshold !== undefined ? st2.fire_threshold : fallbackThreshold || 0.70);
+    const threshPct = `${Math.min(98, Math.max(2, thresh * 100)).toFixed(1)}%`;
+    if (gateBadge) gateBadge.textContent = `Gate > ${thresh.toFixed(2)}`;
+
+    if (!st2.executed) {
+      if (verdictPill) {
+        verdictPill.textContent = "SKIPPED (DIRECT PRO FAST-TRACK)";
+        verdictPill.className = "model-pill pill-deploying";
+      }
+      container.querySelectorAll(".noul-bar-fill").forEach((bar) => {
+        bar.style.transform = "scaleX(0)";
+        bar.classList.remove("is-fired");
+      });
+      container.querySelectorAll(".noul-prob-val").forEach((v) => (v.textContent = "—"));
+      container.querySelectorAll(".noul-tag").forEach((t) => {
+        t.textContent = "SKIP";
+        t.className = "noul-tag";
+      });
+      syncNoulThresholdLines();
+      return;
+    }
+
+    if (verdictPill) {
+      verdictPill.textContent = st2.any_flag_fired
+        ? `FIRED (max=${Number(st2.max_noul_value || 0).toFixed(2)}) → L2 PRO`
+        : `ALL CLEAR (max=${Number(st2.max_noul_value || 0).toFixed(2)}) → L1`;
+      verdictPill.className = `model-pill tabular-nums ${st2.any_flag_fired ? "pill-blocked" : "pill-allowed"}`;
+    }
+
+    const rows = st2.noul_battery_table || [];
+    const rowsHtml = rows
+      .map((row, idx) => {
+        const prob = Math.min(1, Math.max(0, Number(row.probability || 0)));
+        const scaleVal = prob.toFixed(4);
+        const fired = Boolean(row.fired);
+        const title = NOUL_HEAD_TITLES[row.question] || `${idx + 1}. ${row.question}`;
+        return `
+          <div class="noul-row">
+            <div class="noul-head-label">${escapeHtml(title)}<span class="noul-head-code">${escapeHtml(row.question)}</span></div>
+            <div class="noul-bar-track">
+              <div class="noul-bar-fill ${fired ? "is-fired" : ""}" data-target-scale="${scaleVal}"></div>
+              <div class="noul-threshold-line" style="left: ${threshPct};"></div>
+            </div>
+            <div class="noul-prob-cell">
+              <span class="noul-prob-val">${prob.toFixed(4)}</span>
+              <span class="noul-tag ${fired ? "noul-tag-fired" : "noul-tag-clear"}">${fired ? "FIRES" : "CLEAR"}</span>
+            </div>
+          </div>
+        `;
+      })
+      .join("");
+
+    const holProb = Math.min(1, Math.max(0, Number(st2.holistic_escalate_judge || 0)));
+    const holFired = holProb > thresh;
+    const holMissed = Boolean(st2.any_flag_fired) && !holFired;
+    const holTagClass = holFired ? "noul-tag-fired" : holMissed ? "noul-tag-missed" : "noul-tag-clear";
+    const holTagText = holFired ? "FIRES" : holMissed ? "MISSED" : "CLEAR";
+    const holisticHtml = `
+      <div class="noul-row noul-row-holistic" id="noul-holistic-row">
+        <div class="noul-head-label">Holistic Single-Judge (Reference)<span class="noul-head-code">__overall__::holistic_escalate_judge</span></div>
+        <div class="noul-bar-track">
+          <div class="noul-bar-fill is-holistic" id="noul-holistic-fill" data-target-scale="${holProb.toFixed(4)}"></div>
+          <div class="noul-threshold-line" style="left: ${threshPct};"></div>
+        </div>
+        <div class="noul-prob-cell">
+          <span class="noul-prob-val" id="noul-holistic-val">${holProb.toFixed(4)}</span>
+          <span class="noul-tag ${holTagClass}" id="noul-holistic-tag">${holTagText}</span>
+        </div>
+      </div>
+    `;
+
+    container.innerHTML = rowsHtml + holisticHtml;
+    requestAnimationFrame(() => {
+      container.querySelectorAll(".noul-bar-fill[data-target-scale]").forEach((bar) => {
+        bar.style.transform = `scaleX(${bar.dataset.targetScale})`;
+      });
+    });
+  }
+
+  function updateTab5Visuals(data, fireThreshold) {
+    const d = data.direct_baseline || {};
+    const g = data.apigee_gateway || {};
+    const cmp = data.comparison || {};
+    const st1 = g.stage1_jev || {};
+    const st2 = g.stage2_jev || {};
+
+    // 1. Live Pipeline
+    resetPipeSvg("t5-pipeline-svg");
+    const statusPill = document.getElementById("t5-pipe-status");
+    const isDirectPro = g.initial_routing_decision === "GEMINI_2_5_PRO";
+
+    setNodeState("t5-node-client", "state-active");
+    setEdgeState("t5-edge-1", "edge-jev");
+    setNodeState(
+      "t5-node-stage1",
+      "state-jev",
+      "t5-sub-stage1",
+      `conf=${st1.target_tier_confidence !== undefined ? Number(st1.target_tier_confidence).toFixed(2) : "—"}`
+    );
+
+    if (isDirectPro) {
+      setEdgeState("t5-edge-fasttrack", "edge-amber");
+      setNodeState("t5-node-flash", "state-bypass", "t5-sub-flash", "Skipped");
+      setNodeState("t5-node-stage2", "state-bypass", "t5-sub-stage2", "Skipped");
+      setNodeState("t5-node-pro", "state-amber", "t5-sub-pro", "Direct System 2");
+      if (statusPill) {
+        statusPill.textContent = "STAGE 1 DIRECT PRO FAST-TRACK";
+        statusPill.className = "model-pill pill-deploying";
+      }
+    } else if (g.escalated_to_pro) {
+      setEdgeState("t5-edge-2", "edge-active");
+      setNodeState("t5-node-flash", "state-amber", "t5-sub-flash", "L1 defect caught");
+      setEdgeState("t5-edge-3", "edge-jev");
+      setNodeState("t5-node-stage2", "state-alert", "t5-sub-stage2", `FIRES (${Number(st2.max_noul_value || 0).toFixed(2)})`);
+      setEdgeState("t5-edge-4", "edge-alert");
+      setNodeState("t5-node-pro", "state-savings", "t5-sub-pro", "L2 Recovered");
+      if (statusPill) {
+        statusPill.textContent = "STAGE 2 NOUL FIRED → L2 PRO RECOVERY";
+        statusPill.className = "model-pill pill-blocked";
+      }
+    } else {
+      setEdgeState("t5-edge-2", "edge-savings");
+      setNodeState("t5-node-flash", "state-savings", "t5-sub-flash", "L1 Accepted");
+      setEdgeState("t5-edge-3", "edge-jev");
+      setNodeState("t5-node-stage2", "state-savings", "t5-sub-stage2", st2.executed ? "All 5 clear" : "Fast lane");
+      setNodeState("t5-node-pro", "state-bypass", "t5-sub-pro", "Not invoked");
+      if (statusPill) {
+        statusPill.textContent = "L1 FLASH ACCEPTED VIA JEV";
+        statusPill.className = "model-pill pill-allowed";
+      }
+    }
+
+    // 2. 5-Head Noul Battery Visual Meter
+    renderNoulBatteryMeter(st2, fireThreshold);
+
+    // 3. System 2 Direct vs Jev Cascade Cost Bar
+    const dCost = Number((d.cost_accounting || {}).total_cost_usd || 0);
+    const gCost = Number((g.cost_accounting || {}).total_cost_usd || 0);
+    const maxCost = Math.max(dCost, gCost, 0.000001);
+    const costSaved = Number(cmp.cost_saved_usd || 0);
+    const isSavings = costSaved >= 0;
+
+    document.getElementById("s1-viz-direct-val").textContent = fmtUsd(dCost, 6);
+    document.getElementById("s1-viz-gw-val").textContent = fmtUsd(gCost, 6);
+    document.getElementById("s1-viz-direct-bar").style.transform = `scaleX(${Math.max(dCost > 0 ? 0.02 : 0, dCost / maxCost).toFixed(4)})`;
+    const s1GwBar = document.getElementById("s1-viz-gw-bar");
+    s1GwBar.style.transform = `scaleX(${Math.max(gCost > 0 ? 0.02 : 0, gCost / maxCost).toFixed(4)})`;
+    s1GwBar.className = `viz-fill viz-fill-scale ${isSavings ? "viz-fill-savings" : "viz-fill-alert"}`;
+
+    const s1DeltaPill = document.getElementById("s1-viz-delta-pill");
+    s1DeltaPill.textContent = `${isSavings ? "-" : "+"}${Math.abs(Number(cmp.cost_reduction_pct || 0))}% ${isSavings ? "saved" : "added"}`;
+    s1DeltaPill.className = `model-pill tabular-nums ${isSavings ? "pill-allowed" : "pill-blocked"}`;
+  }
+
   // Primary Multi-Tab Navigation
   document.querySelectorAll(".primary-tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -264,15 +843,18 @@
 
     const L = state.sessionLedger;
     const elAnnual = document.getElementById("ledger-annual-savings");
+    const elAnnualCell = document.getElementById("ledger-annual-cell");
     if (L.runs === 0) {
       elAnnual.textContent = "$0 / yr";
       setDeltaClass(elAnnual, null);
+      if (elAnnualCell) elAnnualCell.classList.remove("ledger-cell-alert");
       return;
     }
     const avgSavedPerReq = (L.directCostUsd - L.gatewayCostUsd) / L.runs;
     const annualSaved = avgSavedPerReq * (millionsPerMonth * 1_000_000) * 12;
     elAnnual.textContent = `${annualSaved < 0 ? "-" : ""}${fmtCurrencyLarge(Math.abs(annualSaved))} / yr`;
     setDeltaClass(elAnnual, annualSaved >= 0);
+    if (elAnnualCell) elAnnualCell.classList.toggle("ledger-cell-alert", annualSaved < 0);
   }
 
   // Select a preset scenario (Tab 1)
@@ -330,6 +912,7 @@
     state.isRunning = true;
     elBtnExecute.disabled = true;
     elBtnRunSequence.disabled = true;
+    setPipeRunning("t1-pipeline-svg", true);
     elRunStatus.textContent = "Calling Vertex AI Gemini 2.5 Pro + Apigee X Gateway in parallel...";
 
     let parsedHistory = [];
@@ -384,6 +967,7 @@
       elRunStatus.textContent = `Error: ${err.message}`;
     } finally {
       state.isRunning = false;
+      setPipeRunning("t1-pipeline-svg", false);
       elBtnExecute.disabled = false;
       elBtnRunSequence.disabled = false;
     }
@@ -393,6 +977,9 @@
     const direct = data.direct_baseline;
     const gw = data.apigee_gateway;
     const cmp = data.comparison;
+
+    updateTab1Pipeline(gw);
+    updateTab1Visuals(data);
 
     document.getElementById("direct-model-pill").textContent = direct.model_used;
     document.getElementById("direct-total-tokens").textContent = fmtInt(
@@ -635,6 +1222,51 @@
         gatewayCostUsd: 0.0,
       };
       updateSessionLedgerUI();
+
+      // Reset Tab 1 live pipeline and visual telemetry charts
+      resetPipeSvg("t1-pipeline-svg");
+      setNodeState("t1-node-cache", null, "t1-sub-cache", "cos ≥ 0.85");
+      setNodeState("t1-node-compress", null, "t1-sub-compress", "ratio 0.55");
+      setNodeState("t1-node-prune", null, "t1-sub-prune", "≥ 800 tok");
+      setNodeState("t1-node-router", null, "t1-sub-router", "score ≥ 0.55");
+      setNodeState("t1-node-llm", null, "t1-sub-llm", "Gemini 2.5");
+      const t1PipePill = document.getElementById("t1-pipe-status");
+      if (t1PipePill) {
+        t1PipePill.textContent = "READY — Run a scenario to illuminate active hops";
+        t1PipePill.className = "model-pill";
+      }
+      ["viz-cost-direct-bar", "viz-cost-gw-bar", "viz-comp-bar"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.transform = "scaleX(0)";
+      });
+      [
+        "viz-tok-direct-prompt",
+        "viz-tok-direct-out",
+        "viz-tok-direct-think",
+        "viz-tok-gw-prompt",
+        "viz-tok-gw-out",
+        "viz-tok-gw-think",
+        "viz-tok-gw-overhead",
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.style.width = "0%";
+      });
+      [
+        "viz-cost-direct-val",
+        "viz-cost-gw-val",
+        "viz-comp-val",
+        "viz-tok-direct-val",
+        "viz-tok-gw-val",
+      ].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = "—";
+      });
+      const deltaPill = document.getElementById("viz-cost-delta-pill");
+      if (deltaPill) {
+        deltaPill.textContent = "Awaiting run";
+        deltaPill.className = "model-pill tabular-nums";
+      }
+
       elRunStatus.textContent = "Gateway semantic cache & session ledger reset.";
     } catch (err) {
       elRunStatus.textContent = `Reset error: ${err.message}`;
@@ -815,6 +1447,7 @@ IndexEndpoint: projects/1019413155504/locations/australia-southeast1/indexEndpoi
 Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</div>
       `;
     }
+    syncTab4PipelineLabels();
   }
 
   // Execute Tab 2: Token Governance
@@ -822,6 +1455,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     const btn = document.getElementById("btn-run-tg");
     const statusEl = document.getElementById("tg-status");
     btn.disabled = true;
+    setPipeRunning("t2-pipeline-svg", true);
     statusEl.textContent = "Executing Direct Vertex AI vs. Apigee X Token Governance...";
     try {
       const resp = await apiFetch(`/api/policies/execute`, {
@@ -886,10 +1520,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         fv.ltq_available_count !== null && fv.ltq_available_count !== undefined ? fmtInt(fv.ltq_available_count) : "—";
       document.getElementById("tg-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
       document.getElementById("tg-telemetry-box").textContent = JSON.stringify(g, null, 2);
+      updateTab2Visuals(g, fv);
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
     } finally {
+      setPipeRunning("t2-pipeline-svg", false);
       btn.disabled = false;
     }
   });
@@ -899,6 +1535,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     const btn = document.getElementById("btn-run-ma");
     const statusEl = document.getElementById("ma-status");
     btn.disabled = true;
+    setPipeRunning("t3-pipeline-svg", true);
     statusEl.textContent = "Executing Direct Vertex AI vs. Apigee X + Model Armor...";
     try {
       const resp = await apiFetch(`/api/policies/execute`, {
@@ -964,10 +1601,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("ma-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
       document.getElementById("ma-gw-lat").textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
       document.getElementById("ma-telemetry-box").textContent = JSON.stringify(g, null, 2);
+      updateTab3Pipeline(g);
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
     } finally {
+      setPipeRunning("t3-pipeline-svg", false);
       btn.disabled = false;
     }
   });
@@ -986,6 +1625,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     const btn = document.getElementById("btn-run-sg");
     const statusEl = document.getElementById("sg-status");
     btn.disabled = true;
+    setPipeRunning("t4-pipeline-svg", true);
     statusEl.textContent = `Executing Apigee X (${state.tab4Submode})...`;
     try {
       const resp = await apiFetch(`/api/policies/execute`, {
@@ -1051,10 +1691,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("sg-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
       document.getElementById("sg-gw-lat").textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
       document.getElementById("sg-telemetry-box").textContent = JSON.stringify(g, null, 2);
+      updateTab4Pipeline(g, fv);
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
     } finally {
+      setPipeRunning("t4-pipeline-svg", false);
       btn.disabled = false;
     }
   });
@@ -1164,7 +1806,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   });
 
   wireTablistKeyboardNav();
+  initThemeSwitcher();
   syncPolicySwitches();
+  syncNoulThresholdLines();
+
+  const elFireThreshold = document.getElementById("s1-fire-threshold");
+  if (elFireThreshold) elFireThreshold.addEventListener("input", syncNoulThresholdLines);
 
   document.getElementById("btn-toggles-all-on").addEventListener("click", () => {
     elToggleCache.checked = true;
@@ -1323,6 +1970,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       scen.enable_post_verifier !== false;
     document.getElementById("s1-simulate-defect").checked = Boolean(scen.simulate_l1_defect);
     syncPolicySwitches();
+    syncNoulThresholdLines();
   }
 
   function renderSystem1Tab() {
@@ -1363,6 +2011,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     btnRunS1.addEventListener("click", async () => {
       const statusEl = document.getElementById("s1-status");
       btnRunS1.disabled = true;
+      setPipeRunning("t5-pipeline-svg", true);
       statusEl.textContent = "Calling TypeSafe Jev (System 1) + Apigee X + Vertex AI Gemini...";
       try {
         const payload = {
@@ -1508,10 +2157,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           document.getElementById("s1-stage2-box").textContent = st2Lines.join("\n");
         }
 
+        updateTab5Visuals(data, payload.fire_threshold);
         statusEl.textContent = `Completed at ${data.timestamp_utc}`;
       } catch (e) {
         statusEl.textContent = `Error: ${e.message}`;
       } finally {
+        setPipeRunning("t5-pipeline-svg", false);
         btnRunS1.disabled = false;
       }
     });
