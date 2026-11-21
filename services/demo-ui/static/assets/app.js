@@ -262,6 +262,13 @@
       btnExec.setAttribute("aria-pressed", normalized === "executive" ? "true" : "false");
       btnArch.classList.toggle("active", normalized === "architect");
       btnArch.setAttribute("aria-pressed", normalized === "architect" ? "true" : "false");
+      const eyebrow = document.getElementById("stage-eyebrow-text");
+      if (eyebrow) {
+        eyebrow.textContent =
+          normalized === "architect"
+            ? "Architect Workbench · Prompts, Policies & Raw XML Telemetry"
+            : "Live Executive Keynote · Apigee X + Vertex AI";
+      }
       try {
         localStorage.setItem("apigee-demo-view", normalized);
       } catch (e) {}
@@ -876,7 +883,11 @@
         "main-tab-system1-jev",
       ].forEach((id) => {
         const el = document.getElementById(id);
-        if (el) el.style.display = id === targetId ? "block" : "none";
+        if (el) {
+          const isTarget = id === targetId;
+          el.style.display = isTarget ? "block" : "none";
+          el.classList.toggle("is-active-panel", isTarget);
+        }
       });
       if (targetId === "main-tab-semantic-gov") {
         refreshVectorSearchStatus();
@@ -1011,6 +1022,10 @@
     syncToggleUI();
   }
 
+  function cleanScenarioLabel(title) {
+    return String(title || "").replace(/^\s*(?:Scenario\s*)?\d+\s*[.:)\-]\s*/i, "").trim();
+  }
+
   function renderScenarioList() {
     elScenarioList.innerHTML = "";
     state.scenarios.forEach((scen) => {
@@ -1021,7 +1036,7 @@
       btn.dataset.id = scen.id;
       btn.innerHTML = `
         <div>
-          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-title">${escapeHtml(cleanScenarioLabel(scen.title))}</div>
           <div class="scenario-item-sub">${escapeHtml(scen.subtitle)}</div>
         </div>
         <span class="scenario-badge">${escapeHtml(scen.optimization_focus)}</span>
@@ -1458,7 +1473,7 @@
       btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
-          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-title">${escapeHtml(cleanScenarioLabel(scen.title))}</div>
           <div class="scenario-item-sub">${escapeHtml(scen.description)}</div>
         </div>
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
@@ -1499,7 +1514,7 @@
       btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
-          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-title">${escapeHtml(cleanScenarioLabel(scen.title))}</div>
           <div class="scenario-item-sub">${escapeHtml(scen.description)}</div>
         </div>
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
@@ -1553,7 +1568,7 @@
       btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
-          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-title">${escapeHtml(cleanScenarioLabel(scen.title))}</div>
           <div class="scenario-item-sub">${escapeHtml(scen.description)}</div>
         </div>
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>
@@ -2331,7 +2346,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       btn.setAttribute("aria-pressed", idx === 0 ? "true" : "false");
       btn.innerHTML = `
         <div>
-          <div class="scenario-item-title">${escapeHtml(scen.title)}</div>
+          <div class="scenario-item-title">${escapeHtml(cleanScenarioLabel(scen.title))}</div>
           <div class="scenario-item-sub">${escapeHtml(scen.description)}</div>
         </div>
         <span class="scenario-badge">${escapeHtml(scen.badge)}</span>

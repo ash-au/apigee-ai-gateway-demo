@@ -17,7 +17,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=9.0" />
+  <link rel="stylesheet" href="assets/styles.css?v=9.1" />
 </head>
 <body>
   <!-- ====================================================================
@@ -58,7 +58,7 @@
 
       <div class="keynote-header-actions">
         <div class="view-mode-pill" role="group" aria-label="Display Mode">
-          <button type="button" id="btn-view-executive" class="view-mode-btn active" aria-pressed="true">Keynote</button>
+          <button type="button" id="btn-view-executive" class="view-mode-btn active" aria-pressed="true">Exec</button>
           <button type="button" id="btn-view-architect" class="view-mode-btn" aria-pressed="false">Architect</button>
         </div>
         <button type="button" id="btn-theme-toggle" class="header-icon-btn" aria-pressed="true" aria-label="Toggle Light or Dark theme">
@@ -80,7 +80,7 @@
         <div class="stage-headline-copy">
           <div class="stage-eyebrow">
             <span class="live-pulse-dot" aria-hidden="true"></span>
-            <span>Live Apigee X &middot; Vertex AI Production Traffic</span>
+            <span id="stage-eyebrow-text">Live Executive Keynote &middot; Apigee X + Vertex AI</span>
           </div>
           <h1 id="stage-active-title" class="stage-title">Token Cost &amp; AI Optimization</h1>
           <p id="stage-active-subtitle" class="stage-subtitle">Watch Apigee X slash Gemini token spend in real time with semantic caching, RAG compression, smart routing, and context pruning.</p>
@@ -95,7 +95,7 @@
       <!-- ================================================================
            TAB 1: TOKEN COST & AI OPTIMIZATION
            ================================================================ -->
-      <section id="main-tab-economics" role="tabpanel" aria-label="Token Cost and AI Optimization">
+      <section id="main-tab-economics" class="is-active-panel" role="tabpanel" aria-label="Token Cost and AI Optimization">
         <!-- Zone 1: 1-Row Scenario Pills + Radiant Run CTA -->
         <div class="keynote-action-bar">
           <div id="scenario-list" class="scenario-pill-strip" aria-label="Optimization Scenarios"></div>
@@ -1167,6 +1167,6 @@
     </div>
   </div>
 
-  <script src="assets/app.js?v=9.0"></script>
+  <script src="assets/app.js?v=9.1"></script>
 </body>
 </html>

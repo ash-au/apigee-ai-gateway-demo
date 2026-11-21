@@ -191,13 +191,164 @@ button, input, textarea, select {
 }
 
 /* ==========================================================================
-   PROGRESSIVE DISCLOSURE: KEYNOTE STAGE vs ARCHITECT INSPECTOR
+   PROGRESSIVE DISCLOSURE & FULL EXEC <-> ARCHITECT MODE SHIFT
    ========================================================================== */
 [data-view="executive"] .architect-only {
   display: none !important;
 }
 
 [data-view="executive"] .drawer-body-section {
+  display: none;
+}
+
+/* Zero-Scroll 100dvh Keynote Lock on Desktop in Exec Mode */
+@media (min-width: 960px) {
+  [data-view="executive"] body {
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  [data-view="executive"] .keynote-header {
+    padding: 10px 24px;
+    flex-shrink: 0;
+  }
+
+  [data-view="executive"] .keynote-main {
+    flex: 1;
+    min-height: 0;
+    padding: 16px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  [data-view="executive"] .keynote-container {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    gap: 14px;
+  }
+
+  [data-view="executive"] .stage-headline-row {
+    flex-shrink: 0;
+    align-items: center;
+  }
+
+  [data-view="executive"] .stage-title {
+    font-size: clamp(22px, 2.2vw, 28px);
+  }
+
+  [data-view="executive"] .stage-subtitle {
+    font-size: 13px;
+  }
+
+  [data-view="executive"] section[role="tabpanel"].is-active-panel {
+    flex: 1;
+    min-height: 0;
+    display: flex !important;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  [data-view="executive"] .keynote-action-bar {
+    flex-shrink: 0;
+    padding: 8px 12px;
+  }
+
+  [data-view="executive"] .keynote-stage-card {
+    flex: 1;
+    min-height: 0;
+    margin-top: 0 !important;
+  }
+
+  [data-view="executive"] .stage-top-strip {
+    padding: 12px 20px;
+    flex-shrink: 0;
+  }
+
+  [data-view="executive"] .pipeline-svg-wrap {
+    flex: 1;
+    min-height: 0;
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  [data-view="executive"] .pipeline-svg {
+    max-height: 100%;
+    max-width: 1060px;
+    height: auto;
+    min-width: 0;
+  }
+
+  [data-view="executive"] .hero-outcome-band {
+    flex-shrink: 0;
+  }
+
+  [data-view="executive"] .hero-kpi {
+    padding: 18px 28px;
+    gap: 4px;
+  }
+
+  [data-view="executive"] .hero-kpi-value {
+    font-size: clamp(28px, 3vw, 42px);
+  }
+
+  [data-view="executive"] .stage-footer-bar {
+    padding: 12px 20px;
+    flex-shrink: 0;
+  }
+}
+
+/* Full Visual Shift for Architect Workbench Mode */
+[data-view="architect"] body {
+  background-color: var(--bg-well);
+}
+
+[data-view="architect"] .keynote-header {
+  border-bottom-color: rgba(129, 140, 248, 0.32);
+}
+
+[data-view="architect"] .keynote-main {
+  background-image:
+    radial-gradient(var(--grid-dot) 1px, transparent 1px),
+    radial-gradient(ellipse 65% 320px at 50% -40px, rgba(129, 140, 248, 0.16), transparent 70%);
+  background-size: 20px 20px, 100% 100%;
+  padding: 20px 24px 64px;
+}
+
+[data-view="architect"] .stage-eyebrow {
+  color: var(--sig-violet);
+}
+
+[data-view="architect"] .live-pulse-dot {
+  background-color: var(--sig-violet);
+  box-shadow: 0 0 10px var(--sig-violet);
+}
+
+[data-view="architect"] .hero-kpi {
+  padding: 14px 20px;
+  gap: 4px;
+}
+
+[data-view="architect"] .hero-kpi-value {
+  font-size: 24px;
+  font-family: var(--font-mono);
+}
+
+[data-view="architect"] .pipeline-svg-wrap {
+  padding: 14px 20px;
+}
+
+[data-view="architect"] .stage-drawer-trigger {
+  display: none;
+}
+
+[data-view="architect"] .stage-footer-actions {
   display: none;
 }
 
@@ -498,23 +649,31 @@ button, input, textarea, select {
   flex: 1;
 }
 
+/* Dynamically Rendered Scenario Pills (.scenario-item from app.js) */
+.scenario-item,
 .scenario-btn,
 .policy-pill-btn {
+  appearance: none;
+  -webkit-appearance: none;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
+  gap: 10px;
   padding: 8px 16px;
   border-radius: var(--r-pill);
   border: 1px solid var(--border-subtle);
   background-color: var(--bg-surface);
   color: var(--ink-secondary);
+  font-family: var(--font-sans);
   font-size: 13px;
   font-weight: 600;
+  line-height: 1.3;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: color 0.16s ease, background-color 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
   text-align: left;
 }
 
+.scenario-item:hover,
 .scenario-btn:hover,
 .policy-pill-btn:hover {
   color: var(--ink-primary);
@@ -522,34 +681,68 @@ button, input, textarea, select {
   background-color: var(--bg-elevated);
 }
 
+.scenario-item.active,
 .scenario-btn.active,
 .policy-pill-btn.active {
   color: var(--ink-primary);
   background-color: var(--accent-blue-tint);
   border-color: var(--accent-blue);
-  box-shadow: 0 0 0 1px var(--accent-blue-tint);
+  box-shadow: 0 0 0 1px var(--accent-blue-tint), 0 4px 14px -4px var(--accent-blue-glow);
 }
 
-.scenario-btn-num {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  color: var(--accent-cyan);
-  font-weight: 700;
-}
-
-.scenario-btn-title {
+.scenario-item-title {
+  font-family: var(--font-display);
+  font-size: 13px;
   font-weight: 600;
+  color: inherit;
+  white-space: nowrap;
 }
 
-.scenario-btn-sub {
+/* In Exec Keynote Mode: sleek 1-line pills, zero verbose text soup */
+[data-view="executive"] .scenario-item-sub,
+[data-view="executive"] .scenario-badge {
   display: none;
 }
 
-[data-view="architect"] .scenario-btn-sub {
-  display: inline;
+/* In Architect Workbench Mode: rich cards with descriptions & technical badges */
+[data-view="architect"] .scenario-pill-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+}
+
+[data-view="architect"] .scenario-item {
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 6px;
+}
+
+[data-view="architect"] .scenario-item-title {
+  white-space: normal;
+  font-size: 13px;
+  color: var(--ink-primary);
+}
+
+[data-view="architect"] .scenario-item-sub {
+  display: block;
   font-size: 12px;
   font-weight: 400;
-  color: var(--ink-muted);
+  color: var(--ink-secondary);
+  line-height: 1.4;
+}
+
+[data-view="architect"] .scenario-badge {
+  display: inline-flex;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: var(--r-pill);
+  background-color: var(--bg-well);
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-subtle);
 }
 
 .action-cta-group {
