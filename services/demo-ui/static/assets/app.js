@@ -1235,6 +1235,7 @@
     if (r1gBar) r1gBar.style.transform = `scaleX(${Math.max(0.03, r1gCost / r1Max).toFixed(4)})`;
     if (r1dLbl) r1dLbl.textContent = `${fmtUsd(r1dCost, 6)} · ${fmtInt(direct.latency_ms)} ms`;
     if (r1gLbl) r1gLbl.textContent = `${fmtUsd(r1gCost, 6)} · ${fmtInt(gw.latency_ms)} ms`;
+    recordLiveOutcome("cost", `${costSign}${Math.abs(cmp.cost_reduction_pct)}% Cost · ${tokSign}${Math.abs(cmp.token_reduction_pct)}% Tokens`, `${fmtUsd(r1gCost, 6)} via Apigee X vs. ${fmtUsd(r1dCost, 6)} Direct (${fmtInt(gw.latency_ms)} ms)`);
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
@@ -1753,6 +1754,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         popMetric(h2c);
       }
       if (h2cs) h2cs.textContent = g.blocked ? `Blocked at edge vs. ${fmtUsd(d.cost_usd, 6)} Direct` : `Direct latency ${fmtInt(d.latency_ms)} ms`;
+      recordLiveOutcome("quotas", g.blocked ? `HTTP ${g.http_status_code} Blocked` : "HTTP 200 Within Budget", g.blocked ? `${g.fault_name || "Quota"} circuit breaker ($0.00 LLM spend)` : `Within tenant token quota`);
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -1857,6 +1859,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         popMetric(h3l);
       }
       if (h3ls) h3ls.textContent = g.blocked ? `0 LLM tokens billed vs. ${fmtInt((d.token_usage || {}).total_tokens)} Direct` : `Direct ${fmtInt(d.latency_ms)} ms`;
+      recordLiveOutcome("armor", g.blocked ? `BLOCKED (HTTP ${g.http_status_code})` : "ALLOWED (Clean)", g.blocked ? `Model Armor intercepted threat (${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms, 0 LLM tokens)` : "Passed inbound & outbound Model Armor scan");
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -1975,6 +1978,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         t4SavEl.textContent = `${fmtCurrencyLarge(annual)} / yr`;
         popMetric(t4SavEl);
       }
+      recordLiveOutcome("cache", g.blocked ? "BLOCKED" : Boolean(fv.scl_cache_hit) ? "Semantic Cache HIT" : "Cache Populated", `Edge latency ${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms vs. ${fmtInt(d.latency_ms)} ms Direct`);
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -2333,6 +2337,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           }
           if (hls) hls.textContent = `HTTP ${data.http_status_code} from Apigee X`;
           if (pipeBadge) pipeBadge.textContent = blocked ? `HTTP ${data.http_status_code}` : "HTTP 200";
+          recordLiveOutcome("mcp", isSpiffeReject ? "401 SPIFFE Rejected" : isIntersection ? "403 User∩Agent Blocked" : isRbacBlock ? "403 MCP RBAC Blocked" : blocked ? "400 Model Armor Blocked" : "200 Allowed", `${userPrincipal} via ${role} → ${mcpTool ? mcpTool.value : "tool"}`);
           if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
           document.getElementById("mcp-req-box").textContent = JSON.stringify(
             { rfc8693_delegation_jwt: data.spiffe_jwt_claims, jsonrpc: data.jsonrpc_request },
@@ -2456,6 +2461,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           }
           if (hls) hls.textContent = "Standard OpenAI chat.completion JSON returned";
           if (pipeBadge) pipeBadge.textContent = `HTTP ${data.http_status_code}`;
+          recordLiveOutcome("failover", failover ? "429 Auto-Failover (HTTP 200)" : canary ? "Canary Pro Split (HTTP 200)" : "OpenAI Facade (HTTP 200)", `Translated gpt-4o → ${tel.served_model || "gemini"} (${tel.served_region || "AU-SE1"}, ${fmtInt(data.latency_ms)} ms)`);
           if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
           document.getElementById("res-req-box").textContent = JSON.stringify(data.openai_request || {}, null, 2);
           document.getElementById("res-resp-box").textContent = JSON.stringify(data.openai_response || {}, null, 2);
@@ -2548,6 +2554,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
             popMetric(hr);
           }
           if (hrs) hrs.textContent = `${fmtInt(tel.sse_chunks_inspected || 1)} SSE chunks scanned · ${fmtInt(data.latency_ms)} ms`;
+          recordLiveOutcome("pii", tel.vault_enabled ? `0 Bytes Raw PII to LLM (${count} Masked)` : "Vault Disabled", rehydrated ? `Rehydrated ${tel.tokens_rehydrated_count || 0} tokens for authorized caller` : "Permanently redacted for audit mode");
           if (pipeBadge) pipeBadge.textContent = `HTTP ${data.http_status_code}`;
           if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
           document.getElementById("pii-sent-box").textContent = body.sanitized_prompt_sent_to_llm || "";
@@ -2812,6 +2819,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           if (hvs) hvs.textContent = "High intent diversity — legitimate multi-step agent untouched";
         }
         if (statusEl) statusEl.textContent = `Completed ${turns.length}-turn burst (${allowedCount} allowed, ${blockedCount} blocked).`;
+        recordLiveOutcome("quotas", blockedCount > 0 ? `Loop Tripped (429 · ${blockedCount} turns stopped)` : wouldBlockCount > 0 ? `Observe Mode (${wouldBlockCount} flagged)` : "5/5 Legitimate Turns Allowed", `Session-scoped Apigee X loop breaker (${loopMode} mode)`);
       } catch (e) {
         if (statusEl) statusEl.textContent = `Loop burst error: ${e.message}`;
       } finally {
@@ -2825,6 +2833,130 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     btnLegit.addEventListener("click", () => runBurst("legit"));
   }
 
+  // Track live verified session outcomes across all 8 pillars for Executive Report Export
+  const LIVE_CAPABILITIES = {
+    cost: { name: "Cost & AI Optimization", pillar: "FinOps", desc: "Semantic Cache, RAG Compression, Smart Routing & Context Pruning" },
+    quotas: { name: "Token Quotas & Agent Loop Breaker", pillar: "FinOps", desc: "Native PromptTokenLimit, LLMTokenQuota & Session-Scoped Loop Circuit Breaker" },
+    armor: { name: "Model Armor Safety", pillar: "Security", desc: "Zero-code inbound & outbound prompt injection, PII & RAI screening" },
+    cache: { name: "Native Semantic Cache", pillar: "FinOps", desc: "Apigee X SemanticCacheLookup / Populate backed by Vertex AI Vector Search" },
+    system1: { name: "System 1 / System 2 Routing", pillar: "Routing", desc: "Pure Apigee X ServiceCallout pre-router (Gemini Decision 1 / Jev) + 5-head Noul verifier" },
+    mcp: { name: "MCP Governance & Identity Provenance", pillar: "Agentic", desc: "RFC 8693 Delegation JWT (User ∩ SPIFFE Agent), MCP RBAC & Model Armor indirect scan" },
+    failover: { name: "429 Failover, OpenAI Facade & Canary", pillar: "Resilience", desc: "Drop-in OpenAI SDK translation, multi-region 429 recovery & weighted Canary splits" },
+    pii: { name: "Reversible PII Vault & SSE Scan", pillar: "Sovereignty", desc: "Pre-LLM deterministic tokenization (0 bytes raw PII to LLM) & authorized rehydration" },
+  };
+  state.liveVerified = {};
+
+  function recordLiveOutcome(key, headline, detail) {
+    state.liveVerified[key] = {
+      headline: String(headline || "Verified"),
+      detail: String(detail || ""),
+      timestamp: new Date().toLocaleTimeString(),
+    };
+  }
+
+  function initExecutiveReportExporter() {
+    const btnOpen = document.getElementById("btn-open-export");
+    const btnClose = document.getElementById("btn-close-export");
+    const btnGen = document.getElementById("btn-generate-report");
+    const modal = document.getElementById("export-modal");
+    const summaryEl = document.getElementById("export-session-summary");
+    if (!btnOpen || !modal || !btnGen) return;
+
+    function refreshSummary() {
+      const count = Object.keys(state.liveVerified).length;
+      if (summaryEl) {
+        summaryEl.textContent = `${count} of 8 capabilities verified live in this session`;
+        summaryEl.className = `soft-pill ${count > 0 ? "pill-green" : "pill-blue"}`;
+      }
+    }
+
+    btnOpen.addEventListener("click", () => {
+      refreshSummary();
+      modal.classList.add("open");
+    });
+    if (btnClose) btnClose.addEventListener("click", () => modal.classList.remove("open"));
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.classList.remove("open");
+    });
+
+    btnGen.addEventListener("click", () => {
+      const cust = (document.getElementById("export-customer-name").value || "Enterprise Customer").trim();
+      const presenter = (document.getElementById("export-presenter-name").value || "Google Cloud Apigee Team").trim();
+      const includeAll = Boolean(document.getElementById("export-include-all").checked);
+      const annualText = (document.getElementById("ledger-annual-savings") || {}).textContent || "$0 / yr";
+      const volText = (document.getElementById("scale-slider-label") || {}).textContent || "10M/mo";
+      const sessionPct = (document.getElementById("ledger-cost-pct") || {}).textContent || "0%";
+      const dateStr = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+
+      const liveKeys = Object.keys(state.liveVerified);
+      const liveRows = liveKeys
+        .map((k) => {
+          const cap = LIVE_CAPABILITIES[k];
+          const res = state.liveVerified[k];
+          return `<tr><td><strong>${escapeHtml(cap.name)}</strong><br><span class="sub">${escapeHtml(cap.pillar)}</span></td><td><span class="badge ok">✓ LIVE VERIFIED</span></td><td><strong>${escapeHtml(res.headline)}</strong><br><span class="sub">${escapeHtml(res.detail)}</span></td></tr>`;
+        })
+        .join("");
+
+      const remainingKeys = Object.keys(LIVE_CAPABILITIES).filter((k) => !state.liveVerified[k]);
+      const availRows = includeAll
+        ? remainingKeys
+            .map((k) => {
+              const cap = LIVE_CAPABILITIES[k];
+              return `<tr><td><strong>${escapeHtml(cap.name)}</strong><br><span class="sub">${escapeHtml(cap.pillar)}</span></td><td><span class="badge avail">Available in Apigee X</span></td><td><span class="sub">${escapeHtml(cap.desc)}</span></td></tr>`;
+            })
+            .join("")
+        : "";
+
+      const htmlDoc = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Apigee X AI Gateway — Executive Business Case (${escapeHtml(cust)})</title><style>
+        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:#0f172a;margin:0;padding:32px;background:#fbfcfe;line-height:1.45;}
+        .wrap{max-width:860px;margin:0 auto;}
+        .hdr{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #1a73e8;padding-bottom:16px;margin-bottom:24px;}
+        .brand{font-size:12px;font-weight:700;color:#1a73e8;}
+        h1{margin:4px 0 0;font-size:24px;letter-spacing:-0.02em;}
+        .meta{text-align:right;font-size:12px;color:#475569;}
+        .kpis{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px;margin-bottom:24px;}
+        .kpi{border:1px solid #e2e8f0;border-radius:12px;padding:16px;background:#f8fafc;}
+        .kpi-l{font-size:12px;font-weight:700;color:#64748b;}
+        .kpi-v{font-size:26px;font-weight:800;color:#137333;margin-top:4px;}
+        .kpi-s{font-size:12px;color:#475569;margin-top:4px;}
+        h2{font-size:16px;margin:20px 0 12px;color:#0f172a;}
+        table{width:100%;border-collapse:collapse;font-size:13px;}
+        th,td{text-align:left;padding:12px;border-bottom:1px solid #e2e8f0;vertical-align:top;}
+        th{background:#f1f5f9;font-size:12px;font-weight:700;color:#475569;}
+        .sub{font-size:12px;color:#64748b;}
+        .badge{display:inline-block;padding:4px 8px;border-radius:8px;font-size:12px;font-weight:700;}
+        .ok{background:#e6f4ea;color:#137333;}
+        .avail{background:#e8f0fe;color:#1a73e8;}
+        .foot{margin-top:24px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:12px;color:#64748b;display:flex;justify-content:space-between;}
+        @media print{body{padding:16px;}}
+      </style></head><body><div class="wrap">
+        <div class="hdr">
+          <div><div class="brand">Google Cloud &middot; Apigee X AI Gateway</div><h1>Executive AI Governance &amp; FinOps Summary</h1></div>
+          <div class="meta"><strong>Prepared for:</strong> ${escapeHtml(cust)}<br><strong>Prepared by:</strong> ${escapeHtml(presenter)}<br>${escapeHtml(dateStr)}</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-l">Projected Annual Savings</div><div class="kpi-v">${escapeHtml(annualText)}</div><div class="kpi-s">Scaled at ${escapeHtml(volText)}</div></div>
+          <div class="kpi"><div class="kpi-l">Measured Cost Reduction</div><div class="kpi-v" style="color:#1a73e8">${escapeHtml(sessionPct)}</div><div class="kpi-s">Live Direct vs. Apigee X</div></div>
+          <div class="kpi"><div class="kpi-l">Capabilities Demonstrated</div><div class="kpi-v" style="color:#0f172a">${liveKeys.length} / 8</div><div class="kpi-s">Verified live on Apigee X</div></div>
+        </div>
+        <h2>${liveKeys.length > 0 ? "Live Verified Session Outcomes" : "Apigee X AI Gateway Capabilities"}</h2>
+        <table><thead><tr><th style="width:28%">Capability</th><th style="width:20%">Status</th><th>Measured Outcome / Control</th></tr></thead><tbody>
+          ${liveRows || '<tr><td colspan="3" class="sub">No live scenarios executed in this session yet — showing full Apigee X capability matrix below.</td></tr>'}
+          ${availRows}
+        </tbody></table>
+        <div class="foot"><span>Live Endpoint: https://eval-group.34-120-155-152.nip.io/v1/ai-economics</span><span>Pure Apigee X Policy Enforcement &middot; Vertex AI Gemini 2.5</span></div>
+      </div><script>window.onload=function(){window.print();};</script></body></html>`;
+
+      const win = window.open("", "_blank");
+      if (win) {
+        win.document.open();
+        win.document.write(htmlDoc);
+        win.document.close();
+      }
+      modal.classList.remove("open");
+    });
+  }
+
   wireTablistKeyboardNav();
   initThemeSwitcher();
   initKeynoteDrawer();
@@ -2834,6 +2966,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   initNewEnterpriseTabs();
   initGuidedTour();
   initAgentLoopBreaker();
+  initExecutiveReportExporter();
   syncPolicySwitches();
   const elT5Slider = document.getElementById("t5-scale-slider");
   if (elT5Slider) elT5Slider.addEventListener("input", updateTab5AnnualROI);
@@ -3284,6 +3417,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         if (r5dLbl) r5dLbl.textContent = `${fmtUsd(r5dCost, 6)} · ${fmtInt(d.latency_ms)} ms`;
         if (r5gLbl) r5gLbl.textContent = `${fmtUsd(r5gCost, 6)} · ${fmtInt(g.client_observed_latency_ms || g.latency_ms)} ms`;
         updateTab5AnnualROI();
+        recordLiveOutcome("system1", `${isSavings ? "-" : "+"}${Math.abs(Number(cmp.cost_reduction_pct || 0))}% vs. Direct Pro`, `${g.escalated_to_pro ? "Noul caught L1 defect & escalated to Pro" : "Fast-tracked to Flash & verified"} (${fmtUsd(r5gCost, 6)})`);
 
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {

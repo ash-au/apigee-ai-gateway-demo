@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=12.4" />
+  <link rel="stylesheet" href="assets/styles.css?v=12.5" />
 </head>
 <body>
   <!-- ====================================================================
@@ -45,6 +45,7 @@
         <span class="status-active-pill"><span class="status-live-dot" aria-hidden="true"></span> Gateway Active</span>
         <button type="button" id="btn-open-about" class="gc-nav-pill">Architecture</button>
         <button type="button" id="btn-open-glossary" class="gc-nav-pill">Glossary</button>
+        <button type="button" id="btn-open-export" class="gc-nav-pill">Export Report</button>
         <button type="button" id="btn-copy-curl" class="gc-nav-pill">Copy curl</button>
         <button type="button" id="btn-reset-state" class="gc-nav-pill">Reset</button>
         <button type="button" id="btn-theme-toggle" class="gc-nav-pill" aria-pressed="false" aria-label="Toggle Light or Dark theme">
@@ -876,6 +877,35 @@
     </div>
   </div>
 
+  <!-- Export Executive Business Case Modal -->
+  <div id="export-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Export Executive Business Case">
+    <div class="modal-panel" style="width:min(540px,100%);">
+      <div class="modal-header">
+        <h3 class="modal-title">Export Executive Business Case (PDF / Print)</h3>
+        <button type="button" id="btn-close-export" class="btn-secondary">Close</button>
+      </div>
+      <div class="field-stack">
+        <span id="export-session-summary" class="soft-pill pill-blue" style="align-self:flex-start;">0 of 8 capabilities verified live in this session</span>
+        <div class="field-group">
+          <label class="field-label" for="export-customer-name"><span>Customer / Organization Name (Optional)</span></label>
+          <input id="export-customer-name" class="field-input" type="text" placeholder="e.g., Acme Bank" />
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="export-presenter-name"><span>Prepared By (Optional)</span></label>
+          <input id="export-presenter-name" class="field-input" type="text" placeholder="e.g., Google Cloud Apigee Team" />
+        </div>
+        <div class="policy-row" style="border-top:1px solid var(--border-subtle);padding-top:12px;">
+          <div class="policy-row-info">
+            <span class="policy-row-name">Include Full 8-Pillar Platform Overview</span>
+            <span class="policy-row-tag">Lists un-demoed capabilities as "Available in Apigee X"</span>
+          </div>
+          <label class="gc-switch"><input type="checkbox" id="export-include-all" checked /></label>
+        </div>
+        <button type="button" id="btn-generate-report" class="btn-run-primary" style="margin-top:8px;">Generate Print / PDF Report &rarr;</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Guided Tour Floating Card -->
   <aside id="guided-tour-popover" class="tour-popover" role="dialog" aria-label="Guided Tour">
     <div class="tour-head">
@@ -893,6 +923,6 @@
     </div>
   </aside>
 
-  <script src="assets/app.js?v=12.4"></script>
+  <script src="assets/app.js?v=12.5"></script>
 </body>
 </html>
