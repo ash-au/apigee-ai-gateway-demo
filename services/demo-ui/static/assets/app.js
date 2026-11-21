@@ -173,7 +173,7 @@
     function applyThemeUI(theme) {
       const isDark = theme === "dark";
       btn.setAttribute("aria-pressed", isDark ? "true" : "false");
-      if (label) label.textContent = isDark ? "Light Mode" : "Dark Mode";
+      if (label) label.textContent = isDark ? "Light" : "Dark";
       if (iconMoon) iconMoon.style.display = isDark ? "none" : "block";
       if (iconSun) iconSun.style.display = isDark ? "block" : "none";
     }
@@ -190,6 +190,64 @@
     });
   }
 
+  // Slide-Over Details Drawer (DOM-portals active tab's deep-dive cleanly without duplicating IDs)
+  let _drawerActiveNode = null;
+  let _drawerOriginalParent = null;
+
+  function closeKeynoteDrawer() {
+    const drawer = document.getElementById("keynote-drawer");
+    const scrim = document.getElementById("drawer-scrim");
+    if (!drawer || !scrim) return;
+    drawer.classList.remove("open");
+    scrim.classList.remove("open");
+    drawer.setAttribute("aria-hidden", "true");
+    scrim.setAttribute("aria-hidden", "true");
+    if (_drawerActiveNode && _drawerOriginalParent) {
+      _drawerActiveNode.style.display = "";
+      _drawerOriginalParent.appendChild(_drawerActiveNode);
+      _drawerActiveNode = null;
+      _drawerOriginalParent = null;
+    }
+  }
+
+  function openKeynoteDrawer(targetId, titleText) {
+    const drawer = document.getElementById("keynote-drawer");
+    const scrim = document.getElementById("drawer-scrim");
+    const slot = document.getElementById("drawer-slot");
+    const titleEl = document.getElementById("drawer-title-text");
+    const target = document.getElementById(targetId);
+    if (!drawer || !scrim || !slot || !target) return;
+
+    if (_drawerActiveNode && _drawerActiveNode !== target) {
+      closeKeynoteDrawer();
+    }
+    _drawerActiveNode = target;
+    _drawerOriginalParent = target.parentNode;
+    if (titleEl && titleText) titleEl.textContent = titleText;
+    target.style.display = "flex";
+    slot.appendChild(target);
+
+    drawer.classList.add("open");
+    scrim.classList.add("open");
+    drawer.setAttribute("aria-hidden", "false");
+    scrim.setAttribute("aria-hidden", "false");
+  }
+
+  function initKeynoteDrawer() {
+    document.querySelectorAll("[data-open-drawer]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        openKeynoteDrawer(btn.dataset.openDrawer, btn.dataset.drawerTitle || "Live Responses & Telemetry");
+      });
+    });
+    const btnClose = document.getElementById("btn-close-drawer");
+    const scrim = document.getElementById("drawer-scrim");
+    if (btnClose) btnClose.addEventListener("click", closeKeynoteDrawer);
+    if (scrim) scrim.addEventListener("click", closeKeynoteDrawer);
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeKeynoteDrawer();
+    });
+  }
+
   // Executive View <-> Architect Inspector Switcher
   function initViewModeSwitcher() {
     const btnExec = document.getElementById("btn-view-executive");
@@ -198,6 +256,7 @@
 
     function applyViewMode(mode) {
       const normalized = mode === "architect" ? "architect" : "executive";
+      if (normalized === "architect") closeKeynoteDrawer();
       document.documentElement.setAttribute("data-view", normalized);
       btnExec.classList.toggle("active", normalized === "executive");
       btnExec.setAttribute("aria-pressed", normalized === "executive" ? "true" : "false");
@@ -892,6 +951,10 @@
     const costSaved = L.directCostUsd - L.gatewayCostUsd;
     const costPct = L.directCostUsd > 0 ? ((costSaved / L.directCostUsd) * 100).toFixed(1) : null;
     const elLedgerCostPct = document.getElementById("ledger-cost-pct");
+    const elHeroSession = document.getElementById("hero-t1-session-saved");
+    if (elHeroSession) {
+      elHeroSession.textContent = `${fmtUsd(Math.max(0, costSaved), 6)} (${costPct}%)`;
+    }
     elLedgerCostPct.textContent =
       costPct !== null ? `${costSaved >= 0 ? "-" : "+"}${Math.abs(costPct)}%` : "—";
     setDeltaClass(elLedgerCostPct, costPct === null ? null : costSaved >= 0);
@@ -1093,6 +1156,37 @@
     setDeltaClass(elGwCostDelta, cmp.cost_saved_usd >= 0);
     popMetric(elGwCostDelta);
     popMetric(document.getElementById("gateway-total-cost"));
+
+    // Update Keynote Hero Outcome Band (Tab 1)
+    const elH1Sav = document.getElementById("hero-t1-savings");
+    const elH1SavSub = document.getElementById("hero-t1-savings-sub");
+    const elH1Tok = document.getElementById("hero-t1-tokens");
+    const elH1TokSub = document.getElementById("hero-t1-tokens-sub");
+    const elH1Route = document.getElementById("hero-t1-route");
+    const elH1RouteSub = document.getElementById("hero-t1-route-sub");
+    if (elH1Sav) {
+      elH1Sav.textContent = `${costSign}${Math.abs(cmp.cost_reduction_pct)}%`;
+      elH1Sav.className = `hero-kpi-value ${cmp.cost_saved_usd >= 0 ? "tone-savings" : "tone-alert"}`;
+      popMetric(elH1Sav);
+    }
+    if (elH1SavSub) {
+      elH1SavSub.textContent = `${fmtUsd(gw.cost_accounting.total_cost_usd, 6)} via Apigee vs. ${fmtUsd(direct.cost_accounting.total_cost_usd, 6)} Direct`;
+    }
+    if (elH1Tok) {
+      elH1Tok.textContent = `${tokSign}${Math.abs(cmp.token_reduction_pct)}%`;
+      popMetric(elH1Tok);
+    }
+    if (elH1TokSub) {
+      elH1TokSub.textContent = `${fmtInt(gw.token_accounting.grand_total_billed_tokens)} vs. ${fmtInt(direct.token_accounting.grand_total_billed_tokens)} tokens`;
+    }
+    if (elH1Route) {
+      const hit = Boolean(gw.optimizations && gw.optimizations.semantic_cache && gw.optimizations.semantic_cache.hit);
+      elH1Route.textContent = hit ? `${fmtInt(gw.latency_ms)} ms` : (gw.model_used || "Gemini").replace("gemini-", "");
+      popMetric(elH1Route);
+    }
+    if (elH1RouteSub) {
+      elH1RouteSub.textContent = `Apigee ${fmtInt(gw.latency_ms)} ms vs. Direct ${fmtInt(direct.latency_ms)} ms`;
+    }
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
@@ -1588,6 +1682,29 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("tg-gw-tok").textContent = fmtInt((g.token_usage || {}).total_tokens || 0);
       document.getElementById("tg-telemetry-box").textContent = JSON.stringify(g, null, 2);
       updateTab2Visuals(g, fv);
+      // Update Keynote Hero Outcome Band (Tab 2)
+      const h2v = document.getElementById("hero-t2-verdict");
+      const h2vs = document.getElementById("hero-t2-verdict-sub");
+      const h2q = document.getElementById("hero-t2-quota");
+      const h2qs = document.getElementById("hero-t2-quota-sub");
+      const h2c = document.getElementById("hero-t2-cost");
+      const h2cs = document.getElementById("hero-t2-cost-sub");
+      if (h2v) {
+        h2v.textContent = g.blocked ? `HTTP ${g.http_status_code}` : "ALLOWED";
+        h2v.className = `hero-kpi-value ${g.blocked ? "tone-alert" : "tone-savings"}`;
+        popMetric(h2v);
+      }
+      if (h2vs) h2vs.textContent = g.blocked ? (g.fault_name || "Blocked by Apigee X") : "Within tenant token budget";
+      if (h2q) {
+        h2q.textContent = document.getElementById("t2-quota-pct").textContent;
+        popMetric(h2q);
+      }
+      if (h2qs) h2qs.textContent = document.getElementById("t2-quota-used-label").textContent;
+      if (h2c) {
+        h2c.textContent = g.blocked ? "$0.0000" : fmtUsd(d.cost_usd, 6);
+        popMetric(h2c);
+      }
+      if (h2cs) h2cs.textContent = g.blocked ? `Blocked at edge vs. ${fmtUsd(d.cost_usd, 6)} Direct` : `Direct latency ${fmtInt(d.latency_ms)} ms`;
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -1669,6 +1786,29 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("ma-gw-lat").textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
       document.getElementById("ma-telemetry-box").textContent = JSON.stringify(g, null, 2);
       updateTab3Pipeline(g);
+      // Update Keynote Hero Outcome Band (Tab 3)
+      const h3v = document.getElementById("hero-t3-verdict");
+      const h3vs = document.getElementById("hero-t3-verdict-sub");
+      const h3s = document.getElementById("hero-t3-stage");
+      const h3ss = document.getElementById("hero-t3-stage-sub");
+      const h3l = document.getElementById("hero-t3-latency");
+      const h3ls = document.getElementById("hero-t3-latency-sub");
+      if (h3v) {
+        h3v.textContent = g.blocked ? "BLOCKED" : "SAFE";
+        h3v.className = `hero-kpi-value ${g.blocked ? "tone-alert" : "tone-savings"}`;
+        popMetric(h3v);
+      }
+      if (h3vs) h3vs.textContent = g.blocked ? "Stopped by Model Armor at Apigee X edge" : "Passed prompt & response safety inspection";
+      if (h3s) {
+        h3s.textContent = document.getElementById("ma-gw-fault").textContent;
+        popMetric(h3s);
+      }
+      if (h3ss) h3ss.textContent = document.getElementById("ma-gw-fault-sub").textContent;
+      if (h3l) {
+        h3l.textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
+        popMetric(h3l);
+      }
+      if (h3ls) h3ls.textContent = g.blocked ? `0 LLM tokens billed vs. ${fmtInt((d.token_usage || {}).total_tokens)} Direct` : `Direct ${fmtInt(d.latency_ms)} ms`;
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -1759,6 +1899,22 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       document.getElementById("sg-gw-lat").textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
       document.getElementById("sg-telemetry-box").textContent = JSON.stringify(g, null, 2);
       updateTab4Pipeline(g, fv);
+      // Update Keynote Hero Outcome Band (Tab 4)
+      const h4v = document.getElementById("hero-t4-verdict");
+      const h4vs = document.getElementById("hero-t4-verdict-sub");
+      const h4l = document.getElementById("hero-t4-latency");
+      const h4ls = document.getElementById("hero-t4-latency-sub");
+      if (h4v) {
+        h4v.textContent = g.blocked ? "BLOCKED" : document.getElementById("sg-gw-fault").textContent;
+        h4v.className = `hero-kpi-value ${g.blocked ? "tone-alert" : "tone-savings"}`;
+        popMetric(h4v);
+      }
+      if (h4vs) h4vs.textContent = g.blocked ? (g.fault_name || "Policy Violation") : document.getElementById("sg-gw-fault-sub").textContent;
+      if (h4l) {
+        h4l.textContent = `${fmtInt(g.latency_ms || g.client_observed_latency_ms)} ms`;
+        popMetric(h4l);
+      }
+      if (h4ls) h4ls.textContent = `Apigee X vs. ${fmtInt(d.latency_ms)} ms Direct`;
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -1872,8 +2028,9 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     if (el) el.addEventListener("input", updateComposerCounters);
   });
 
-  wireTablistKeyboardNav();
+      wireTablistKeyboardNav();
   initThemeSwitcher();
+  initKeynoteDrawer();
   initViewModeSwitcher();
   syncPolicySwitches();
   syncNoulThresholdLines();
@@ -2283,6 +2440,31 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         setDeltaClass(elS1Savings, isSavings);
         setDeltaClass(elS1SavingsSub, isSavings);
         popMetric(elS1Savings);
+
+        // Update Keynote Hero Outcome Band (Tab 5)
+        const h5s = document.getElementById("hero-t5-savings");
+        const h5ss = document.getElementById("hero-t5-savings-sub");
+        const h5r = document.getElementById("hero-t5-route");
+        const h5rs = document.getElementById("hero-t5-route-sub");
+        const h5g = document.getElementById("hero-t5-gate");
+        const h5gs = document.getElementById("hero-t5-gate-sub");
+        if (h5s) {
+          h5s.textContent = `${isSavings ? "-" : "+"}${Math.abs(Number(cmp.cost_reduction_pct || 0))}%`;
+          h5s.className = `hero-kpi-value ${isSavings ? "tone-savings" : "tone-alert"}`;
+          popMetric(h5s);
+        }
+        if (h5ss) h5ss.textContent = `${fmtUsd(gCost.total_cost_usd, 6)} Apigee X vs. ${fmtUsd(dCost.total_cost_usd, 6)} Direct Pro`;
+        if (h5r) {
+          h5r.textContent = g.escalated_to_pro ? "Escalated" : (g.final_model || "Flash").replace("gemini-", "");
+          popMetric(h5r);
+        }
+        if (h5rs) h5rs.textContent = document.getElementById("s1-gw-route-sub").textContent;
+        if (h5g) {
+          h5g.textContent = g.escalated_to_pro ? "Defect Caught" : (g.stage2_jev && g.stage2_jev.enabled ? "Verified" : "Bypassed");
+          h5g.className = `hero-kpi-value ${g.escalated_to_pro ? "tone-alert" : "tone-savings"}`;
+          popMetric(h5g);
+        }
+        if (h5gs) h5gs.textContent = g.escalated_to_pro ? "Auto-recovered via Gemini 2.5 Pro" : "Noul quality battery passed";
 
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {
