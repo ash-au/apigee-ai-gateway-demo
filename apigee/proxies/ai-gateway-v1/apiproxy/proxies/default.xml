@@ -171,11 +171,15 @@
             </Response>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/native-cache")</Condition>
         </Flow>
-        <!-- Tab 6: Native Apigee X MCP Tool Governance (JSON-RPC RBAC + Model Armor Indirect Injection Scan) -->
+        <!-- Tab 6: Native Apigee X MCP Tool Governance (SPIFFE Identity + JSON-RPC RBAC + Model Armor Indirect Injection Scan) -->
         <Flow name="Policy-MCP-Governance">
             <Request>
                 <Step>
                     <Name>JS-McpPreCheck</Name>
+                </Step>
+                <Step>
+                    <Name>RF-SpiffeUntrusted</Name>
+                    <Condition>ai.spiffe_rejected = "true"</Condition>
                 </Step>
                 <Step>
                     <Name>RF-McpForbidden</Name>

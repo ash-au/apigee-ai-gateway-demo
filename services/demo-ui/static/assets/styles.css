@@ -1152,6 +1152,103 @@ button, input, textarea, select {
   box-shadow: var(--shadow-xs);
 }
 
+/* SPIFFE Identity Card inside Left MCP Controls */
+.spiffe-card {
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background-color: var(--g-blue-tint);
+  border: 1px solid var(--g-blue-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.spiffe-card.spiffe-untrusted {
+  background-color: var(--g-red-tint);
+  border-color: var(--g-red-border);
+}
+
+.spiffe-card-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--g-blue);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.spiffe-card.spiffe-untrusted .spiffe-card-label {
+  color: var(--g-red);
+}
+
+.spiffe-uri {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink-primary);
+  word-break: break-all;
+}
+
+/* Guided Tour Floating Popover (Bottom-Right, Non-Blocking) */
+.tour-popover {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: min(400px, calc(100vw - 32px));
+  background-color: var(--bg-card);
+  border: 1px solid var(--g-blue-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  padding: 20px;
+  z-index: 95;
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tour-popover.open {
+  display: flex;
+}
+
+.tour-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tour-step-pill {
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  background-color: var(--g-blue-tint);
+  color: var(--g-blue);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tour-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.tour-desc {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
 /* Modals */
 .modal-backdrop { position: fixed; inset: 0; background-color: var(--scrim-bg); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
 .modal-backdrop.open { display: flex; }

@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=12.0" />
+  <link rel="stylesheet" href="assets/styles.css?v=12.1" />
 </head>
 <body>
   <!-- ====================================================================
@@ -41,6 +41,7 @@
       </div>
 
       <div class="gc-header-tools">
+        <button type="button" id="btn-start-tour" class="gc-nav-pill active">Guided Tour</button>
         <span class="status-active-pill"><span class="status-live-dot" aria-hidden="true"></span> Gateway Active</span>
         <button type="button" id="btn-open-about" class="gc-nav-pill">Architecture</button>
         <button type="button" id="btn-open-glossary" class="gc-nav-pill">Glossary</button>
@@ -227,18 +228,29 @@
 
         <!-- 6. MCP TOOL GOVERNANCE CONTROLS -->
         <div id="left-ctrl-mcp" class="left-ctrl-panel" style="display:none;">
-          <div id="mcp-scenario-list" class="scenario-chips" style="margin-bottom:14px;">
+          <div id="mcp-scenario-list" class="scenario-chips" style="margin-bottom:12px;">
             <button type="button" class="scenario-item active" data-mcp-preset="safe" aria-pressed="true"><span class="scenario-item-title">Allowed: search_kb</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="forbidden" aria-pressed="false"><span class="scenario-item-title">Rogue: drop_production_db</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="poisoned" aria-pressed="false"><span class="scenario-item-title">Poisoned Tool Output</span></button>
+            <button type="button" class="scenario-item" data-mcp-preset="untrusted" aria-pressed="false"><span class="scenario-item-title">Shadow Agent (401 SPIFFE)</span></button>
           </div>
+
+          <div id="mcp-spiffe-card" class="spiffe-card" style="margin-bottom:12px;">
+            <div class="spiffe-card-label">
+              <span>SPIFFE Workload SVID (JWT)</span>
+              <span id="mcp-spiffe-trust-tag">Trusted Domain</span>
+            </div>
+            <span id="mcp-spiffe-uri" class="spiffe-uri">spiffe://apac-cs-5g-demo5.svc.id.goog/ns/support/sa/tier1-support-agent</span>
+          </div>
+
           <div class="field-stack">
             <div class="field-group">
-              <label class="field-label" for="mcp-role-select"><span>Agent Role (X-Agent-Role)</span></label>
+              <label class="field-label" for="mcp-role-select"><span>Agent Identity Persona</span></label>
               <select id="mcp-role-select" class="field-select">
-                <option value="support-agent">support-agent (KB &amp; tickets only)</option>
-                <option value="finance-admin">finance-admin (+ wire_transfer)</option>
-                <option value="readonly-bot">readonly-bot (read-only)</option>
+                <option value="support-agent">support-agent (Trusted · KB &amp; tickets)</option>
+                <option value="finance-admin">finance-admin (Trusted · + wire_transfer)</option>
+                <option value="readonly-bot">readonly-bot (Trusted · read-only)</option>
+                <option value="untrusted-shadow">shadow-bot (UNTRUSTED external cloud)</option>
               </select>
             </div>
             <div class="field-group"><label class="field-label" for="mcp-tool-input"><span>MCP Tool Name</span></label><input id="mcp-tool-input" class="field-input" type="text" value="search_kb" /></div>
@@ -668,7 +680,7 @@
       <section id="main-tab-mcp-gov" class="exec-card" role="tabpanel" aria-label="MCP Tool Governance" style="display:none;">
         <div class="exec-card-head">
           <div class="exec-proxy-meta">
-            <div class="exec-badge-row"><span class="soft-pill pill-red">AGENTIC MCP FIREWALL</span><span class="soft-pill pill-blue">JSON-RPC 2.0 RBAC</span><span class="soft-pill pill-green">Model Armor Indirect Scan</span></div>
+            <div class="exec-badge-row"><span class="soft-pill pill-red">AGENTIC MCP FIREWALL</span><span id="mcp-spiffe-status-pill" class="soft-pill pill-blue">SPIFFE SVID</span><span class="soft-pill pill-green">Model Armor Indirect Scan</span></div>
             <span class="exec-proxy-name">mcp-governance-flow</span>
             <span class="exec-proxy-path">/v1/ai-economics/policies/mcp-governance</span>
           </div>
@@ -829,6 +841,23 @@
     </div>
   </div>
 
-  <script src="assets/app.js?v=12.0"></script>
+  <!-- Guided Tour Floating Card -->
+  <aside id="guided-tour-popover" class="tour-popover" role="dialog" aria-label="Guided Tour">
+    <div class="tour-head">
+      <span id="tour-step-pill" class="tour-step-pill">Step 1 / 5</span>
+      <button type="button" id="btn-tour-close" class="btn-secondary">Close</button>
+    </div>
+    <h3 id="tour-title" class="tour-title">1. Slash AI Token Spend &amp; Show Annual ROI</h3>
+    <p id="tour-desc" class="tour-desc">Click Run Live Comparison to watch Apigee X route to Flash and short-circuit cached queries, then drag the monthly volume slider.</p>
+    <div class="tour-actions">
+      <button type="button" id="btn-tour-prev" class="btn-secondary">&larr; Back</button>
+      <div style="display:flex;gap:8px;">
+        <button type="button" id="btn-tour-run" class="btn-secondary">Run Step</button>
+        <button type="button" id="btn-tour-next" class="btn-run-primary" style="width:auto;padding:8px 16px;">Next &rarr;</button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="assets/app.js?v=12.1"></script>
 </body>
 </html>

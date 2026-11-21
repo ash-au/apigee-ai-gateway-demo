@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-SpiffeUntrusted">
+    <DisplayName>RF-SpiffeUntrusted</DisplayName>
+    <FaultResponse>
+        <Set>
+            <Headers>
+                <Header name="X-Apigee-SPIFFE-Verified">false</Header>
+                <Header name="X-Apigee-Fault-Name">SPIFFE_TRUST_DOMAIN_REJECTED</Header>
+            </Headers>
+            <Payload contentType="application/json">{
+  "error": {
+    "code": 401,
+    "fault_name": "SPIFFE_TRUST_DOMAIN_REJECTED",
+    "message": "Apigee X rejected agent SPIFFE identity: {ai.spiffe_reject_reason}",
+    "details": {
+      "enforced_by": "Apigee X Native Proxy (ai-gateway-v1)",
+      "presented_spiffe_id": "{ai.spiffe_id}",
+      "expected_trust_domain": "spiffe://{ai.spiffe_trust_domain}/",
+      "verdict": "UNTRUSTED_WORKLOAD_IDENTITY"
+    }
+  }
+}</Payload>
+            <StatusCode>401</StatusCode>
+            <ReasonPhrase>Unauthorized</ReasonPhrase>
+        </Set>
+    </FaultResponse>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>

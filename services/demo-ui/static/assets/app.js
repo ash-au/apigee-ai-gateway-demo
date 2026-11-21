@@ -2168,12 +2168,31 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   }
 
   function initNewEnterpriseTabs() {
-    // --- TAB 6: MCP TOOL GOVERNANCE ---
+    // --- TAB 6: MCP TOOL GOVERNANCE + LIVE SPIFFE IDENTITY ---
     const mcpRole = document.getElementById("mcp-role-select");
     const mcpTool = document.getElementById("mcp-tool-input");
     const mcpPoison = document.getElementById("mcp-sim-poison");
     const mcpArmor = document.getElementById("mcp-enable-armor");
     const btnRunMcp = document.getElementById("btn-run-mcp");
+    const spiffeMap = {
+      "support-agent": { uri: "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/support/sa/tier1-support-agent", trusted: true },
+      "finance-admin": { uri: "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/finance/sa/treasury-admin-agent", trusted: true },
+      "readonly-bot": { uri: "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/readonly/sa/audit-viewer-bot", trusted: true },
+      "untrusted-shadow": { uri: "spiffe://untrusted-external.cloud/ns/rogue/sa/shadow-bot", trusted: false },
+    };
+
+    function syncSpiffeCard() {
+      const role = (mcpRole && mcpRole.value) || "support-agent";
+      const info = spiffeMap[role] || spiffeMap["support-agent"];
+      const card = document.getElementById("mcp-spiffe-card");
+      const uriEl = document.getElementById("mcp-spiffe-uri");
+      const tagEl = document.getElementById("mcp-spiffe-trust-tag");
+      if (uriEl) uriEl.textContent = info.uri;
+      if (tagEl) tagEl.textContent = info.trusted ? "Trusted Domain" : "UNTRUSTED DOMAIN";
+      if (card) card.classList.toggle("spiffe-untrusted", !info.trusted);
+    }
+    if (mcpRole) mcpRole.addEventListener("change", syncSpiffeCard);
+    syncSpiffeCard();
 
     document.querySelectorAll("#mcp-scenario-list .scenario-item").forEach((btn) => {
       btn.addEventListener("click", () => {
@@ -2196,7 +2215,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           if (mcpRole) mcpRole.value = "support-agent";
           if (mcpTool) mcpTool.value = "search_kb";
           if (mcpPoison) mcpPoison.checked = true;
+        } else if (p === "untrusted") {
+          if (mcpRole) mcpRole.value = "untrusted-shadow";
+          if (mcpTool) mcpTool.value = "search_kb";
+          if (mcpPoison) mcpPoison.checked = false;
         }
+        syncSpiffeCard();
         const hTool = document.getElementById("hero-t6-tool");
         const hToolSub = document.getElementById("hero-t6-tool-sub");
         if (hTool && mcpTool) hTool.textContent = mcpTool.value;
@@ -2212,13 +2236,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const statusEl = document.getElementById("mcp-status");
         const pipeBadge = document.getElementById("t6-pipe-status");
         if (pipeBadge) pipeBadge.textContent = "RUNNING";
-        if (statusEl) statusEl.textContent = "Executing live JSON-RPC 2.0 MCP call through Apigee X...";
+        if (statusEl) statusEl.textContent = "Verifying SPIFFE JWT-SVID & executing MCP call through Apigee X...";
         try {
+          const role = mcpRole ? mcpRole.value : "support-agent";
+          const spiffeInfo = spiffeMap[role] || spiffeMap["support-agent"];
           const resp = await apiFetch("/api/mcp/execute", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              agent_role: mcpRole ? mcpRole.value : "support-agent",
+              agent_role: role,
+              spiffe_id: spiffeInfo.uri,
               tool_name: mcpTool ? mcpTool.value.trim() : "search_kb",
               tool_arguments: { query: "VPN SSO reset" },
               simulate_poisoned_tool: Boolean(mcpPoison && mcpPoison.checked),
@@ -2227,24 +2254,35 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           });
           const data = await resp.json();
           const blocked = Boolean(data.blocked);
+          const isSpiffeReject = data.http_status_code === 401;
           const isRbacBlock = data.http_status_code === 403;
-          setNodeState("t6-node-agent", "state-active", "t6-sub-agent", mcpRole ? mcpRole.value : "agent");
-          setEdgeState("t6-edge-1", isRbacBlock ? "edge-alert" : "edge-active");
-          if (isRbacBlock) {
+          setNodeState("t6-node-agent", isSpiffeReject ? "state-alert" : "state-active", "t6-sub-agent", isSpiffeReject ? "SPIFFE 401" : role);
+          setEdgeState("t6-edge-1", isSpiffeReject || isRbacBlock ? "edge-alert" : "edge-active");
+          if (isSpiffeReject) {
+            setNodeState("t6-node-rbac", "state-alert", "t6-sub-rbac", "UNTRUSTED 401");
+            setNodeState("t6-node-armor", "state-bypass", "t6-sub-armor", "Skipped");
+            setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Never called");
+          } else if (isRbacBlock) {
             setNodeState("t6-node-rbac", "state-alert", "t6-sub-rbac", "BLOCKED 403");
             setNodeState("t6-node-armor", "state-bypass", "t6-sub-armor", "Skipped");
             setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Never called");
           } else if (blocked) {
-            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "Allowed");
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "SPIFFE + RBAC OK");
             setEdgeState("t6-edge-2", "edge-alert");
             setNodeState("t6-node-armor", "state-alert", "t6-sub-armor", `BLOCKED ${data.http_status_code}`);
             setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Injection stopped");
           } else {
-            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "Allowed");
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "SPIFFE + RBAC OK");
             setEdgeState("t6-edge-2", "edge-savings");
             setNodeState("t6-node-armor", "state-savings", "t6-sub-armor", "Clean");
             setEdgeState("t6-edge-3", "edge-savings");
             setNodeState("t6-node-llm", "state-savings", "t6-sub-llm", "Executed 200");
+          }
+
+          const spiffePill = document.getElementById("mcp-spiffe-status-pill");
+          if (spiffePill) {
+            spiffePill.textContent = isSpiffeReject ? "✗ SPIFFE Rejected (401)" : "✓ SPIFFE Verified";
+            spiffePill.className = `soft-pill ${isSpiffeReject ? "pill-red" : "pill-green"}`;
           }
 
           const hv = document.getElementById("hero-t6-verdict");
@@ -2254,13 +2292,13 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           const hl = document.getElementById("hero-t6-lat");
           const hls = document.getElementById("hero-t6-lat-sub");
           if (hv) {
-            hv.textContent = isRbacBlock ? "403 BLOCKED" : blocked ? "ARMOR BLOCK" : "ALLOWED";
-            hv.className = `hero-kpi-value ${blocked ? "tone-alert" : "tone-savings"}`;
+            hv.textContent = isSpiffeReject ? "401 SPIFFE" : isRbacBlock ? "403 BLOCKED" : blocked ? "ARMOR BLOCK" : "ALLOWED";
+            hv.className = `kpi-val ${blocked ? "tone-alert" : "tone-savings"}`;
             popMetric(hv);
           }
-          if (hvs) hvs.textContent = isRbacBlock ? "Blocked by Apigee X MCP RBAC Allowlist" : blocked ? "Indirect prompt injection caught by Model Armor" : "Tool authorized & scanned clean";
+          if (hvs) hvs.textContent = isSpiffeReject ? "Untrusted SPIFFE trust domain rejected at edge" : isRbacBlock ? "Blocked by Apigee X MCP RBAC Allowlist" : blocked ? "Indirect prompt injection caught by Model Armor" : "SPIFFE verified, tool authorized & scanned clean";
           if (ht && mcpTool) ht.textContent = mcpTool.value;
-          if (hts && mcpRole) hts.textContent = `Role: ${mcpRole.value}`;
+          if (hts) hts.textContent = data.spiffe_id || `Role: ${role}`;
           if (hl) {
             hl.textContent = `${fmtInt(data.latency_ms)} ms`;
             popMetric(hl);
@@ -2268,7 +2306,11 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           if (hls) hls.textContent = `HTTP ${data.http_status_code} from Apigee X`;
           if (pipeBadge) pipeBadge.textContent = blocked ? `HTTP ${data.http_status_code}` : "HTTP 200";
           if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
-          document.getElementById("mcp-req-box").textContent = JSON.stringify(data.jsonrpc_request || {}, null, 2);
+          document.getElementById("mcp-req-box").textContent = JSON.stringify(
+            { spiffe_svid_claims: data.spiffe_jwt_claims, jsonrpc: data.jsonrpc_request },
+            null,
+            2
+          );
           document.getElementById("mcp-resp-box").textContent = JSON.stringify(data.apigee_response || {}, null, 2);
           const pill = document.getElementById("mcp-resp-pill");
           if (pill) {
@@ -2502,6 +2544,91 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     }
   }
 
+  function initGuidedTour() {
+    const popover = document.getElementById("guided-tour-popover");
+    const btnStart = document.getElementById("btn-start-tour");
+    const btnClose = document.getElementById("btn-tour-close");
+    const btnPrev = document.getElementById("btn-tour-prev");
+    const btnNext = document.getElementById("btn-tour-next");
+    const btnRun = document.getElementById("btn-tour-run");
+    if (!popover || !btnStart) return;
+
+    const steps = [
+      {
+        tab: "main-tab-economics",
+        runBtn: "btn-execute-compare",
+        title: "1. Slash AI Token Spend & Annual ROI",
+        desc: "Compare Direct Gemini 2.5 Pro vs. Apigee X live. Run twice to see a 99% Semantic Cache hit, then drag the Monthly Volume slider to project annual savings.",
+      },
+      {
+        tab: "main-tab-model-armor",
+        runBtn: "btn-run-ma",
+        title: "2. Zero-Code Model Armor Shield",
+        desc: "Direct Vertex AI processes prompt-injection attacks and bills tokens. Apigee X intercepts them at the edge with Google Cloud Model Armor (HTTP 400, 0 LLM tokens).",
+      },
+      {
+        tab: "main-tab-mcp-gov",
+        presetSelector: '#mcp-scenario-list .scenario-item[data-mcp-preset="untrusted"]',
+        runBtn: "btn-run-mcp",
+        title: "3. SPIFFE Workload Identity + MCP Firewall",
+        desc: "Apigee X validates the agent's SPIFFE JWT-SVID (HTTP 401 on untrusted shadow agents), enforces MCP tool RBAC (HTTP 403), and scans tool outputs with Model Armor.",
+      },
+      {
+        tab: "main-tab-resilient",
+        presetSelector: '#res-scenario-list .scenario-item[data-res-preset="failover"]',
+        runBtn: "btn-run-res",
+        title: "4. 429 Auto-Failover & OpenAI Facade",
+        desc: "Send a standard OpenAI gpt-4o request. Apigee X translates it to Vertex AI, automatically recovers from a simulated HTTP 429 via australia-southeast1, and returns OpenAI JSON.",
+      },
+      {
+        tab: "main-tab-pii-vault",
+        presetSelector: '#pii-scenario-list .scenario-item[data-pii-preset="rehydrate"]',
+        runBtn: "btn-run-pii",
+        title: "5. Reversible PII Vault (0 Bytes to LLM)",
+        desc: "Apigee X tokenizes credit cards, emails, and IDs before Vertex AI sees a single byte, then deterministically rehydrates the reply for the authorized caller.",
+      },
+    ];
+
+    let idx = 0;
+
+    function renderStep() {
+      const s = steps[idx];
+      document.getElementById("tour-step-pill").textContent = `Step ${idx + 1} / ${steps.length}`;
+      document.getElementById("tour-title").textContent = s.title;
+      document.getElementById("tour-desc").textContent = s.desc;
+      if (btnPrev) btnPrev.disabled = idx === 0;
+      if (btnNext) btnNext.textContent = idx === steps.length - 1 ? "Finish ✓" : "Next →";
+
+      const tabBtn = document.querySelector(`.primary-tab-btn[data-maintab="${s.tab}"]`);
+      if (tabBtn) tabBtn.click();
+      if (s.presetSelector) {
+        const presetBtn = document.querySelector(s.presetSelector);
+        if (presetBtn) presetBtn.click();
+      }
+    }
+
+    btnStart.addEventListener("click", () => {
+      idx = 0;
+      popover.classList.add("open");
+      renderStep();
+    });
+    if (btnClose) btnClose.addEventListener("click", () => popover.classList.remove("open"));
+    if (btnPrev) btnPrev.addEventListener("click", () => { if (idx > 0) { idx -= 1; renderStep(); } });
+    if (btnNext) btnNext.addEventListener("click", () => {
+      if (idx < steps.length - 1) {
+        idx += 1;
+        renderStep();
+      } else {
+        popover.classList.remove("open");
+      }
+    });
+    if (btnRun) btnRun.addEventListener("click", () => {
+      const s = steps[idx];
+      const runEl = document.getElementById(s.runBtn);
+      if (runEl) runEl.click();
+    });
+  }
+
   wireTablistKeyboardNav();
   initThemeSwitcher();
   initKeynoteDrawer();
@@ -2509,6 +2636,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   initClickableNodes();
   initCopyCurl();
   initNewEnterpriseTabs();
+  initGuidedTour();
   syncPolicySwitches();
   const elT5Slider = document.getElementById("t5-scale-slider");
   if (elT5Slider) elT5Slider.addEventListener("input", updateTab5AnnualROI);

@@ -1,6 +1,7 @@
 """FastAPI Side-by-Side BFF & Static Host for the Apigee X AI Economics & Governance Demo."""
 
 import asyncio
+import base64
 import json
 import os
 import time
@@ -965,6 +966,7 @@ async def passthrough_gateway_chat(
 
 class McpGovernanceRequest(BaseModel):
     agent_role: str = "support-agent"
+    spiffe_id: Optional[str] = None
     tool_name: str = "search_kb"
     tool_arguments: Dict[str, Any] = Field(default_factory=lambda: {"query": "VPN reset"})
     simulate_poisoned_tool: bool = False
@@ -987,6 +989,26 @@ class PiiVaultRequest(BaseModel):
 @app.post("/api/mcp/execute")
 async def execute_mcp_governance(req: McpGovernanceRequest) -> Dict[str, Any]:
     target_url = f"{APIGEE_GATEWAY_URL}/policies/mcp-governance"
+    default_spiffe_map = {
+        "support-agent": "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/support/sa/tier1-support-agent",
+        "finance-admin": "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/finance/sa/treasury-admin-agent",
+        "readonly-bot": "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/readonly/sa/audit-viewer-bot",
+        "untrusted-shadow": "spiffe://untrusted-external.cloud/ns/rogue/sa/shadow-bot",
+    }
+    spiffe_id = req.spiffe_id or default_spiffe_map.get(req.agent_role, default_spiffe_map["support-agent"])
+    now_sec = int(time.time())
+    jwt_header = {"alg": "ES256", "typ": "JWT", "kid": "spiffe-svid-demo-key"}
+    jwt_claims = {
+        "sub": spiffe_id,
+        "aud": ["https://apigee-ai-gateway.apac-cs-5g-demo5.internal"],
+        "iat": now_sec,
+        "exp": now_sec + 300,
+    }
+    def _b64url(obj: Dict[str, Any]) -> str:
+        return base64.urlsafe_b64encode(json.dumps(obj, separators=(",", ":")).encode()).rstrip(b"=").decode()
+
+    spiffe_jwt = f"{_b64url(jwt_header)}.{_b64url(jwt_claims)}.demo-spiffe-svid-sig"
+
     jsonrpc_payload = {
         "jsonrpc": "2.0",
         "id": f"mcp-{int(time.time() * 1000)}",
@@ -995,6 +1017,7 @@ async def execute_mcp_governance(req: McpGovernanceRequest) -> Dict[str, Any]:
     }
     headers = {
         "Content-Type": "application/json",
+        "Authorization": f"Bearer {spiffe_jwt}",
         "X-Agent-Role": req.agent_role,
         "X-Simulate-Poisoned-Tool": "true" if req.simulate_poisoned_tool else "false",
         "X-Enable-Mcp-Armor": "true" if req.enable_model_armor else "false",
@@ -1012,6 +1035,8 @@ async def execute_mcp_governance(req: McpGovernanceRequest) -> Dict[str, Any]:
         "http_status_code": resp.status_code,
         "blocked": resp.status_code >= 400,
         "latency_ms": latency_ms,
+        "spiffe_id": spiffe_id,
+        "spiffe_jwt_claims": jwt_claims,
         "jsonrpc_request": jsonrpc_payload,
         "apigee_response": data,
         "apigee_headers": {k: v for k, v in resp.headers.items() if k.lower().startswith("x-apigee")},
