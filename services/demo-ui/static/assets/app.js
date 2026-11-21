@@ -167,7 +167,7 @@
     function getCurrentTheme() {
       const explicit = document.documentElement.getAttribute("data-theme");
       if (explicit === "light" || explicit === "dark") return explicit;
-      return "dark";
+      return "light";
     }
 
     function applyThemeUI(theme) {
@@ -880,6 +880,12 @@
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       const targetId = btn.dataset.maintab;
+      const leftPanelId = btn.dataset.leftpanel;
+      if (leftPanelId) {
+        document.querySelectorAll(".left-ctrl-panel").forEach((panel) => {
+          panel.style.display = panel.id === leftPanelId ? "block" : "none";
+        });
+      }
       const meta = STAGE_HEADERS[targetId];
       if (meta) {
         const elTitle = document.getElementById("stage-active-title");
@@ -992,8 +998,7 @@
 
   function updateAnnualProjectionUI() {
     const millionsPerMonth = Number(elScaleSlider.value || 10);
-    document.getElementById("scale-slider-label").textContent =
-      `At ${millionsPerMonth}M requests/month (${millionsPerMonth * 12}M/yr)`;
+    document.getElementById("scale-slider-label").textContent = `${millionsPerMonth}M/mo`;
 
     const L = state.sessionLedger;
     const elAnnual = document.getElementById("ledger-annual-savings");

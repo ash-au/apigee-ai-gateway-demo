@@ -1,368 +1,403 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-view="executive">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apigee X — AI Gateway Dual-Lens Demo</title>
+  <title>Apigee X — AI Gateway Solutions</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <script>
     (function () {
       try {
         var savedTheme = localStorage.getItem("apigee-demo-theme");
-        document.documentElement.setAttribute("data-theme", savedTheme === "light" ? "light" : "dark");
-        var savedView = localStorage.getItem("apigee-demo-view");
-        document.documentElement.setAttribute("data-view", savedView === "architect" ? "architect" : "executive");
+        document.documentElement.setAttribute("data-theme", savedTheme === "dark" ? "dark" : "light");
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=11.0" />
+  <link rel="stylesheet" href="assets/styles.css?v=12.0" />
 </head>
 <body>
   <!-- ====================================================================
-       TOP HEADER BAR (Slim 54px Dock + Dual-Lens Exec | Architect Toggle)
+       GOOGLE CLOUD | APIGEE X HEADER BAR
        ==================================================================== -->
-  <header class="keynote-header" role="banner">
-    <div class="keynote-header-inner">
-      <div class="keynote-brand">
-        <div class="brand-mark" aria-hidden="true">AX</div>
-        <span class="brand-title">Apigee X AI Gateway</span>
+  <header class="gc-header" role="banner">
+    <div class="gc-header-inner">
+      <div class="gc-brand">
+        <div class="gc-logo-group">
+          <svg width="24" height="20" viewBox="0 0 24 20" fill="none" aria-hidden="true">
+            <path d="M12.2 4.4A5.4 5.4 0 0 1 17.4 8.2h.9a3.9 3.9 0 0 1 .4 7.7H6.2a4.6 4.6 0 0 1-.8-9.1A5.4 5.4 0 0 1 12.2 4.4Z" stroke="#4285F4" stroke-width="2.2" fill="#E8F0FE"/>
+            <circle cx="7" cy="12" r="2.2" fill="#EA4335"/>
+            <circle cx="12.5" cy="9" r="2.2" fill="#FBBC04"/>
+            <circle cx="17.5" cy="12" r="2.2" fill="#34A853"/>
+          </svg>
+          <span class="gc-wordmark">Google Cloud</span>
+          <span class="gc-apigee-badge">&middot; Apigee X</span>
+        </div>
+        <div class="gc-app-meta">
+          <span id="stage-active-title" class="gc-app-title">Apigee X AI Gateway Solutions</span>
+          <span id="stage-active-subtitle" class="gc-app-sub">Gemini 2.5 Pro &amp; Flash &middot; FinOps, Guardrails, Agentic MCP &amp; Resilience</span>
+        </div>
       </div>
 
-      <nav class="keynote-nav-dock" role="tablist" aria-label="AI Gateway Capabilities">
-        <button type="button" class="primary-tab-btn active" role="tab" aria-selected="true" data-maintab="main-tab-economics">
-          <span class="nav-dot nav-dot-blue" aria-hidden="true"></span>
-          <span>Cost</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-token-finops">
-          <span class="nav-dot nav-dot-amber" aria-hidden="true"></span>
-          <span>Quotas</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-model-armor">
-          <span class="nav-dot nav-dot-alert" aria-hidden="true"></span>
-          <span>Armor</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-semantic-gov">
-          <span class="nav-dot nav-dot-savings" aria-hidden="true"></span>
-          <span>Cache</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-system1-jev">
-          <span class="nav-dot nav-dot-violet" aria-hidden="true"></span>
-          <span>System 1</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-mcp-gov">
-          <span class="nav-dot nav-dot-alert" aria-hidden="true"></span>
-          <span>MCP Tools</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-resilient">
-          <span class="nav-dot nav-dot-blue" aria-hidden="true"></span>
-          <span>Failover</span>
-        </button>
-        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-pii-vault">
-          <span class="nav-dot nav-dot-savings" aria-hidden="true"></span>
-          <span>PII Vault</span>
-        </button>
-      </nav>
-
-      <div class="keynote-header-actions">
-        <div class="view-mode-pill" role="group" aria-label="Display Mode">
-          <button type="button" id="btn-view-executive" class="view-mode-btn active" aria-pressed="true">Exec</button>
-          <button type="button" id="btn-view-architect" class="view-mode-btn" aria-pressed="false">Architect</button>
-        </div>
-        <button type="button" id="btn-reset-state" class="header-icon-btn" title="Reset session ledger and cache">Reset</button>
-        <button type="button" id="btn-theme-toggle" class="header-icon-btn" aria-pressed="true" aria-label="Toggle Light or Dark theme">
-          <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-          <svg id="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-          <span id="theme-toggle-label">Light</span>
+      <div class="gc-header-tools">
+        <span class="status-active-pill"><span class="status-live-dot" aria-hidden="true"></span> Gateway Active</span>
+        <button type="button" id="btn-open-about" class="gc-nav-pill">Architecture</button>
+        <button type="button" id="btn-open-glossary" class="gc-nav-pill">Glossary</button>
+        <button type="button" id="btn-copy-curl" class="gc-nav-pill">Copy curl</button>
+        <button type="button" id="btn-reset-state" class="gc-nav-pill">Reset</button>
+        <button type="button" id="btn-theme-toggle" class="gc-nav-pill" aria-pressed="false" aria-label="Toggle Light or Dark theme">
+          <svg id="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <span id="theme-toggle-label">Dark</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- ====================================================================
-       MAIN STAGE
+       2-COLUMN GOOGLE CLOUD WORKBENCH (Left Controls | Right Live Stage)
        ==================================================================== -->
-  <main class="keynote-main" role="main">
-    <div class="keynote-container">
-      <!-- Architect Workbench Header (Hidden in Exec Mode to give ~50% height to Topology!) -->
-      <section class="stage-headline-row" aria-label="Workbench Context">
-        <div class="stage-headline-copy">
-          <div class="stage-eyebrow">
-            <span class="live-pulse-dot" aria-hidden="true"></span>
-            <span id="stage-eyebrow-text">Live Executive Keynote &middot; Apigee X + Vertex AI</span>
-          </div>
-          <h1 id="stage-active-title" class="stage-title">Token Cost &amp; AI Optimization</h1>
-          <p id="stage-active-subtitle" class="stage-subtitle">Live Direct Vertex AI vs. Apigee X Gateway — Cache, Compress, Route &amp; Prune</p>
-        </div>
-        <div class="stage-utility-links">
-          <button type="button" id="btn-copy-curl" class="btn-secondary">Copy curl</button>
-          <button type="button" id="btn-open-about" class="btn-secondary">Architecture &amp; Pricing</button>
-          <button type="button" id="btn-open-glossary" class="btn-secondary">System 1 Glossary</button>
-        </div>
-      </section>
+  <main class="gc-workspace" role="main">
+    <!-- ==================== LEFT CONTROL COLUMN ==================== -->
+    <aside class="gc-left-col" aria-label="Test Scenarios and Policy Controls">
+      <button type="button" class="gc-guide-banner" id="btn-open-glossary-tab5">
+        <span>When to use what &middot; FinOps vs Armor vs System 1 vs MCP</span>
+        <span aria-hidden="true">&rarr;</span>
+      </button>
 
-      <!-- ================================================================
-           TAB 1: TOKEN COST & AI OPTIMIZATION
-           ================================================================ -->
-      <section id="main-tab-economics" class="is-active-panel" role="tabpanel" aria-label="Token Cost and AI Optimization">
-        <!-- Zone 1: Scenario Pills + Radiant Run CTA -->
-        <div class="keynote-action-bar">
-          <div id="scenario-list" class="scenario-pill-strip" aria-label="Optimization Scenarios"></div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-sequence" class="btn-secondary">Run All 5</button>
-            <button type="button" id="btn-execute-compare" class="btn-primary">
-              <span>Run Live</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
-          </div>
+      <!-- Card 1: Capability Dot Tabs + Scenario Chips -->
+      <div class="gc-card gc-card-pad">
+        <div class="gc-card-head">
+          <h2 class="gc-card-title">Test Scenario</h2>
+          <span class="kpi-sub">8 Native Apigee X Flows</span>
         </div>
 
-        <!-- Zone 2 + Zone 3: Large Interactive Topology + Hero KPIs + Permanent Annual ROI Card -->
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t1-pipe-status" class="stage-story-badge">READY</span>
-              <span id="active-scenario-meta">Select a scenario and click Run Live to compare Direct Vertex AI vs. Apigee X Gateway.</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span id="run-status-indicator" class="metric-sub"></span>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Side-by-Side Outputs &amp; Charts">
-                <span>Inspect Outputs &amp; Charts &rarr;</span>
-              </button>
+        <nav class="cap-tabs-wrap" role="tablist" aria-label="Apigee AI Gateway Capabilities">
+          <button type="button" class="primary-tab-btn active" role="tab" aria-selected="true" data-maintab="main-tab-economics" data-leftpanel="left-ctrl-economics"><span class="cap-dot dot-blue"></span>Cost</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-token-finops" data-leftpanel="left-ctrl-finops"><span class="cap-dot dot-amber"></span>Quotas</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-model-armor" data-leftpanel="left-ctrl-armor"><span class="cap-dot dot-red"></span>Armor</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-semantic-gov" data-leftpanel="left-ctrl-semantic"><span class="cap-dot dot-green"></span>Cache</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-system1-jev" data-leftpanel="left-ctrl-system1"><span class="cap-dot dot-purple"></span>System 1</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-mcp-gov" data-leftpanel="left-ctrl-mcp"><span class="cap-dot dot-red"></span>MCP</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-resilient" data-leftpanel="left-ctrl-resilient"><span class="cap-dot dot-blue"></span>Failover</button>
+          <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-pii-vault" data-leftpanel="left-ctrl-pii"><span class="cap-dot dot-green"></span>PII Vault</button>
+        </nav>
+
+        <!-- Per-Capability Scenario Chips + Policy Controls -->
+        <!-- 1. COST & OPTIMIZATION CONTROLS -->
+        <div id="left-ctrl-economics" class="left-ctrl-panel">
+          <div id="scenario-list" class="scenario-chips" style="margin-bottom:14px;"></div>
+
+          <div class="gc-card-head" style="margin-top:4px;padding-top:12px;border-top:1px solid var(--border-subtle);">
+            <h3 class="gc-card-title">Optimization Policies</h3>
+            <div class="preset-btn-group">
+              <button type="button" id="btn-toggles-all-on" class="preset-btn active">All On</button>
+              <button type="button" id="btn-toggles-all-off" class="preset-btn">All Off</button>
             </div>
           </div>
 
-          <!-- LARGE 1120x260 Topology Canvas -->
-          <div class="pipeline-svg-wrap">
-            <svg id="t1-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X AI Optimization Pipeline">
-              <!-- Connectors -->
-              <path id="t1-edge-1" class="pipe-edge" d="M 156 142 L 194 142" />
-              <path id="t1-edge-2" class="pipe-edge" d="M 344 142 L 382 142" />
-              <path id="t1-edge-3" class="pipe-edge" d="M 532 142 L 570 142" />
-              <path id="t1-edge-4" class="pipe-edge" d="M 720 142 L 758 142" />
-              <path id="t1-edge-5" class="pipe-edge" d="M 908 142 L 946 142" />
-              <!-- Cache Hit Short-Circuit Arc -->
-              <path id="t1-edge-shortcircuit" class="pipe-edge" d="M 269 90 C 269 18, 1026 18, 1026 90" stroke-dasharray="8 6" />
-              <text class="pipe-node-kicker" x="647" y="34" text-anchor="middle">SEMANTIC CACHE SHORT-CIRCUIT (0 LLM TOKENS)</text>
-
-              <!-- Glowing Traveling Photon Orbs -->
-              <circle class="pipe-photon" r="6">
-                <animateMotion dur="1.4s" repeatCount="indefinite" path="M 156 142 L 946 142" />
-              </circle>
-              <circle class="pipe-photon" r="4.5">
-                <animateMotion dur="1.4s" begin="0.7s" repeatCount="indefinite" path="M 156 142 L 946 142" />
-              </circle>
-
-              <!-- Large Crisp Node Cards -->
-              <g id="t1-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="14" y="90" width="142" height="104" />
-                <text class="pipe-node-kicker" x="85" y="116" text-anchor="middle">01 ENTRY</text>
-                <text class="pipe-node-title" x="85" y="144" text-anchor="middle">Client App</text>
-                <text id="t1-sub-client" class="pipe-node-sub" x="85" y="172" text-anchor="middle">Dual Call</text>
-              </g>
-              <g id="t1-node-cache" class="pipe-node">
-                <rect class="pipe-node-box" x="194" y="90" width="150" height="104" />
-                <text class="pipe-node-kicker" x="269" y="116" text-anchor="middle">02 CACHE</text>
-                <text class="pipe-node-title" x="269" y="144" text-anchor="middle">Semantic Cache</text>
-                <text id="t1-sub-cache" class="pipe-node-sub" x="269" y="172" text-anchor="middle">Vector Match</text>
-              </g>
-              <g id="t1-node-compress" class="pipe-node">
-                <rect class="pipe-node-box" x="382" y="90" width="150" height="104" />
-                <text class="pipe-node-kicker" x="457" y="116" text-anchor="middle">03 COMPRESS</text>
-                <text class="pipe-node-title" x="457" y="144" text-anchor="middle">RAG Compress</text>
-                <text id="t1-sub-compress" class="pipe-node-sub" x="457" y="172" text-anchor="middle">Token Trim</text>
-              </g>
-              <g id="t1-node-prune" class="pipe-node">
-                <rect class="pipe-node-box" x="570" y="90" width="150" height="104" />
-                <text class="pipe-node-kicker" x="645" y="116" text-anchor="middle">04 PRUNE</text>
-                <text class="pipe-node-title" x="645" y="144" text-anchor="middle">Context Prune</text>
-                <text id="t1-sub-prune" class="pipe-node-sub" x="645" y="172" text-anchor="middle">Dedup History</text>
-              </g>
-              <g id="t1-node-router" class="pipe-node">
-                <rect class="pipe-node-box" x="758" y="90" width="150" height="104" />
-                <text class="pipe-node-kicker" x="833" y="116" text-anchor="middle">05 ROUTE</text>
-                <text class="pipe-node-title" x="833" y="144" text-anchor="middle">Smart Router</text>
-                <text id="t1-sub-router" class="pipe-node-sub" x="833" y="172" text-anchor="middle">Flash / Pro</text>
-              </g>
-              <g id="t1-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="946" y="90" width="160" height="104" />
-                <text class="pipe-node-kicker" x="1026" y="116" text-anchor="middle">06 MODEL</text>
-                <text class="pipe-node-title" x="1026" y="144" text-anchor="middle">Vertex AI</text>
-                <text id="t1-sub-llm" class="pipe-node-sub" x="1026" y="172" text-anchor="middle">Gemini 2.5</text>
-              </g>
-            </svg>
+          <div id="card-toggle-cache" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">Semantic Cache</span><span class="policy-row-tag toggle-header-tag">X-Opt-Cache: true</span></div>
+            <label class="gc-switch"><input type="checkbox" id="toggle-cache" checked aria-label="Semantic Cache" /></label>
+          </div>
+          <div id="card-toggle-compress" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">RAG Compression</span><span class="policy-row-tag toggle-header-tag">X-Opt-Compress: true</span></div>
+            <label class="gc-switch"><input type="checkbox" id="toggle-compress" checked aria-label="Prompt Compression" /></label>
+          </div>
+          <div id="card-toggle-route" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">Smart Model Router</span><span class="policy-row-tag toggle-header-tag">X-Opt-Route: true</span></div>
+            <label class="gc-switch"><input type="checkbox" id="toggle-route" checked aria-label="Smart Model Routing" /></label>
+          </div>
+          <div id="card-toggle-prune" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">Context Pruning</span><span class="policy-row-tag toggle-header-tag">X-Opt-Prune: true</span></div>
+            <label class="gc-switch"><input type="checkbox" id="toggle-prune" checked aria-label="Context Pruning" /></label>
           </div>
 
-          <!-- Live Direct vs. Apigee X Race Strip -->
-          <div class="race-strip" aria-label="Direct vs Apigee X Live Comparison">
-            <div class="race-lane">
-              <div class="race-lane-head"><span>Direct Vertex AI (Baseline)</span><span id="t1-race-direct-label" class="race-lane-val">Awaiting run</span></div>
-              <div class="race-track"><div id="t1-race-direct-bar" class="race-fill race-fill-direct" style="transform:scaleX(0.08)"></div></div>
-            </div>
-            <div class="race-lane">
-              <div class="race-lane-head"><span>Apigee X AI Gateway</span><span id="t1-race-gw-label" class="race-lane-val">Optimized path</span></div>
-              <div class="race-track"><div id="t1-race-gw-bar" class="race-fill race-fill-gateway" style="transform:scaleX(0.08)"></div></div>
-            </div>
-          </div>
-
-          <!-- Zone 3: 3 Live KPIs + PERMANENT ANNUALIZED ROI VALUE CARD -->
-          <div class="hero-outcome-band hero-outcome-band-4">
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Cost Saved vs. Direct</span>
-              <div id="hero-t1-savings" class="hero-kpi-value tone-savings">Ready</div>
-              <span id="hero-t1-savings-sub" class="hero-kpi-sub">Run any scenario for live USD savings</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Tokens Eliminated</span>
-              <div id="hero-t1-tokens" class="hero-kpi-value tone-cyan">Live</div>
-              <span id="hero-t1-tokens-sub" class="hero-kpi-sub">Prompt, output &amp; thinking tokens</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Route &amp; Latency</span>
-              <div id="hero-t1-route" class="hero-kpi-value">Apigee X</div>
-              <span id="hero-t1-route-sub" class="hero-kpi-sub">Direct Vertex AI vs. Apigee X</span>
-            </div>
-            <!-- ALWAYS-VISIBLE ANNUALIZED ROI CARD -->
-            <div id="ledger-annual-cell" class="hero-roi-card">
-              <div class="roi-hero-head">
-                <span class="hero-kpi-label">Projected Annual Savings</span>
-                <span id="scale-slider-label" class="metric-sub">At 10M req/mo (120M/yr)</span>
+          <div class="field-stack" style="margin-top:12px;">
+            <div class="field-group"><label class="field-label" for="input-prompt"><span>User Prompt</span></label><textarea id="input-prompt" class="field-textarea" rows="2"></textarea></div>
+            <details class="audit-accordion">
+              <summary>Edit System, RAG &amp; History</summary>
+              <div class="audit-accordion-body">
+                <div class="field-group"><label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label><textarea id="input-system" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label><textarea id="input-rag" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="input-history"><span>Chat History</span><span id="meta-history-turns">0 turns</span></label><textarea id="input-history" class="field-textarea" rows="2"></textarea></div>
               </div>
-              <div id="ledger-annual-savings" class="roi-hero-value">$0 / yr</div>
-              <div class="roi-slider-row">
-                <label for="scale-slider" class="metric-label">Volume</label>
-                <input id="scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="Monthly requests in millions" />
-              </div>
-            </div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary">
-              <span>Session Saved: <strong id="hero-t1-session-saved">$0.000000</strong></span>
-              <span>&middot;</span>
-              <span id="presenter-note">Select a scenario above and press <strong>Run Live</strong> to update Annualized ROI in real time.</span>
-            </div>
-            <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Side-by-Side Outputs &amp; Charts">
-                Inspect Outputs &amp; Charts &rarr;
-              </button>
+            </details>
+            <div style="display:flex;gap:8px;margin-top:4px;">
+              <button type="button" id="btn-execute-compare" class="btn-run-primary" style="flex:1;">Run Live Comparison &rarr;</button>
+              <button type="button" id="btn-run-sequence" class="btn-secondary">Run All 5</button>
             </div>
           </div>
         </div>
 
-        <!-- 2-Column Architect Workbench (Hidden in Exec Mode; slides open in Drawer or expands inline in Architect Mode) -->
-        <div id="details-economics" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <!-- Left Column: Controls & Prompt Composer -->
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header">
-                <div>
-                  <h2 class="surface-card-title">Optimization Headers</h2>
-                  <p class="surface-card-sub">Isolate individual Apigee X FinOps policies.</p>
-                </div>
-                <div style="display:flex;gap:6px;">
-                  <button type="button" id="btn-toggles-all-on" class="btn-secondary">All On</button>
-                  <button type="button" id="btn-toggles-all-off" class="btn-ghost">Off</button>
+        <!-- 2. TOKEN QUOTAS CONTROLS -->
+        <div id="left-ctrl-finops" class="left-ctrl-panel" style="display:none;">
+          <div id="tg-scenario-list" class="scenario-chips" style="margin-bottom:14px;"></div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Prompt Token Limit</span><span class="policy-row-tag">Pre-flight spike cap</span></div>
+            <label class="gc-switch"><input type="checkbox" id="tg-enable-ptl" checked /></label>
+          </div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Rolling Token Quota</span><span class="policy-row-tag">Per-tenant token budget</span></div>
+            <label class="gc-switch"><input type="checkbox" id="tg-enable-ltq" checked /></label>
+          </div>
+          <div class="field-stack" style="margin-top:10px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+              <div class="field-group"><label class="field-label" for="tg-prompt-limit"><span>Prompt Cap</span></label><input id="tg-prompt-limit" class="field-input" type="number" value="120" /></div>
+              <div class="field-group"><label class="field-label" for="tg-quota-limit"><span>Quota Limit</span></label><input id="tg-quota-limit" class="field-input" type="number" value="350" /></div>
+            </div>
+            <div class="field-group"><label class="field-label" for="tg-quota-id"><span>Tenant Quota ID</span></label><input id="tg-quota-id" class="field-input" type="text" value="tenant-finops-demo" /></div>
+            <div class="field-group"><label class="field-label" for="tg-prompt"><span>Test Prompt</span></label><textarea id="tg-prompt" class="field-textarea" rows="3"></textarea></div>
+            <button type="button" id="btn-run-tg" class="btn-run-primary">Test Token Quota Policy &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 3. MODEL ARMOR CONTROLS -->
+        <div id="left-ctrl-armor" class="left-ctrl-panel" style="display:none;">
+          <div id="ma-scenario-list" class="scenario-chips" style="margin-bottom:14px;"></div>
+          <div id="card-ma-prompt" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">SanitizeUserPrompt</span><span class="policy-row-tag">Inbound Jailbreak / PII / RAI</span></div>
+            <label class="gc-switch"><input type="checkbox" id="ma-enable-prompt" checked /></label>
+          </div>
+          <div id="card-ma-response" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">SanitizeModelResponse</span><span class="policy-row-tag">Outbound safety guardrail</span></div>
+            <label class="gc-switch"><input type="checkbox" id="ma-enable-response" checked /></label>
+          </div>
+          <div class="field-stack" style="margin-top:10px;">
+            <div class="field-group"><label class="field-label" for="ma-prompt"><span>Attack / Test Prompt</span></label><textarea id="ma-prompt" class="field-textarea" rows="3"></textarea></div>
+            <button type="button" id="btn-run-ma" class="btn-run-primary">Test Model Armor Shield &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 4. SEMANTIC CACHE & SAFETY CONTROLS -->
+        <div id="left-ctrl-semantic" class="left-ctrl-panel" style="display:none;">
+          <div class="provider-segmented" style="margin-bottom:12px;">
+            <button type="button" id="btn-submode-nc" class="provider-seg-btn active">Semantic Cache</button>
+            <button type="button" id="btn-submode-sg" class="provider-seg-btn">Semantic Guardrail</button>
+          </div>
+          <div id="sg-scenario-list" class="scenario-chips" style="margin-bottom:14px;"></div>
+          <div class="field-stack">
+            <div class="field-group"><label class="field-label" for="sg-prompt"><span id="sg-composer-title">Semantic Query</span></label><textarea id="sg-prompt" class="field-textarea" rows="3"></textarea></div>
+            <p id="sg-policy-explanation" class="kpi-sub" style="margin:0;">Native Apigee X SemanticCacheLookup / Populate flow.</p>
+            <button type="button" id="btn-run-sg" class="btn-run-primary">Run Semantic Policy &rarr;</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:8px;border-top:1px solid var(--border-subtle);">
+              <button type="button" id="btn-vs-wake" class="btn-secondary" style="flex:1;">Wake Vector Node</button>
+              <button type="button" id="btn-vs-suspend" class="btn-secondary">Suspend</button>
+              <button type="button" id="btn-vs-refresh" class="btn-secondary">Refresh</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. SYSTEM 1 ROUTING CONTROLS -->
+        <div id="left-ctrl-system1" class="left-ctrl-panel" style="display:none;">
+          <div class="provider-segmented" style="margin-bottom:12px;">
+            <button type="button" id="btn-s1-provider-gemini" class="provider-seg-btn active">Gemini Decision 1</button>
+            <button type="button" id="btn-s1-provider-jev" class="provider-seg-btn">TypeSafe Jev</button>
+          </div>
+          <div id="s1-scenario-list" class="scenario-chips" style="margin-bottom:14px;"></div>
+          <div id="s1-card-fast-track" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">Stage 1 Fast-Track</span><span class="policy-row-tag">Route simple tasks to Flash</span></div>
+            <label class="gc-switch"><input type="checkbox" id="s1-enable-fast-track" checked /></label>
+          </div>
+          <div id="s1-card-verifier" class="policy-row enabled">
+            <div class="policy-row-info"><span class="policy-row-name">Stage 2 Noul Verifier</span><span class="policy-row-tag">Auto-escalate L1 defects to Pro</span></div>
+            <label class="gc-switch"><input type="checkbox" id="s1-enable-verifier" checked /></label>
+          </div>
+          <div id="s1-card-defect" class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Simulate L1 Defect</span><span class="policy-row-tag">Force hallucination escalation</span></div>
+            <label class="gc-switch"><input type="checkbox" id="s1-simulate-defect" /></label>
+          </div>
+          <div class="field-stack" style="margin-top:10px;">
+            <div class="field-group"><label class="field-label" for="s1-query"><span>User Query</span></label><textarea id="s1-query" class="field-textarea" rows="2"></textarea></div>
+            <details class="audit-accordion">
+              <summary>System Instruction &amp; Thresholds</summary>
+              <div class="audit-accordion-body">
+                <div class="field-group"><label class="field-label" for="s1-sys"><span>System</span></label><textarea id="s1-sys" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="s1-rag"><span>Grounding Context</span></label><textarea id="s1-rag" class="field-textarea" rows="2"></textarea></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                  <div class="field-group"><label class="field-label" for="s1-conf-threshold"><span>Confidence</span></label><input id="s1-conf-threshold" class="field-input" type="number" step="0.05" value="0.75" /></div>
+                  <div class="field-group"><label class="field-label" for="s1-fire-threshold"><span>Noul Fire</span></label><input id="s1-fire-threshold" class="field-input" type="number" step="0.05" value="0.50" /></div>
                 </div>
               </div>
-              <div class="toggle-grid">
-                <label id="card-toggle-cache" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">Semantic Cache</span><input type="checkbox" id="toggle-cache" checked /></div>
-                  <span class="toggle-header-tag">X-Opt-Cache: true</span>
-                </label>
-                <label id="card-toggle-compress" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">Prompt Compress</span><input type="checkbox" id="toggle-compress" checked /></div>
-                  <span class="toggle-header-tag">X-Opt-Compress: true</span>
-                </label>
-                <label id="card-toggle-route" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">Smart Routing</span><input type="checkbox" id="toggle-route" checked /></div>
-                  <span class="toggle-header-tag">X-Opt-Route: true</span>
-                </label>
-                <label id="card-toggle-prune" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">Context Pruning</span><input type="checkbox" id="toggle-prune" checked /></div>
-                  <span class="toggle-header-tag">X-Opt-Prune: true</span>
-                </label>
+            </details>
+            <button type="button" id="btn-run-s1" class="btn-run-primary">Run System 1 Pipeline &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 6. MCP TOOL GOVERNANCE CONTROLS -->
+        <div id="left-ctrl-mcp" class="left-ctrl-panel" style="display:none;">
+          <div id="mcp-scenario-list" class="scenario-chips" style="margin-bottom:14px;">
+            <button type="button" class="scenario-item active" data-mcp-preset="safe" aria-pressed="true"><span class="scenario-item-title">Allowed: search_kb</span></button>
+            <button type="button" class="scenario-item" data-mcp-preset="forbidden" aria-pressed="false"><span class="scenario-item-title">Rogue: drop_production_db</span></button>
+            <button type="button" class="scenario-item" data-mcp-preset="poisoned" aria-pressed="false"><span class="scenario-item-title">Poisoned Tool Output</span></button>
+          </div>
+          <div class="field-stack">
+            <div class="field-group">
+              <label class="field-label" for="mcp-role-select"><span>Agent Role (X-Agent-Role)</span></label>
+              <select id="mcp-role-select" class="field-select">
+                <option value="support-agent">support-agent (KB &amp; tickets only)</option>
+                <option value="finance-admin">finance-admin (+ wire_transfer)</option>
+                <option value="readonly-bot">readonly-bot (read-only)</option>
+              </select>
+            </div>
+            <div class="field-group"><label class="field-label" for="mcp-tool-input"><span>MCP Tool Name</span></label><input id="mcp-tool-input" class="field-input" type="text" value="search_kb" /></div>
+          </div>
+          <div class="policy-row" style="margin-top:8px;">
+            <div class="policy-row-info"><span class="policy-row-name">Simulate Poisoned Output</span><span class="policy-row-tag">Hidden indirect injection</span></div>
+            <label class="gc-switch"><input type="checkbox" id="mcp-sim-poison" /></label>
+          </div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Model Armor Indirect Scan</span><span class="policy-row-tag">SUP-SanitizeUserPrompt</span></div>
+            <label class="gc-switch"><input type="checkbox" id="mcp-enable-armor" checked /></label>
+          </div>
+          <button type="button" id="btn-run-mcp" class="btn-run-primary" style="margin-top:10px;">Execute MCP Call &rarr;</button>
+        </div>
+
+        <!-- 7. 429 FAILOVER & OPENAI FACADE CONTROLS -->
+        <div id="left-ctrl-resilient" class="left-ctrl-panel" style="display:none;">
+          <div id="res-scenario-list" class="scenario-chips" style="margin-bottom:14px;">
+            <button type="button" class="scenario-item active" data-res-preset="openai" aria-pressed="true"><span class="scenario-item-title">OpenAI Facade (gpt-4o)</span></button>
+            <button type="button" class="scenario-item" data-res-preset="failover" aria-pressed="false"><span class="scenario-item-title">429 Auto-Failover</span></button>
+            <button type="button" class="scenario-item" data-res-preset="canary" aria-pressed="false"><span class="scenario-item-title">Canary 50% Pro / Flash</span></button>
+          </div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Simulate Primary HTTP 429</span><span class="policy-row-tag">Failover us &rarr; australia-southeast1</span></div>
+            <label class="gc-switch"><input type="checkbox" id="res-sim-429" /></label>
+          </div>
+          <div class="field-stack" style="margin-top:10px;">
+            <div class="field-group"><label class="field-label" for="res-canary-slider"><span>Canary Split to Pro</span><span id="res-canary-label">0%</span></label><input id="res-canary-slider" type="range" min="0" max="100" step="10" value="0" /></div>
+            <div class="field-group"><label class="field-label" for="res-prompt-input"><span>OpenAI User Message</span></label><textarea id="res-prompt-input" class="field-textarea" rows="3">Explain how Apigee X provides zero-downtime LLM failover and OpenAI SDK compatibility in 2 concise sentences.</textarea></div>
+            <button type="button" id="btn-run-res" class="btn-run-primary">Send OpenAI Request &rarr;</button>
+          </div>
+        </div>
+
+        <!-- 8. REVERSIBLE PII VAULT CONTROLS -->
+        <div id="left-ctrl-pii" class="left-ctrl-panel" style="display:none;">
+          <div id="pii-scenario-list" class="scenario-chips" style="margin-bottom:14px;">
+            <button type="button" class="scenario-item active" data-pii-preset="rehydrate" aria-pressed="true"><span class="scenario-item-title">Banking PII (Rehydrate)</span></button>
+            <button type="button" class="scenario-item" data-pii-preset="redact" aria-pressed="false"><span class="scenario-item-title">Audit Mode (Permanent Mask)</span></button>
+          </div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Pre-LLM PII Vault</span><span class="policy-row-tag">Zero raw PII leaves Apigee X</span></div>
+            <label class="gc-switch"><input type="checkbox" id="pii-enable-vault" checked /></label>
+          </div>
+          <div class="policy-row">
+            <div class="policy-row-info"><span class="policy-row-name">Rehydrate Authorized Reply</span><span class="policy-row-tag">De-tokenize on egress</span></div>
+            <label class="gc-switch"><input type="checkbox" id="pii-enable-rehydrate" checked /></label>
+          </div>
+          <div class="field-stack" style="margin-top:10px;">
+            <div class="field-group"><label class="field-label" for="pii-prompt-input"><span>Sensitive Customer Prompt</span></label><textarea id="pii-prompt-input" class="field-textarea" rows="4">Draft a short confirmation email to Sarah Jenkins (sarah.jenkins@acme-bank.com, phone +61 412 555 890) confirming her replacement Visa card 4532-8910-4421-9901 linked to TFN 123-45-6789 is now active.</textarea></div>
+            <button type="button" id="btn-run-pii" class="btn-run-primary">Run PII Vault &rarr;</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== RIGHT LIVE EXECUTION STAGE ==================== -->
+    <div class="gc-right-col">
+      <!-- ==================== TAB 1: COST & OPTIMIZATION ==================== -->
+      <section id="main-tab-economics" class="exec-card" role="tabpanel" aria-label="Token Cost and AI Optimization">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row">
+              <span class="soft-pill pill-blue">APIGEE X FINOPS</span>
+              <span class="soft-pill pill-green">&bull; Live Dual Comparison</span>
+              <span class="soft-pill pill-amber">Cache &middot; Compress &middot; Route &middot; Prune</span>
+            </div>
+            <span class="exec-proxy-name">ai-gateway-v1</span>
+            <span class="exec-proxy-path">/v1/ai-economics/chat</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span id="run-status-indicator" class="kpi-sub"></span>
+            <span id="t1-pipe-status" class="soft-pill pill-idle">IDLE</span>
+          </div>
+        </div>
+
+        <div class="kpi-strip kpi-strip-4">
+          <div class="kpi-cell"><span class="kpi-label">Cost Saved</span><span id="hero-t1-savings" class="kpi-val tone-savings">Waiting...</span><span id="hero-t1-savings-sub" class="kpi-sub">Direct vs. Apigee X</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Tokens Cut</span><span id="hero-t1-tokens" class="kpi-val tone-blue">Waiting...</span><span id="hero-t1-tokens-sub" class="kpi-sub">Prompt, out &amp; thinking</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Model &amp; Latency</span><span id="hero-t1-route" class="kpi-val">Waiting...</span><span id="hero-t1-route-sub" class="kpi-sub">End-to-end duration</span></div>
+          <div id="ledger-annual-cell" class="kpi-roi-box">
+            <span class="kpi-label">Projected Annual Savings</span>
+            <span id="ledger-annual-savings" class="roi-val">$0 / yr</span>
+            <div class="roi-slider-inline">
+              <input id="scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="Monthly volume in millions" />
+              <span id="scale-slider-label">10M/mo</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="pipeline-section">
+          <svg id="t1-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 185" role="img" aria-label="Apigee X AI Optimization Pipeline">
+            <path id="t1-edge-1" class="pipe-edge" d="M 156 108 L 194 108" />
+            <path id="t1-edge-2" class="pipe-edge" d="M 344 108 L 382 108" />
+            <path id="t1-edge-3" class="pipe-edge" d="M 532 108 L 570 108" />
+            <path id="t1-edge-4" class="pipe-edge" d="M 720 108 L 758 108" />
+            <path id="t1-edge-5" class="pipe-edge" d="M 908 108 L 946 108" />
+            <path id="t1-edge-shortcircuit" class="pipe-edge" d="M 269 68 C 269 16, 1026 16, 1026 68" stroke-dasharray="6 5" />
+            <text class="pipe-node-kicker" x="647" y="28" text-anchor="middle">SEMANTIC CACHE SHORT-CIRCUIT (0 LLM TOKENS)</text>
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 156 108 L 946 108" /></circle>
+            <g id="t1-node-client" class="pipe-node"><rect class="pipe-node-box" x="14" y="68" width="142" height="80" /><text class="pipe-node-title" x="85" y="102" text-anchor="middle">Client App</text><text id="t1-sub-client" class="pipe-node-sub" x="85" y="126" text-anchor="middle">Dual Call</text></g>
+            <g id="t1-node-cache" class="pipe-node"><rect class="pipe-node-box" x="194" y="68" width="150" height="80" /><text class="pipe-node-title" x="269" y="102" text-anchor="middle">Semantic Cache</text><text id="t1-sub-cache" class="pipe-node-sub" x="269" y="126" text-anchor="middle">Vector Match</text></g>
+            <g id="t1-node-compress" class="pipe-node"><rect class="pipe-node-box" x="382" y="68" width="150" height="80" /><text class="pipe-node-title" x="457" y="102" text-anchor="middle">RAG Compress</text><text id="t1-sub-compress" class="pipe-node-sub" x="457" y="126" text-anchor="middle">Token Trim</text></g>
+            <g id="t1-node-prune" class="pipe-node"><rect class="pipe-node-box" x="570" y="68" width="150" height="80" /><text class="pipe-node-title" x="645" y="102" text-anchor="middle">Context Prune</text><text id="t1-sub-prune" class="pipe-node-sub" x="645" y="126" text-anchor="middle">Dedup History</text></g>
+            <g id="t1-node-router" class="pipe-node"><rect class="pipe-node-box" x="758" y="68" width="150" height="80" /><text class="pipe-node-title" x="833" y="102" text-anchor="middle">Smart Router</text><text id="t1-sub-router" class="pipe-node-sub" x="833" y="126" text-anchor="middle">Flash / Pro</text></g>
+            <g id="t1-node-llm" class="pipe-node"><rect class="pipe-node-box" x="946" y="68" width="160" height="80" /><text class="pipe-node-title" x="1026" y="102" text-anchor="middle">Vertex AI</text><text id="t1-sub-llm" class="pipe-node-sub" x="1026" y="126" text-anchor="middle">Gemini 2.5</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner">
+            <span id="active-scenario-meta">Select a scenario on the left and click Run Live Comparison.</span>
+            <span>Session Saved: <strong id="hero-t1-session-saved">$0.000000</strong></span>
+          </div>
+
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Direct to Vertex AI (Unoptimized)</h3><span id="direct-model-pill" class="model-pill">gemini-2.5-pro</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Total Tokens</span><span id="direct-total-tokens" class="metric-main">—</span><span id="direct-thinking-tokens" class="metric-sub">Thinking: —</span></div>
+                <div class="mini-metric"><span class="metric-label">Cost &amp; Latency</span><span id="direct-total-cost" class="metric-main">—</span><span id="direct-latency" class="metric-sub">—</span></div>
               </div>
+              <div class="metric-sub">Prompt: <strong id="direct-prompt-tok">—</strong> &middot; Out: <strong id="direct-cand-tok">—</strong> &middot; Think: <strong id="direct-thought-tok">—</strong> &middot; <span id="direct-finish-reason">—</span></div>
+              <pre id="direct-response-body" class="response-box">Click "Run Live Comparison" to execute direct Vertex AI baseline...</pre>
             </div>
 
-            <div class="surface-card">
-              <details class="workbench-details" style="border-top:none;margin-top:0;padding-top:0;">
-                <summary>Live Prompt Composer (Click to Edit Payload)</summary>
-                <div class="composer-grid" style="margin-top:12px;">
-                  <div class="field-group"><label class="field-label" for="input-prompt"><span>User Prompt</span></label><textarea id="input-prompt" class="field-textarea" rows="2"></textarea></div>
-                  <div class="field-group"><label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label><textarea id="input-system" class="field-textarea" rows="2"></textarea></div>
-                  <div class="field-group"><label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label><textarea id="input-rag" class="field-textarea" rows="2"></textarea></div>
-                  <div class="field-group"><label class="field-label" for="input-history"><span>Chat History (JSON)</span><span id="meta-history-turns">0 turns</span></label><textarea id="input-history" class="field-textarea" rows="2"></textarea></div>
-                </div>
-              </details>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Via Apigee X AI Gateway</h3><span id="gateway-model-pill" class="model-pill pill-allowed">apigee-x</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Total Tokens</span><span id="gateway-total-tokens" class="metric-main">—</span><span id="gateway-token-delta" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Cost &amp; Savings</span><span id="gateway-total-cost" class="metric-main">—</span><span id="gateway-cost-delta" class="metric-sub">—</span></div>
+              </div>
+              <div class="metric-sub">Latency: <strong id="gateway-latency">—</strong> &middot; <span id="gateway-cache-badge">Cache: —</span> &middot; Overhead: <strong id="gateway-overhead-tokens">0 tok</strong> (<span id="gateway-overhead-cost">$0</span>)</div>
+              <div class="metric-sub">P: <strong id="gw-prompt-tok">—</strong> &middot; O: <strong id="gw-cand-tok">—</strong> &middot; T: <strong id="gw-thought-tok">—</strong> &middot; Emb: <strong id="gw-embed-tok">—</strong> &middot; Prune: <strong id="gw-prune-tok">—</strong></div>
+              <pre id="gateway-response-body" class="response-box">Click "Run Live Comparison" to execute Apigee X AI Gateway...</pre>
             </div>
           </div>
 
-          <!-- Right Column: Side-by-Side Outputs, Charts, Ledger & Audit Inspector -->
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head">
-                  <h3 class="compare-head-title">Direct Vertex AI (Baseline)</h3>
-                  <span id="direct-model-pill" class="model-pill">gemini-2.5-pro</span>
-                </div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Billed Tokens</span><span id="direct-total-tokens" class="metric-main">—</span><span id="direct-thinking-tokens" class="metric-sub">Thinking: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Request Cost</span><span id="direct-total-cost" class="metric-main">—</span><span id="direct-finish-reason" class="metric-sub">Finish: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Latency</span><span id="direct-latency" class="metric-main">—</span><span class="metric-sub">Unoptimized direct</span></div>
-                  <div class="metric-tile"><span class="metric-label">Breakdown</span><span class="metric-sub">P: <strong id="direct-prompt-tok">—</strong> &middot; O: <strong id="direct-cand-tok">—</strong> &middot; T: <strong id="direct-thought-tok">—</strong></span></div>
-                </div>
-                <pre id="direct-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
-              </div>
-
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head">
-                  <h3 class="compare-head-title">Apigee X AI Gateway</h3>
-                  <span id="gateway-model-pill" class="model-pill pill-allowed">apigee-x</span>
-                </div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Billed Tokens</span><span id="gateway-total-tokens" class="metric-main">—</span><span id="gateway-token-delta" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Request Cost</span><span id="gateway-total-cost" class="metric-main">—</span><span id="gateway-cost-delta" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Latency</span><span id="gateway-latency" class="metric-main">—</span><span id="gateway-cache-badge" class="metric-sub">Cache: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Overhead</span><span id="gateway-overhead-tokens" class="metric-main">0 tok</span><span id="gateway-overhead-cost" class="metric-sub">Overhead: $0.0000000</span></div>
-                </div>
-                <div class="metric-sub">P: <strong id="gw-prompt-tok">—</strong> &middot; O: <strong id="gw-cand-tok">—</strong> &middot; T: <strong id="gw-thought-tok">—</strong> &middot; Emb: <strong id="gw-embed-tok">—</strong> &middot; Prune: <strong id="gw-prune-tok">—</strong></div>
-                <pre id="gateway-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
-              </div>
-            </div>
-
-            <div class="surface-card">
-              <div class="surface-card-header">
-                <h3 class="surface-card-title">Cost &amp; Token Breakdown</h3>
-                <span id="viz-cost-delta-pill" class="model-pill">—</span>
-              </div>
+          <details class="audit-accordion">
+            <summary>Cost &amp; Token Breakdown Charts + Session Ledger</summary>
+            <div class="audit-accordion-body">
               <div class="viz-stack">
                 <div class="viz-row"><div class="viz-row-head"><span>Direct Cost</span><span id="viz-cost-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-cost-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div></div>
-                <div class="viz-row"><div class="viz-row-head"><span>Apigee Gateway Cost</span><span id="viz-cost-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-cost-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Apigee Gateway Cost <span id="viz-cost-delta-pill" class="model-pill">—</span></span><span id="viz-cost-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-cost-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
                 <div class="viz-row"><div class="viz-row-head"><span>Direct Tokens</span><span id="viz-tok-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-tok-direct-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div><div id="viz-tok-direct-out" class="viz-fill viz-fill-savings" style="width:0%"></div><div id="viz-tok-direct-think" class="viz-fill viz-fill-amber" style="width:0%"></div></div></div>
                 <div class="viz-row"><div class="viz-row-head"><span>Gateway Tokens</span><span id="viz-tok-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-tok-gw-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div><div id="viz-tok-gw-out" class="viz-fill viz-fill-savings" style="width:0%"></div><div id="viz-tok-gw-think" class="viz-fill viz-fill-amber" style="width:0%"></div><div id="viz-tok-gw-overhead" class="viz-fill viz-fill-violet" style="width:0%"></div></div></div>
                 <div class="viz-row"><div class="viz-row-head"><span>RAG Compression</span><span id="viz-comp-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-comp-bar" class="viz-fill viz-fill-scale viz-fill-blue" style="transform:scaleX(0.02)"></div></div></div>
-                <div class="viz-legend">
-                  <span class="legend-item"><span class="legend-swatch" style="background:#38bdf8"></span>Prompt</span>
-                  <span class="legend-item"><span class="legend-swatch" style="background:#34d399"></span>Output</span>
-                  <span class="legend-item"><span class="legend-swatch" style="background:#fbbf24"></span>Thinking</span>
-                  <span class="legend-item"><span class="legend-swatch" style="background:#a78bfa"></span>Overhead</span>
-                </div>
               </div>
-            </div>
-
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">Cumulative Session Ledger</h3></div>
               <div class="ledger-grid">
-                <div class="ledger-card"><span class="ledger-label">Direct Baseline</span><span id="ledger-direct-cost" class="ledger-value">$0.000000</span><span id="ledger-direct-tokens" class="ledger-sub">0 tokens</span></div>
-                <div class="ledger-card"><span class="ledger-label">Apigee Gateway</span><span id="ledger-gateway-cost" class="ledger-value">$0.000000</span><span id="ledger-gateway-tokens" class="ledger-sub">0 tokens</span></div>
-                <div class="ledger-card"><span class="ledger-label">Net Saved</span><span id="ledger-cost-saved" class="ledger-value delta-positive">$0.000000</span><span class="ledger-sub"><strong id="ledger-cost-pct">0%</strong> &middot; <strong id="ledger-tokens-saved">0</strong> (<span id="ledger-token-pct">0%</span>) tok</span></div>
+                <div class="ledger-card"><span class="ledger-label">Session Direct</span><span id="ledger-direct-cost" class="ledger-value">$0.000000</span><span id="ledger-direct-tokens" class="ledger-sub">0 tokens</span></div>
+                <div class="ledger-card"><span class="ledger-label">Session Apigee X</span><span id="ledger-gateway-cost" class="ledger-value">$0.000000</span><span id="ledger-gateway-tokens" class="ledger-sub">0 tokens</span></div>
+                <div class="ledger-card"><span class="ledger-label">Session Net Saved</span><span id="ledger-cost-saved" class="ledger-value delta-positive">$0.000000</span><span class="ledger-sub"><strong id="ledger-cost-pct">0%</strong> &middot; <strong id="ledger-tokens-saved">0</strong> (<span id="ledger-token-pct">0%</span>) tok</span></div>
               </div>
+              <span id="presenter-note" class="kpi-sub"></span>
             </div>
+          </details>
 
-            <div class="surface-card architect-only">
-              <div class="surface-card-header"><h3 class="surface-card-title">Deep Audit Inspector</h3></div>
+          <details class="audit-accordion">
+            <summary>Deep Audit Inspector (Compression Diff, Routing Cascade, Headers &amp; JSON)</summary>
+            <div class="audit-accordion-body">
               <div class="audit-tab-bar" role="tablist">
                 <button type="button" class="audit-tab active" role="tab" aria-selected="true" data-tab="tab-compression">Compression Diff</button>
                 <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-cascade">Routing Cascade</button>
@@ -370,931 +405,430 @@
                 <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-headers-raw">Headers &amp; JSON</button>
               </div>
               <div id="tab-compression">
-                <div class="metric-sub" style="margin-bottom:8px;">Method: <strong id="comp-method-label">—</strong> &middot; Before: <strong id="comp-before-count">—</strong> &middot; After: <strong id="comp-after-count">—</strong> &middot; <span id="comp-stats-summary">—</span></div>
-                <div class="compare-grid"><pre id="comp-original-box" class="code-block">Original</pre><pre id="comp-compressed-box" class="code-block">Compressed</pre></div>
+                <div class="metric-sub" style="margin-bottom:6px;">Method: <strong id="comp-method-label">—</strong> &middot; Before: <strong id="comp-before-count">—</strong> &middot; After: <strong id="comp-after-count">—</strong> &middot; <span id="comp-stats-summary">—</span></div>
+                <div class="compare-grid"><pre id="comp-original-box" class="code-block">—</pre><pre id="comp-compressed-box" class="code-block">—</pre></div>
               </div>
               <div id="tab-cascade" style="display:none;"><pre id="cascade-audit-body" class="code-block">—</pre></div>
               <div id="tab-cache-prune" style="display:none;"><pre id="cache-prune-audit-body" class="code-block">—</pre></div>
               <div id="tab-headers-raw" style="display:none;"><div class="compare-grid"><pre id="raw-headers-box" class="code-block">—</pre><pre id="raw-json-box" class="code-block">—</pre></div></div>
             </div>
-          </div>
+          </details>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 2: TOKEN QUOTAS & FINOPS
-           ================================================================ -->
-      <section id="main-tab-token-finops" role="tabpanel" aria-label="Token Quotas and FinOps" style="display:none;">
-        <div class="keynote-action-bar">
-          <div id="tg-scenario-list" class="scenario-pill-strip" aria-label="Token Quota Scenarios"></div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-tg" class="btn-primary"><span>Test Quota Policy</span><span aria-hidden="true">&rarr;</span></button>
+      <!-- ==================== TAB 2: TOKEN QUOTAS ==================== -->
+      <section id="main-tab-token-finops" class="exec-card" role="tabpanel" aria-label="Token Quotas" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-amber">NATIVE TOKEN FINOPS</span><span class="soft-pill pill-green">&bull; PromptTokenLimit + LLMTokenQuota</span></div>
+            <span class="exec-proxy-name">token-governance-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/policies/token-governance</span>
           </div>
+          <span id="t2-pipe-status" class="soft-pill pill-idle">IDLE</span>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t2-pipe-status" class="stage-story-badge">READY</span>
-              <span id="tg-status">Native Apigee X ExtractVariables + Quota / Prompt Token Limit circuit breaker.</span>
-            </div>
-            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-finops" data-drawer-title="Token Quotas &amp; FinOps — Responses &amp; Policy XML">
-              <span>Inspect Outputs &amp; XML &rarr;</span>
-            </button>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t2-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 240" role="img" aria-label="Token Quota Enforcement Pipeline">
-              <path id="t2-edge-1" class="pipe-edge" d="M 218 122 L 298 122" />
-              <path id="t2-edge-2" class="pipe-edge" d="M 518 122 L 598 122" />
-              <path id="t2-edge-3" class="pipe-edge" d="M 818 122 L 898 122" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 218 122 L 898 122" /></circle>
-              <g id="t2-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="18" y="68" width="200" height="108" />
-                <text class="pipe-node-kicker" x="118" y="96" text-anchor="middle">01 TENANT</text>
-                <text class="pipe-node-title" x="118" y="124" text-anchor="middle">Client App</text>
-                <text id="t2-sub-client" class="pipe-node-sub" x="118" y="152" text-anchor="middle">API Key</text>
-              </g>
-              <g id="t2-node-ptl" class="pipe-node">
-                <rect class="pipe-node-box" x="298" y="68" width="220" height="108" />
-                <text class="pipe-node-kicker" x="408" y="96" text-anchor="middle">02 PRE-FLIGHT</text>
-                <text class="pipe-node-title" x="408" y="124" text-anchor="middle">Prompt Token Limit</text>
-                <text id="t2-sub-ptl" class="pipe-node-sub" x="408" y="152" text-anchor="middle">Spike Cap</text>
-              </g>
-              <g id="t2-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="598" y="68" width="220" height="108" />
-                <text class="pipe-node-kicker" x="708" y="96" text-anchor="middle">03 INFERENCE</text>
-                <text class="pipe-node-title" x="708" y="124" text-anchor="middle">Vertex AI</text>
-                <text id="t2-sub-llm" class="pipe-node-sub" x="708" y="152" text-anchor="middle">Gemini 2.5</text>
-              </g>
-              <g id="t2-node-ltq" class="pipe-node">
-                <rect class="pipe-node-box" x="898" y="68" width="204" height="108" />
-                <text class="pipe-node-kicker" x="1000" y="96" text-anchor="middle">04 METERING</text>
-                <text class="pipe-node-title" x="1000" y="124" text-anchor="middle">Token Quota</text>
-                <text id="t2-sub-ltq" class="pipe-node-sub" x="1000" y="152" text-anchor="middle">Rolling Window</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">Apigee Policy Verdict</span><div id="hero-t2-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t2-verdict-sub" class="hero-kpi-sub">HTTP 429 / 413 circuit breaker at edge</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Tenant Quota Consumed</span><div id="hero-t2-quota" class="hero-kpi-value">0%</div><span id="hero-t2-quota-sub" class="hero-kpi-sub">Live rolling token budget gauge</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Direct vs. Edge Cost</span><div id="hero-t2-cost" class="hero-kpi-value tone-savings">Protected</div><span id="hero-t2-cost-sub" class="hero-kpi-sub">Blocked calls incur $0.00 Vertex AI spend</span></div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary" style="flex:1;min-width:260px;">
-              <div style="flex:1;">
-                <div class="viz-row-head" style="margin-bottom:4px;">
-                  <span id="t2-quota-used-label">Quota Used: 0 tokens</span>
-                  <span id="t2-quota-pct" class="viz-val">0%</span>
-                  <span id="t2-quota-rem-label">Remaining: —</span>
-                </div>
-                <div id="t2-quota-progressbar" class="viz-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                  <div id="t2-quota-fill" class="viz-fill viz-fill-blue" style="width:0%"></div>
-                </div>
-              </div>
-            </div>
-            <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-finops" data-drawer-title="Token Quotas &amp; FinOps — Side-by-Side &amp; Policy XML">Inspect Outputs &rarr;</button>
-            </div>
-          </div>
+        <div class="kpi-strip">
+          <div class="kpi-cell"><span class="kpi-label">Apigee Policy Verdict</span><span id="hero-t2-verdict" class="kpi-val tone-blue">Waiting...</span><span id="hero-t2-verdict-sub" class="kpi-sub">HTTP 429 / 413 circuit breaker</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Tenant Quota Used</span><span id="hero-t2-quota" class="kpi-val">0%</span><span id="hero-t2-quota-sub" class="kpi-sub">Rolling token budget</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Edge Cost Saved</span><span id="hero-t2-cost" class="kpi-val tone-savings">Protected</span><span id="hero-t2-cost-sub" class="kpi-sub">Blocked calls cost $0.00</span></div>
         </div>
 
-        <div id="details-finops" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">Quota Policy Configuration</h3></div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="tg-prompt"><span>Test Prompt</span></label><textarea id="tg-prompt" class="field-textarea" rows="3"></textarea></div>
-                <div class="field-group"><label class="field-label"><input type="checkbox" id="tg-enable-ptl" checked /> Prompt Token Limit</label><input id="tg-prompt-limit" class="field-input" type="number" value="120" /></div>
-                <div class="field-group"><label class="field-label"><input type="checkbox" id="tg-enable-ltq" checked /> Rolling Token Quota</label><input id="tg-quota-id" class="field-input" type="text" value="tenant-finops-demo" /><input id="tg-quota-limit" class="field-input" type="number" value="350" /></div>
+        <div class="pipeline-section">
+          <svg id="t2-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 155" role="img" aria-label="Token Quota Pipeline">
+            <path id="t2-edge-1" class="pipe-edge" d="M 218 78 L 298 78" />
+            <path id="t2-edge-2" class="pipe-edge" d="M 518 78 L 598 78" />
+            <path id="t2-edge-3" class="pipe-edge" d="M 818 78 L 898 78" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 218 78 L 898 78" /></circle>
+            <g id="t2-node-client" class="pipe-node"><rect class="pipe-node-box" x="18" y="38" width="200" height="80" /><text class="pipe-node-title" x="118" y="72" text-anchor="middle">Tenant App</text><text id="t2-sub-client" class="pipe-node-sub" x="118" y="96" text-anchor="middle">API Key</text></g>
+            <g id="t2-node-ptl" class="pipe-node"><rect class="pipe-node-box" x="298" y="38" width="220" height="80" /><text class="pipe-node-title" x="408" y="72" text-anchor="middle">PromptTokenLimit</text><text id="t2-sub-ptl" class="pipe-node-sub" x="408" y="96" text-anchor="middle">Pre-flight Gate</text></g>
+            <g id="t2-node-llm" class="pipe-node"><rect class="pipe-node-box" x="598" y="38" width="220" height="80" /><text class="pipe-node-title" x="708" y="72" text-anchor="middle">Vertex AI Gemini</text><text id="t2-sub-llm" class="pipe-node-sub" x="708" y="96" text-anchor="middle">Inference</text></g>
+            <g id="t2-node-ltq" class="pipe-node"><rect class="pipe-node-box" x="898" y="38" width="204" height="80" /><text class="pipe-node-title" x="1000" y="72" text-anchor="middle">LLMTokenQuota</text><text id="t2-sub-ltq" class="pipe-node-sub" x="1000" y="96" text-anchor="middle">Rolling Window</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner"><span id="tg-status">Ready to test native Apigee X token governance.</span></div>
+          <div>
+            <div class="viz-row-head" style="margin-bottom:4px;"><span id="t2-quota-used-label">Quota Used: 0 tokens</span><span id="t2-quota-pct" class="viz-val">0%</span><span id="t2-quota-rem-label">Remaining: —</span></div>
+            <div id="t2-quota-progressbar" class="viz-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div id="t2-quota-fill" class="viz-fill viz-fill-blue" style="width:0%"></div></div>
+          </div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Direct Vertex AI (No Quotas)</h3><span id="tg-direct-pill" class="model-pill">UNPROTECTED</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Tokens</span><span id="tg-direct-total-tok" class="metric-main">—</span><span id="tg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                <div class="mini-metric"><span class="metric-label">Cost &amp; Latency</span><span id="tg-direct-cost" class="metric-main">—</span><span id="tg-direct-lat" class="metric-sub">—</span></div>
               </div>
+              <pre id="tg-direct-body" class="response-box">Run a quota test to compare...</pre>
+            </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Apigee X Token Governance</h3><span id="tg-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Verdict</span><span id="tg-gw-verdict" class="metric-main">—</span><span id="tg-gw-verdict-sub" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Quota State</span><span id="tg-gw-tok" class="metric-main">—</span><span class="metric-sub">Used: <strong id="tg-gw-quota-used">—</strong> &middot; Rem: <strong id="tg-gw-quota-rem">—</strong></span></div>
+              </div>
+              <pre id="tg-gw-body" class="response-box">Run a quota test to compare...</pre>
             </div>
           </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI</h3><span id="tg-direct-pill" class="model-pill">UNPROTECTED</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Total Tokens</span><span id="tg-direct-total-tok" class="metric-main">—</span><span id="tg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="tg-direct-cost" class="metric-main">—</span><span id="tg-direct-lat" class="metric-sub">—</span></div>
-                </div>
-                <pre id="tg-direct-body" class="response-box">Run a quota test to inspect live output.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">Apigee X Token Governance</h3><span id="tg-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Verdict</span><span id="tg-gw-verdict" class="metric-main">—</span><span id="tg-gw-verdict-sub" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Quota State</span><span id="tg-gw-tok" class="metric-main">—</span><span class="metric-sub">Used: <strong id="tg-gw-quota-used">—</strong> &middot; Rem: <strong id="tg-gw-quota-rem">—</strong></span></div>
-                </div>
-                <pre id="tg-gw-body" class="response-box">Run a quota test to inspect live output.</pre>
-              </div>
-            </div>
-            <div class="surface-card architect-only">
-              <div class="compare-grid">
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="tg-xml-box" class="code-block">—</pre></div>
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="tg-telemetry-box" class="code-block">—</pre></div>
-              </div>
-            </div>
-          </div>
+          <details class="audit-accordion"><summary>Apigee Policy XML &amp; Raw Telemetry</summary><div class="audit-accordion-body"><div class="compare-grid"><pre id="tg-xml-box" class="code-block">—</pre><pre id="tg-telemetry-box" class="code-block">—</pre></div></div></details>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 3: MODEL ARMOR SAFETY
-           ================================================================ -->
-      <section id="main-tab-model-armor" role="tabpanel" aria-label="Model Armor Safety" style="display:none;">
-        <div class="keynote-action-bar">
-          <div id="ma-scenario-list" class="scenario-pill-strip" aria-label="Model Armor Attack Scenarios"></div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-ma" class="btn-primary"><span>Test Model Armor</span><span aria-hidden="true">&rarr;</span></button>
+      <!-- ==================== TAB 3: MODEL ARMOR ==================== -->
+      <section id="main-tab-model-armor" class="exec-card" role="tabpanel" aria-label="Model Armor Safety" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-red">GOOGLE CLOUD MODEL ARMOR</span><span class="soft-pill pill-green">&bull; Zero-Code Inbound &amp; Outbound</span></div>
+            <span class="exec-proxy-name">model-armor-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/policies/model-armor</span>
           </div>
+          <span id="t3-pipe-status" class="soft-pill pill-idle">IDLE</span>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t3-pipe-status" class="stage-story-badge">READY</span>
-              <span id="ma-status">Zero-code Apigee X SanitizeUserPrompt &amp; SanitizeModelResponse inspection.</span>
-            </div>
-            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-armor" data-drawer-title="Model Armor Safety — Attack vs. Intercepted Output">
-              <span>Inspect Outputs &amp; XML &rarr;</span>
-            </button>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t3-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 240" role="img" aria-label="Model Armor Security Pipeline">
-              <path id="t3-edge-1" class="pipe-edge" d="M 176 122 L 222 122" />
-              <path id="t3-edge-2" class="pipe-edge" d="M 432 122 L 478 122" />
-              <path id="t3-edge-3" class="pipe-edge" d="M 658 122 L 704 122" />
-              <path id="t3-edge-4" class="pipe-edge" d="M 914 122 L 952 122" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 122 L 952 122" /></circle>
-              <g id="t3-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="14" y="68" width="162" height="108" />
-                <text class="pipe-node-kicker" x="95" y="96" text-anchor="middle">01 INPUT</text>
-                <text class="pipe-node-title" x="95" y="124" text-anchor="middle">User Prompt</text>
-                <text id="t3-sub-client" class="pipe-node-sub" x="95" y="152" text-anchor="middle">Untrusted</text>
-              </g>
-              <g id="t3-node-sup" class="pipe-node">
-                <rect class="pipe-node-box" x="222" y="68" width="210" height="108" />
-                <text class="pipe-node-kicker" x="327" y="96" text-anchor="middle">02 PRE-LLM SHIELD</text>
-                <text class="pipe-node-title" x="327" y="124" text-anchor="middle">SanitizeUserPrompt</text>
-                <text id="t3-sub-sup" class="pipe-node-sub" x="327" y="152" text-anchor="middle">Jailbreak / PII / RAI</text>
-              </g>
-              <g id="t3-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="478" y="68" width="180" height="108" />
-                <text class="pipe-node-kicker" x="568" y="96" text-anchor="middle">03 MODEL</text>
-                <text class="pipe-node-title" x="568" y="124" text-anchor="middle">Vertex AI</text>
-                <text id="t3-sub-llm" class="pipe-node-sub" x="568" y="152" text-anchor="middle">Gemini 2.5</text>
-              </g>
-              <g id="t3-node-smr" class="pipe-node">
-                <rect class="pipe-node-box" x="704" y="68" width="210" height="108" />
-                <text class="pipe-node-kicker" x="809" y="96" text-anchor="middle">04 POST-LLM SHIELD</text>
-                <text class="pipe-node-title" x="809" y="124" text-anchor="middle">SanitizeResponse</text>
-                <text id="t3-sub-smr" class="pipe-node-sub" x="809" y="152" text-anchor="middle">Output Guardrail</text>
-              </g>
-              <g id="t3-node-out" class="pipe-node">
-                <rect class="pipe-node-box" x="952" y="68" width="154" height="108" />
-                <text class="pipe-node-kicker" x="1029" y="96" text-anchor="middle">05 OUTPUT</text>
-                <text class="pipe-node-title" x="1029" y="124" text-anchor="middle">Safe Reply</text>
-                <text id="t3-sub-out" class="pipe-node-sub" x="1029" y="152" text-anchor="middle">Verified</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">Model Armor Verdict</span><div id="hero-t3-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t3-verdict-sub" class="hero-kpi-sub">Blocks prompt injection, PII &amp; toxic output</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Threat Stage</span><div id="hero-t3-stage" class="hero-kpi-value">Zero-Code</div><span id="hero-t3-stage-sub" class="hero-kpi-sub">Enforced in Apigee X before LLM call</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t3-latency" class="hero-kpi-value tone-savings">Sub-Second</div><span id="hero-t3-latency-sub" class="hero-kpi-sub">Zero tokens billed on intercepted attacks</span></div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span>Zero application code changes &middot; Centralized enterprise Model Armor template</span></div>
-            <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-armor" data-drawer-title="Model Armor Safety — Side-by-Side &amp; Policy XML">Inspect Outputs &rarr;</button>
-            </div>
-          </div>
+        <div class="kpi-strip">
+          <div class="kpi-cell"><span class="kpi-label">Model Armor Verdict</span><span id="hero-t3-verdict" class="kpi-val tone-blue">Waiting...</span><span id="hero-t3-verdict-sub" class="kpi-sub">Prompt injection, PII &amp; RAI</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Threat Stage</span><span id="hero-t3-stage" class="kpi-val">Zero-Code</span><span id="hero-t3-stage-sub" class="kpi-sub">Enforced in Apigee X</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Edge Latency</span><span id="hero-t3-latency" class="kpi-val tone-savings">Sub-Second</span><span id="hero-t3-latency-sub" class="kpi-sub">0 tokens billed on blocks</span></div>
         </div>
 
-        <div id="details-armor" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">Model Armor Controls</h3></div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="ma-prompt"><span>Prompt Payload</span></label><textarea id="ma-prompt" class="field-textarea" rows="3"></textarea></div>
-                <div class="toggle-grid">
-                  <label id="card-ma-prompt" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">SanitizeUserPrompt</span><input type="checkbox" id="ma-enable-prompt" checked /></div><span class="toggle-desc">Pre-LLM inspection</span></label>
-                  <label id="card-ma-response" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">SanitizeResponse</span><input type="checkbox" id="ma-enable-response" checked /></div><span class="toggle-desc">Post-LLM inspection</span></label>
-                </div>
+        <div class="pipeline-section">
+          <svg id="t3-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 155" role="img" aria-label="Model Armor Pipeline">
+            <path id="t3-edge-1" class="pipe-edge" d="M 176 78 L 222 78" />
+            <path id="t3-edge-2" class="pipe-edge" d="M 432 78 L 478 78" />
+            <path id="t3-edge-3" class="pipe-edge" d="M 658 78 L 704 78" />
+            <path id="t3-edge-4" class="pipe-edge" d="M 914 78 L 952 78" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 78 L 952 78" /></circle>
+            <g id="t3-node-client" class="pipe-node"><rect class="pipe-node-box" x="14" y="38" width="162" height="80" /><text class="pipe-node-title" x="95" y="72" text-anchor="middle">User Prompt</text><text id="t3-sub-client" class="pipe-node-sub" x="95" y="96" text-anchor="middle">Untrusted</text></g>
+            <g id="t3-node-sup" class="pipe-node"><rect class="pipe-node-box" x="222" y="38" width="210" height="80" /><text class="pipe-node-title" x="327" y="72" text-anchor="middle">SanitizeUserPrompt</text><text id="t3-sub-sup" class="pipe-node-sub" x="327" y="96" text-anchor="middle">Jailbreak / PII</text></g>
+            <g id="t3-node-llm" class="pipe-node"><rect class="pipe-node-box" x="478" y="38" width="180" height="80" /><text class="pipe-node-title" x="568" y="72" text-anchor="middle">Vertex AI</text><text id="t3-sub-llm" class="pipe-node-sub" x="568" y="96" text-anchor="middle">Gemini 2.5</text></g>
+            <g id="t3-node-smr" class="pipe-node"><rect class="pipe-node-box" x="704" y="38" width="210" height="80" /><text class="pipe-node-title" x="809" y="72" text-anchor="middle">SanitizeResponse</text><text id="t3-sub-smr" class="pipe-node-sub" x="809" y="96" text-anchor="middle">Output Shield</text></g>
+            <g id="t3-node-out" class="pipe-node"><rect class="pipe-node-box" x="952" y="38" width="154" height="80" /><text class="pipe-node-title" x="1029" y="72" text-anchor="middle">Safe Reply</text><text id="t3-sub-out" class="pipe-node-sub" x="1029" y="96" text-anchor="middle">Verified</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner"><span id="ma-status">Ready to test Google Cloud Model Armor policies.</span></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Direct Vertex AI (Unprotected)</h3><span id="ma-direct-pill" class="model-pill">UNPROTECTED</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Tokens</span><span id="ma-direct-total-tok" class="metric-main">—</span><span id="ma-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                <div class="mini-metric"><span class="metric-label">Cost &amp; Latency</span><span id="ma-direct-cost" class="metric-main">—</span><span id="ma-direct-lat" class="metric-sub">—</span></div>
               </div>
+              <pre id="ma-direct-body" class="response-box">Run an attack scenario to compare...</pre>
+            </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Apigee X + Model Armor</h3><span id="ma-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Verdict</span><span id="ma-gw-verdict" class="metric-main">—</span><span id="ma-gw-verdict-sub" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Fault / Latency</span><span id="ma-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="ma-gw-fault-sub">—</span> &middot; <span id="ma-gw-lat">—</span> &middot; <span id="ma-gw-tok">—</span></span></div>
+              </div>
+              <pre id="ma-gw-body" class="response-box">Run an attack scenario to compare...</pre>
             </div>
           </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI (Unprotected)</h3><span id="ma-direct-pill" class="model-pill">UNPROTECTED</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="ma-direct-total-tok" class="metric-main">—</span><span id="ma-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="ma-direct-cost" class="metric-main">—</span><span id="ma-direct-lat" class="metric-sub">—</span></div>
-                </div>
-                <pre id="ma-direct-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">Apigee X + Model Armor</h3><span id="ma-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Verdict</span><span id="ma-gw-verdict" class="metric-main">—</span><span id="ma-gw-verdict-sub" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Fault / Latency</span><span id="ma-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="ma-gw-fault-sub">—</span> &middot; <span id="ma-gw-lat">—</span> &middot; <span id="ma-gw-tok">—</span></span></div>
-                </div>
-                <pre id="ma-gw-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
-              </div>
-            </div>
-            <div class="surface-card architect-only">
-              <div class="compare-grid">
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="ma-xml-box" class="code-block">—</pre></div>
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="ma-telemetry-box" class="code-block">—</pre></div>
-              </div>
-            </div>
-          </div>
+          <details class="audit-accordion"><summary>Apigee Policy XML &amp; Raw Telemetry</summary><div class="audit-accordion-body"><div class="compare-grid"><pre id="ma-xml-box" class="code-block">—</pre><pre id="ma-telemetry-box" class="code-block">—</pre></div></div></details>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 4: SEMANTIC CACHE & SAFETY
-           ================================================================ -->
-      <section id="main-tab-semantic-gov" role="tabpanel" aria-label="Semantic Cache and Safety" style="display:none;">
-        <div class="keynote-action-bar">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;">
-            <div class="provider-segmented" role="group" aria-label="Native Policy Mode">
-              <button type="button" id="btn-submode-nc" class="provider-seg-btn active">Semantic Cache</button>
-              <button type="button" id="btn-submode-sg" class="provider-seg-btn">Semantic Guardrail</button>
-            </div>
-            <div id="sg-scenario-list" class="scenario-pill-strip" aria-label="Semantic Scenarios"></div>
+      <!-- ==================== TAB 4: SEMANTIC CACHE & SAFETY ==================== -->
+      <section id="main-tab-semantic-gov" class="exec-card" role="tabpanel" aria-label="Semantic Cache" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-green">NATIVE SEMANTIC CACHE</span><span id="vs-state-badge" class="soft-pill pill-idle">Checking Vector Search...</span></div>
+            <span class="exec-proxy-name">semantic-cache-flow</span>
+            <span id="sg-flow-footer" class="exec-proxy-path">/v1/ai-economics/policies/native-cache</span>
           </div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-sg" class="btn-primary"><span>Run Semantic Policy</span><span aria-hidden="true">&rarr;</span></button>
-          </div>
+          <span id="t4-pipe-status" class="soft-pill pill-idle">IDLE</span>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t4-pipe-status" class="stage-story-badge">READY</span>
-              <span id="sg-status">Native Apigee X SemanticCacheLookup &amp; Populate backed by Vertex AI Vector Search.</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <span id="vs-state-badge" class="model-pill">Checking Vector Search...</span>
-              <button type="button" id="btn-vs-wake" class="btn-secondary">Wake Node</button>
-              <button type="button" id="btn-vs-suspend" class="btn-ghost">Suspend</button>
-              <button type="button" id="btn-vs-refresh" class="btn-ghost">Refresh</button>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Responses &amp; Vector Telemetry">
-                <span>Inspect Outputs &rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t4-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Native Semantic Cache Pipeline">
-              <path id="t4-edge-1" class="pipe-edge" d="M 176 142 L 222 142" />
-              <path id="t4-edge-2" class="pipe-edge" d="M 432 142 L 478 142" />
-              <path id="t4-edge-3" class="pipe-edge" d="M 658 142 L 704 142" />
-              <path id="t4-edge-4" class="pipe-edge" d="M 914 142 L 952 142" />
-              <path id="t4-edge-hit" class="pipe-edge" d="M 327 90 C 327 18, 1029 18, 1029 90" stroke-dasharray="8 6" />
-              <text class="pipe-node-kicker" x="678" y="34" text-anchor="middle">NATIVE VECTOR CACHE HIT — BYPASSES VERTEX AI</text>
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 142 L 952 142" /></circle>
-              <g id="t4-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="14" y="90" width="162" height="104" />
-                <text class="pipe-node-kicker" x="95" y="116" text-anchor="middle">01 QUERY</text>
-                <text class="pipe-node-title" x="95" y="144" text-anchor="middle">Client App</text>
-                <text id="t4-sub-client" class="pipe-node-sub" x="95" y="172" text-anchor="middle">Paraphrase</text>
-              </g>
-              <g id="t4-node-pre" class="pipe-node">
-                <rect class="pipe-node-box" x="222" y="90" width="210" height="104" />
-                <text class="pipe-node-kicker" x="327" y="116" text-anchor="middle">02 LOOKUP</text>
-                <text id="t4-title-pre" class="pipe-node-title" x="327" y="144" text-anchor="middle">SemanticCacheLookup</text>
-                <text id="t4-sub-pre" class="pipe-node-sub" x="327" y="172" text-anchor="middle">Vector Similarity</text>
-              </g>
-              <g id="t4-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="478" y="90" width="180" height="104" />
-                <text class="pipe-node-kicker" x="568" y="116" text-anchor="middle">03 MODEL</text>
-                <text class="pipe-node-title" x="568" y="144" text-anchor="middle">Vertex AI</text>
-                <text id="t4-sub-llm" class="pipe-node-sub" x="568" y="172" text-anchor="middle">Gemini 2.5</text>
-              </g>
-              <g id="t4-node-post" class="pipe-node">
-                <rect class="pipe-node-box" x="704" y="90" width="210" height="104" />
-                <text class="pipe-node-kicker" x="809" y="116" text-anchor="middle">04 POPULATE</text>
-                <text id="t4-title-post" class="pipe-node-title" x="809" y="144" text-anchor="middle">SemanticCachePopulate</text>
-                <text id="t4-sub-post" class="pipe-node-sub" x="809" y="172" text-anchor="middle">Vector Store</text>
-              </g>
-              <g id="t4-node-out" class="pipe-node">
-                <rect class="pipe-node-box" x="952" y="90" width="154" height="104" />
-                <text class="pipe-node-kicker" x="1029" y="116" text-anchor="middle">05 REPLY</text>
-                <text class="pipe-node-title" x="1029" y="144" text-anchor="middle">Response</text>
-                <text id="t4-sub-out" class="pipe-node-sub" x="1029" y="172" text-anchor="middle">Delivered</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band hero-outcome-band-4">
-            <div class="hero-kpi"><span class="hero-kpi-label">Semantic Policy Outcome</span><div id="hero-t4-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t4-verdict-sub" class="hero-kpi-sub">Native Apigee X vector lookup &amp; populate</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t4-latency" class="hero-kpi-value tone-cyan">Live</div><span id="hero-t4-latency-sub" class="hero-kpi-sub">Bypasses Vertex AI on semantic hit</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Vector Search Node</span><div id="vs-cost-badge" class="hero-kpi-value">—</div><span id="vs-resource-details" class="hero-kpi-sub">Checking Vertex AI Vector Search status...</span></div>
-            <div class="hero-roi-card">
-              <div class="roi-hero-head"><span class="hero-kpi-label">Projected Annual Savings</span><span id="t4-scale-label" class="metric-sub">At 10M req/mo</span></div>
-              <div id="t4-annual-savings" class="roi-hero-value">$0 / yr</div>
-              <span class="hero-kpi-sub">On semantic cache hits (0 Vertex AI tokens)</span>
-            </div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span id="sg-flow-footer">Native Apigee X Policy Flow</span><span>&middot;</span><span id="vs-domain-label">—</span><span>&middot;</span><span id="vs-shard-label">—</span></div>
-            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Responses &amp; XML">Inspect Outputs &rarr;</button></div>
-          </div>
+        <div class="kpi-strip kpi-strip-4">
+          <div class="kpi-cell"><span class="kpi-label">Semantic Outcome</span><span id="hero-t4-verdict" class="kpi-val tone-savings">Waiting...</span><span id="hero-t4-verdict-sub" class="kpi-sub">Vector lookup &amp; populate</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Edge Latency</span><span id="hero-t4-latency" class="kpi-val tone-blue">Waiting...</span><span id="hero-t4-latency-sub" class="kpi-sub">Bypasses LLM on hit</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Vector Node</span><span id="vs-cost-badge" class="kpi-val">—</span><span id="vs-resource-details" class="kpi-sub">Checking...</span></div>
+          <div class="kpi-roi-box"><span class="kpi-label">Projected Annual Savings</span><span id="t4-annual-savings" class="roi-val">$0 / yr</span><span id="t4-scale-label" class="kpi-sub">At 10M req/mo</span></div>
         </div>
 
-        <div id="details-semantic" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><div><h3 id="sg-composer-title" class="surface-card-title">Semantic Policy Prompt</h3><p id="sg-policy-explanation" class="surface-card-sub">Native Apigee X SemanticCacheLookup / Populate flow.</p></div></div>
-              <textarea id="sg-prompt" class="field-textarea" rows="4"></textarea>
+        <div class="pipeline-section">
+          <svg id="t4-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 185" role="img" aria-label="Semantic Cache Pipeline">
+            <path id="t4-edge-1" class="pipe-edge" d="M 176 108 L 222 108" />
+            <path id="t4-edge-2" class="pipe-edge" d="M 432 108 L 478 108" />
+            <path id="t4-edge-3" class="pipe-edge" d="M 658 108 L 704 108" />
+            <path id="t4-edge-4" class="pipe-edge" d="M 914 108 L 952 108" />
+            <path id="t4-edge-hit" class="pipe-edge" d="M 327 68 C 327 16, 1029 16, 1029 68" stroke-dasharray="6 5" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 108 L 952 108" /></circle>
+            <g id="t4-node-client" class="pipe-node"><rect class="pipe-node-box" x="14" y="68" width="162" height="80" /><text class="pipe-node-title" x="95" y="102" text-anchor="middle">Client App</text><text id="t4-sub-client" class="pipe-node-sub" x="95" y="126" text-anchor="middle">Paraphrase</text></g>
+            <g id="t4-node-pre" class="pipe-node"><rect class="pipe-node-box" x="222" y="68" width="210" height="80" /><text id="t4-title-pre" class="pipe-node-title" x="327" y="102" text-anchor="middle">SemanticCacheLookup</text><text id="t4-sub-pre" class="pipe-node-sub" x="327" y="126" text-anchor="middle">Vector Similarity</text></g>
+            <g id="t4-node-llm" class="pipe-node"><rect class="pipe-node-box" x="478" y="68" width="180" height="80" /><text class="pipe-node-title" x="568" y="102" text-anchor="middle">Vertex AI</text><text id="t4-sub-llm" class="pipe-node-sub" x="568" y="126" text-anchor="middle">Gemini 2.5</text></g>
+            <g id="t4-node-post" class="pipe-node"><rect class="pipe-node-box" x="704" y="68" width="210" height="80" /><text id="t4-title-post" class="pipe-node-title" x="809" y="102" text-anchor="middle">SemanticCachePopulate</text><text id="t4-sub-post" class="pipe-node-sub" x="809" y="126" text-anchor="middle">Vector Store</text></g>
+            <g id="t4-node-out" class="pipe-node"><rect class="pipe-node-box" x="952" y="68" width="154" height="80" /><text class="pipe-node-title" x="1029" y="102" text-anchor="middle">Response</text><text id="t4-sub-out" class="pipe-node-sub" x="1029" y="126" text-anchor="middle">Delivered</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner"><span id="sg-status">Ready to execute native semantic cache policy.</span><span><span id="vs-domain-label">—</span> &middot; <span id="vs-shard-label">—</span></span></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Direct Vertex AI (Uncached)</h3><span id="sg-direct-pill" class="model-pill">DIRECT</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Tokens</span><span id="sg-direct-total-tok" class="metric-main">—</span><span id="sg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                <div class="mini-metric"><span class="metric-label">Cost &amp; Latency</span><span id="sg-direct-cost" class="metric-main">—</span><span id="sg-direct-lat" class="metric-sub">—</span></div>
+              </div>
+              <pre id="sg-direct-body" class="response-box">Run a semantic query to compare...</pre>
+            </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 id="sg-gw-heading" class="compare-box-title">Apigee X Native Semantic Cache</h3><span id="sg-gw-pill" class="model-pill pill-allowed">NATIVE</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Outcome</span><span id="sg-gw-verdict" class="metric-main">—</span><span id="sg-gw-verdict-sub" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Detail / Latency</span><span id="sg-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="sg-gw-fault-sub">—</span> &middot; <span id="sg-gw-lat">—</span> &middot; <span id="sg-gw-tok">—</span></span></div>
+              </div>
+              <pre id="sg-gw-body" class="response-box">Run a semantic query to compare...</pre>
             </div>
           </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI (Uncached)</h3><span id="sg-direct-pill" class="model-pill">DIRECT</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="sg-direct-total-tok" class="metric-main">—</span><span id="sg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="sg-direct-cost" class="metric-main">—</span><span id="sg-direct-lat" class="metric-sub">—</span></div>
-                </div>
-                <pre id="sg-direct-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 id="sg-gw-heading" class="compare-head-title">Apigee X Native Semantic Cache</h3><span id="sg-gw-pill" class="model-pill pill-allowed">NATIVE</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Outcome</span><span id="sg-gw-verdict" class="metric-main">—</span><span id="sg-gw-verdict-sub" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Detail / Latency</span><span id="sg-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="sg-gw-fault-sub">—</span> &middot; <span id="sg-gw-lat">—</span> &middot; <span id="sg-gw-tok">—</span></span></div>
-                </div>
-                <pre id="sg-gw-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
-              </div>
-            </div>
-            <div class="surface-card architect-only">
-              <div class="compare-grid">
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="sg-xml-box" class="code-block">—</pre></div>
-                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="sg-telemetry-box" class="code-block">—</pre></div>
-              </div>
-            </div>
-          </div>
+          <details class="audit-accordion"><summary>Apigee Policy XML &amp; Vector Telemetry</summary><div class="audit-accordion-body"><div class="compare-grid"><pre id="sg-xml-box" class="code-block">—</pre><pre id="sg-telemetry-box" class="code-block">—</pre></div></div></details>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 5: SYSTEM 1 / SYSTEM 2 ROUTING (PURE APIGEE X SERVICECALLOUT)
-           ================================================================ -->
-      <section id="main-tab-system1-jev" role="tabpanel" aria-label="System 1 and System 2 Routing" style="display:none;">
-        <div class="keynote-action-bar">
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;">
-            <div class="provider-segmented" role="group" aria-label="System 1 Decision Engine">
-              <button type="button" id="btn-s1-provider-gemini" class="provider-seg-btn active">Gemini Decision 1</button>
-              <button type="button" id="btn-s1-provider-jev" class="provider-seg-btn">TypeSafe Jev</button>
-            </div>
-            <div id="s1-scenario-list" class="scenario-pill-strip" aria-label="System 1 Scenarios"></div>
+      <!-- ==================== TAB 5: SYSTEM 1 / SYSTEM 2 ROUTING ==================== -->
+      <section id="main-tab-system1-jev" class="exec-card" role="tabpanel" aria-label="System 1 Routing" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-purple">PURE APIGEE X SERVICECALLOUT</span><span class="soft-pill pill-green">&bull; Zero Cloud Run Hops</span><span class="soft-pill pill-amber">Encrypted KVM</span></div>
+            <span class="exec-proxy-name">system1-routing-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/system1-routing</span>
           </div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-s1" class="btn-primary"><span>Run System 1</span><span aria-hidden="true">&rarr;</span></button>
+          <span id="t5-pipe-status" class="soft-pill pill-idle">IDLE</span>
+        </div>
+
+        <div class="kpi-strip kpi-strip-4">
+          <div class="kpi-cell"><span class="kpi-label">Cost Savings</span><span id="hero-t5-savings" class="kpi-val tone-savings">Waiting...</span><span id="hero-t5-savings-sub" class="kpi-sub">vs. Direct Gemini 2.5 Pro</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Route Taken</span><span id="hero-t5-route" class="kpi-val tone-violet">Waiting...</span><span id="hero-t5-route-sub" class="kpi-sub">Flash fast-track or Pro</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Noul Quality Gate</span><span id="hero-t5-gate" class="kpi-val">Standby</span><span id="hero-t5-gate-sub" class="kpi-sub">5-head defect verifier</span></div>
+          <div class="kpi-roi-box">
+            <span class="kpi-label">Projected Annual Savings</span>
+            <span id="t5-annual-savings" class="roi-val">$0 / yr</span>
+            <div class="roi-slider-inline"><input id="t5-scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="System 1 monthly volume" /><span id="t5-scale-label">10M/mo</span></div>
           </div>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t5-pipe-status" class="stage-story-badge">READY</span>
-              <span id="s1-status">Pure Apigee X ServiceCallout pre-router &amp; Noul post-verifier (Zero Cloud Run hops).</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px;">
-              <button type="button" id="btn-open-glossary-tab5" class="btn-ghost">What is Noul?</button>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Telemetry &amp; Outputs">
-                <span>Inspect Noul &amp; Outputs &rarr;</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t5-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="System 1 System 2 Apigee X Pipeline">
-              <path id="t5-edge-1" class="pipe-edge" d="M 176 130 L 236 130" />
-              <path id="t5-edge-2" class="pipe-edge" d="M 446 104 C 492 104, 502 66, 548 66" />
-              <path id="t5-edge-fasttrack" class="pipe-edge" d="M 446 156 C 492 156, 502 194, 548 194" />
-              <path id="t5-edge-3" class="pipe-edge" d="M 748 66 L 818 66" />
-              <path id="t5-edge-4" class="pipe-edge" d="M 948 118 C 948 194, 804 194, 748 194" stroke-dasharray="8 6" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 176 130 L 446 130 L 548 66 L 818 66" /></circle>
-              <g id="t5-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="14" y="76" width="162" height="108" />
-                <text class="pipe-node-kicker" x="95" y="104" text-anchor="middle">01 ENTRY</text>
-                <text class="pipe-node-title" x="95" y="132" text-anchor="middle">Client App</text>
-                <text id="t5-sub-client" class="pipe-node-sub" x="95" y="160" text-anchor="middle">Prompt</text>
-              </g>
-              <g id="t5-node-stage1" class="pipe-node">
-                <rect class="pipe-node-box" x="236" y="76" width="210" height="108" />
-                <text class="pipe-node-kicker" x="341" y="104" text-anchor="middle">02 APIGEE SERVICECALLOUT</text>
-                <text class="pipe-node-title" x="341" y="132" text-anchor="middle">Stage 1: System 1</text>
-                <text id="t5-sub-stage1" class="pipe-node-sub" x="341" y="160" text-anchor="middle">Pre-Router</text>
-              </g>
-              <g id="t5-node-flash" class="pipe-node">
-                <rect class="pipe-node-box" x="548" y="16" width="200" height="100" />
-                <text class="pipe-node-kicker" x="648" y="42" text-anchor="middle">FAST-TRACK L1</text>
-                <text class="pipe-node-title" x="648" y="68" text-anchor="middle">Gemini Flash</text>
-                <text id="t5-sub-flash" class="pipe-node-sub" x="648" y="94" text-anchor="middle">Low-Cost Path</text>
-              </g>
-              <g id="t5-node-stage2" class="pipe-node">
-                <rect class="pipe-node-box" x="818" y="16" width="260" height="100" />
-                <text class="pipe-node-kicker" x="948" y="42" text-anchor="middle">03 QUALITY GATE</text>
-                <text class="pipe-node-title" x="948" y="68" text-anchor="middle">Stage 2: Noul Verifier</text>
-                <text id="t5-sub-stage2" class="pipe-node-sub" x="948" y="94" text-anchor="middle">Hallucination Check</text>
-              </g>
-              <g id="t5-node-pro" class="pipe-node">
-                <rect class="pipe-node-box" x="548" y="144" width="200" height="100" />
-                <text class="pipe-node-kicker" x="648" y="170" text-anchor="middle">SYSTEM 2 ESCALATION</text>
-                <text class="pipe-node-title" x="648" y="196" text-anchor="middle">Gemini 2.5 Pro</text>
-                <text id="t5-sub-pro" class="pipe-node-sub" x="648" y="222" text-anchor="middle">Deep Reasoning</text>
-              </g>
-            </svg>
-          </div>
-
-          <!-- Live Direct Pro vs. System 1 Race Strip -->
-          <div class="race-strip" aria-label="Direct Pro vs System 1 Live Comparison">
-            <div class="race-lane">
-              <div class="race-lane-head"><span>Direct Gemini 2.5 Pro (Always System 2)</span><span id="t5-race-direct-label" class="race-lane-val">Awaiting run</span></div>
-              <div class="race-track"><div id="t5-race-direct-bar" class="race-fill race-fill-direct" style="transform:scaleX(0.08)"></div></div>
-            </div>
-            <div class="race-lane">
-              <div class="race-lane-head"><span>Apigee X System 1 / System 2</span><span id="t5-race-gw-label" class="race-lane-val">Fast-track + Noul Gate</span></div>
-              <div class="race-track"><div id="t5-race-gw-bar" class="race-fill race-fill-gateway" style="transform:scaleX(0.08)"></div></div>
-            </div>
-          </div>
-
-          <div class="hero-outcome-band hero-outcome-band-4">
-            <div class="hero-kpi"><span class="hero-kpi-label">System 1 Cost Savings</span><div id="hero-t5-savings" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t5-savings-sub" class="hero-kpi-sub">Fast-tracks simple tasks, escalates defects</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Routing Decision</span><div id="hero-t5-route" class="hero-kpi-value tone-violet">Apigee X</div><span id="hero-t5-route-sub" class="hero-kpi-sub">Native ServiceCallout + TargetServer</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Noul Quality Gate</span><div id="hero-t5-gate" class="hero-kpi-value">Standby</div><span id="hero-t5-gate-sub" class="hero-kpi-sub">Checks hallucination, grounding &amp; safety</span></div>
-            <div class="hero-roi-card">
-              <div class="roi-hero-head"><span class="hero-kpi-label">Projected Annual Savings</span><span id="t5-scale-label" class="metric-sub">At 10M req/mo</span></div>
-              <div id="t5-annual-savings" class="roi-hero-value">$0 / yr</div>
-              <div class="roi-slider-row">
-                <label for="t5-scale-slider" class="metric-label">Volume</label>
-                <input id="t5-scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="System 1 monthly requests in millions" />
-              </div>
-            </div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span>Pure Apigee X (Zero Cloud Run proxy hops) &middot; Encrypted Apigee KVM API Keys</span></div>
-            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Battery &amp; Outputs">Inspect Noul &amp; Outputs &rarr;</button></div>
-          </div>
+        <div class="pipeline-section">
+          <svg id="t5-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 205" role="img" aria-label="System 1 System 2 Pipeline">
+            <path id="t5-edge-1" class="pipe-edge" d="M 176 102 L 236 102" />
+            <path id="t5-edge-2" class="pipe-edge" d="M 446 82 C 492 82, 502 52, 548 52" />
+            <path id="t5-edge-fasttrack" class="pipe-edge" d="M 446 122 C 492 122, 502 152, 548 152" />
+            <path id="t5-edge-3" class="pipe-edge" d="M 748 52 L 818 52" />
+            <path id="t5-edge-4" class="pipe-edge" d="M 948 92 C 948 152, 804 152, 748 152" stroke-dasharray="6 5" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 176 102 L 446 102 L 548 52 L 818 52" /></circle>
+            <g id="t5-node-client" class="pipe-node"><rect class="pipe-node-box" x="14" y="62" width="162" height="80" /><text class="pipe-node-title" x="95" y="96" text-anchor="middle">Client App</text><text id="t5-sub-client" class="pipe-node-sub" x="95" y="120" text-anchor="middle">Prompt</text></g>
+            <g id="t5-node-stage1" class="pipe-node"><rect class="pipe-node-box" x="236" y="62" width="210" height="80" /><text class="pipe-node-title" x="341" y="96" text-anchor="middle">Stage 1: System 1</text><text id="t5-sub-stage1" class="pipe-node-sub" x="341" y="120" text-anchor="middle">Apigee Pre-Router</text></g>
+            <g id="t5-node-flash" class="pipe-node"><rect class="pipe-node-box" x="548" y="12" width="200" height="78" /><text class="pipe-node-title" x="648" y="46" text-anchor="middle">L1: Gemini Flash</text><text id="t5-sub-flash" class="pipe-node-sub" x="648" y="68" text-anchor="middle">Fast-Track</text></g>
+            <g id="t5-node-stage2" class="pipe-node"><rect class="pipe-node-box" x="818" y="12" width="260" height="78" /><text class="pipe-node-title" x="948" y="46" text-anchor="middle">Stage 2: Noul Gate</text><text id="t5-sub-stage2" class="pipe-node-sub" x="948" y="68" text-anchor="middle">Quality Verifier</text></g>
+            <g id="t5-node-pro" class="pipe-node"><rect class="pipe-node-box" x="548" y="114" width="200" height="78" /><text class="pipe-node-title" x="648" y="148" text-anchor="middle">L2: Gemini Pro</text><text id="t5-sub-pro" class="pipe-node-sub" x="648" y="170" text-anchor="middle">System 2 Escalation</text></g>
+          </svg>
         </div>
 
-        <div id="details-system1" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">System 1 &amp; Noul Controls</h3></div>
-              <div class="toggle-grid" style="margin-bottom:12px;">
-                <label id="s1-card-fast-track" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Stage 1 Fast-Track</span><input type="checkbox" id="s1-enable-fast-track" checked /></div></label>
-                <label id="s1-card-verifier" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Stage 2 Verifier</span><input type="checkbox" id="s1-enable-verifier" checked /></div></label>
-                <label id="s1-card-defect" class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate L1 Defect</span><input type="checkbox" id="s1-simulate-defect" /></div></label>
+        <div class="exec-body">
+          <div class="status-banner"><span id="s1-status">Ready to execute pure Apigee X System 1 / System 2 routing.</span><div style="display:flex;gap:6px;"><span id="noul-gate-badge" class="model-pill">—</span><span id="noul-verdict-pill" class="model-pill pill-jev">STANDBY</span></div></div>
+          <div id="noul-bars-container" class="noul-grid"></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Direct Gemini 2.5 Pro</h3><span class="model-pill">gemini-2.5-pro</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Cost</span><span id="s1-direct-cost" class="metric-main">—</span><span id="s1-direct-lat" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Tokens</span><span id="s1-direct-prompt-tok" class="metric-main">—</span><span id="s1-direct-out-tok" class="metric-sub">—</span></div>
               </div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="s1-query"><span>User Query</span></label><textarea id="s1-query" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="s1-sys"><span>System Instruction</span></label><textarea id="s1-sys" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="s1-rag"><span>Grounding Context</span></label><textarea id="s1-rag" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="s1-conf-threshold"><span>Confidence Threshold</span></label><input id="s1-conf-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.75" /></div>
-                <div class="field-group"><label class="field-label" for="s1-fire-threshold"><span>Noul Fire Threshold</span></label><input id="s1-fire-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.50" /></div>
+              <pre id="s1-direct-body" class="response-box">Run System 1 pipeline to compare...</pre>
+            </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Apigee X System 1 / 2</h3><span id="s1-gw-pill" class="model-pill pill-jev">SYSTEM 1</span></div>
+              <div class="mini-metrics">
+                <div class="mini-metric"><span class="metric-label">Savings</span><span id="s1-gw-savings" class="metric-main">—</span><span id="s1-gw-savings-sub" class="metric-sub">—</span></div>
+                <div class="mini-metric"><span class="metric-label">Route &amp; Cost</span><span id="s1-gw-route" class="metric-main">—</span><span id="s1-gw-total-cost" class="metric-sub">—</span></div>
               </div>
+              <div class="metric-sub"><span id="s1-gw-route-sub">—</span> &middot; Classifier: <strong id="s1-gw-jev-cost">—</strong></div>
+              <pre id="s1-gw-body" class="response-box">Run System 1 pipeline to compare...</pre>
             </div>
           </div>
-          <div class="workbench-right">
-            <div class="surface-card">
-              <div class="surface-card-header">
-                <h3 class="surface-card-title">Stage 2 Noul Quality Battery</h3>
-                <div style="display:flex;gap:8px;"><span id="noul-gate-badge" class="model-pill">—</span><span id="noul-verdict-pill" class="model-pill pill-jev">STANDBY</span></div>
-              </div>
-              <div id="noul-bars-container" class="noul-grid"></div>
-            </div>
-
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">Direct Gemini 2.5 Pro</h3><span class="model-pill">gemini-2.5-pro</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Cost</span><span id="s1-direct-cost" class="metric-main">—</span><span id="s1-direct-lat" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="s1-direct-prompt-tok" class="metric-main">—</span><span id="s1-direct-out-tok" class="metric-sub">—</span></div>
-                </div>
-                <pre id="s1-direct-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">Apigee X System 1 / 2</h3><span id="s1-gw-pill" class="model-pill pill-jev">SYSTEM 1</span></div>
-                <div class="metric-grid">
-                  <div class="metric-tile"><span class="metric-label">Savings</span><span id="s1-gw-savings" class="metric-main">—</span><span id="s1-gw-savings-sub" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Route</span><span id="s1-gw-route" class="metric-main">—</span><span id="s1-gw-route-sub" class="metric-sub">—</span></div>
-                  <div class="metric-tile"><span class="metric-label">Total Cost</span><span id="s1-gw-total-cost" class="metric-main">—</span><span id="s1-gw-jev-cost" class="metric-sub">Classifier: —</span></div>
-                </div>
-                <pre id="s1-gw-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
-              </div>
-            </div>
-
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">Cost Comparison</h3><span id="s1-viz-delta-pill" class="model-pill">—</span></div>
+          <details class="audit-accordion">
+            <summary>Cost Comparison Chart &amp; Stage 1 / Stage 2 Telemetry</summary>
+            <div class="audit-accordion-body">
               <div class="viz-stack">
                 <div class="viz-row"><div class="viz-row-head"><span>Direct Pro</span><span id="s1-viz-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="s1-viz-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div></div>
-                <div class="viz-row"><div class="viz-row-head"><span>Apigee X System 1</span><span id="s1-viz-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="s1-viz-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Apigee X System 1 <span id="s1-viz-delta-pill" class="model-pill">—</span></span><span id="s1-viz-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="s1-viz-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
               </div>
-            </div>
-
-            <div class="surface-card architect-only">
               <div class="compare-grid">
-                <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 1 Pre-Router</h4><p id="s1-stage1-meta" class="metric-sub">—</p><pre id="s1-stage1-box" class="code-block">—</pre></div>
-                <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 2 Verifier</h4><p id="s1-stage2-meta" class="metric-sub">—</p><pre id="s1-stage2-box" class="code-block">—</pre></div>
+                <div><span id="s1-stage1-meta" class="metric-sub">Stage 1</span><pre id="s1-stage1-box" class="code-block">—</pre></div>
+                <div><span id="s1-stage2-meta" class="metric-sub">Stage 2</span><pre id="s1-stage2-box" class="code-block">—</pre></div>
               </div>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 6: MCP TOOL GOVERNANCE ==================== -->
+      <section id="main-tab-mcp-gov" class="exec-card" role="tabpanel" aria-label="MCP Tool Governance" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-red">AGENTIC MCP FIREWALL</span><span class="soft-pill pill-blue">JSON-RPC 2.0 RBAC</span><span class="soft-pill pill-green">Model Armor Indirect Scan</span></div>
+            <span class="exec-proxy-name">mcp-governance-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/policies/mcp-governance</span>
+          </div>
+          <span id="t6-pipe-status" class="soft-pill pill-idle">IDLE</span>
+        </div>
+
+        <div class="kpi-strip">
+          <div class="kpi-cell"><span class="kpi-label">MCP Gateway Verdict</span><span id="hero-t6-verdict" class="kpi-val tone-blue">Waiting...</span><span id="hero-t6-verdict-sub" class="kpi-sub">RBAC allowlist + indirect scan</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Tool &amp; Role</span><span id="hero-t6-tool" class="kpi-val">search_kb</span><span id="hero-t6-tool-sub" class="kpi-sub">Role: support-agent</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Edge Latency</span><span id="hero-t6-lat" class="kpi-val tone-savings">Waiting...</span><span id="hero-t6-lat-sub" class="kpi-sub">Zero backend hit on blocks</span></div>
+        </div>
+
+        <div class="pipeline-section">
+          <svg id="t6-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 155" role="img" aria-label="MCP Governance Pipeline">
+            <path id="t6-edge-1" class="pipe-edge" d="M 186 78 L 246 78" />
+            <path id="t6-edge-2" class="pipe-edge" d="M 466 78 L 526 78" />
+            <path id="t6-edge-3" class="pipe-edge" d="M 746 78 L 806 78" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 78 L 806 78" /></circle>
+            <g id="t6-node-agent" class="pipe-node"><rect class="pipe-node-box" x="16" y="38" width="170" height="80" /><text class="pipe-node-title" x="101" y="72" text-anchor="middle">MCP Agent</text><text id="t6-sub-agent" class="pipe-node-sub" x="101" y="96" text-anchor="middle">JSON-RPC 2.0</text></g>
+            <g id="t6-node-rbac" class="pipe-node"><rect class="pipe-node-box" x="246" y="38" width="220" height="80" /><text class="pipe-node-title" x="356" y="72" text-anchor="middle">MCP RBAC Allowlist</text><text id="t6-sub-rbac" class="pipe-node-sub" x="356" y="96" text-anchor="middle">Role / Tool Gate</text></g>
+            <g id="t6-node-armor" class="pipe-node"><rect class="pipe-node-box" x="526" y="38" width="220" height="80" /><text class="pipe-node-title" x="636" y="72" text-anchor="middle">Model Armor Scan</text><text id="t6-sub-armor" class="pipe-node-sub" x="636" y="96" text-anchor="middle">Indirect Injection</text></g>
+            <g id="t6-node-llm" class="pipe-node"><rect class="pipe-node-box" x="806" y="38" width="294" height="80" /><text class="pipe-node-title" x="953" y="72" text-anchor="middle">MCP Server + Vertex AI</text><text id="t6-sub-llm" class="pipe-node-sub" x="953" y="96" text-anchor="middle">Governed Tool Result</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner"><span id="mcp-status">Select an MCP scenario on the left and click Execute MCP Call.</span></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">JSON-RPC 2.0 MCP Request</h3><span class="model-pill">tools/call</span></div>
+              <pre id="mcp-req-box" class="code-block">Click Execute MCP Call to inspect JSON-RPC 2.0 request...</pre>
+            </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Apigee X MCP Governance Response</h3><span id="mcp-resp-pill" class="model-pill">IDLE</span></div>
+              <pre id="mcp-resp-box" class="code-block">Click Execute MCP Call to inspect live Apigee X verdict...</pre>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 6: MCP TOOL GOVERNANCE (JSON-RPC RBAC + MODEL ARMOR INDIRECT SCAN)
-           ================================================================ -->
-      <section id="main-tab-mcp-gov" role="tabpanel" aria-label="MCP Tool Governance" style="display:none;">
-        <div class="keynote-action-bar">
-          <div id="mcp-scenario-list" class="scenario-pill-strip" aria-label="MCP Governance Scenarios">
-            <button type="button" class="scenario-item active" data-mcp-preset="safe" aria-pressed="true">
-              <div><div class="scenario-item-title">Allowed Tool (search_kb)</div><div class="scenario-item-sub">Support agent calls approved KB search tool</div></div>
-              <span class="scenario-badge">RBAC ALLOW</span>
-            </button>
-            <button type="button" class="scenario-item" data-mcp-preset="forbidden" aria-pressed="false">
-              <div><div class="scenario-item-title">Rogue Tool (drop_production_db)</div><div class="scenario-item-sub">Support agent attempts destructive tool call</div></div>
-              <span class="scenario-badge">HTTP 403 BLOCK</span>
-            </button>
-            <button type="button" class="scenario-item" data-mcp-preset="poisoned" aria-pressed="false">
-              <div><div class="scenario-item-title">Poisoned Tool Output (Indirect Injection)</div><div class="scenario-item-sub">Tool returns hidden jailbreak caught by Model Armor</div></div>
-              <span class="scenario-badge">MODEL ARMOR 400</span>
-            </button>
+      <!-- ==================== TAB 7: 429 FAILOVER & OPENAI FACADE ==================== -->
+      <section id="main-tab-resilient" class="exec-card" role="tabpanel" aria-label="429 Failover and OpenAI Facade" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-blue">OPENAI SDK FACADE</span><span class="soft-pill pill-green">429 Auto-Failover</span><span class="soft-pill pill-purple">Canary Traffic Split</span></div>
+            <span class="exec-proxy-name">resilient-openai-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/policies/resilient-chat</span>
           </div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-mcp" class="btn-primary"><span>Execute MCP Call</span><span aria-hidden="true">&rarr;</span></button>
-          </div>
+          <span id="t7-pipe-status" class="soft-pill pill-idle">IDLE</span>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t6-pipe-status" class="stage-story-badge">READY</span>
-              <span id="mcp-status">Native Apigee X JSON-RPC 2.0 RBAC Allowlist + Model Armor Indirect Prompt Injection Shield.</span>
-            </div>
-            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-mcp" data-drawer-title="MCP Tool Governance — JSON-RPC Payload &amp; Apigee Telemetry">
-              <span>Inspect JSON-RPC &amp; Telemetry &rarr;</span>
-            </button>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t6-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X MCP Tool Governance Pipeline">
-              <path id="t6-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
-              <path id="t6-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
-              <path id="t6-edge-3" class="pipe-edge" d="M 746 130 L 806 130" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 806 130" /></circle>
-              <g id="t6-node-agent" class="pipe-node">
-                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
-                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 AI AGENT</text>
-                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">MCP Client</text>
-                <text id="t6-sub-agent" class="pipe-node-sub" x="101" y="160" text-anchor="middle">JSON-RPC 2.0</text>
-              </g>
-              <g id="t6-node-rbac" class="pipe-node">
-                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
-                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE X POLICY</text>
-                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">MCP RBAC Allowlist</text>
-                <text id="t6-sub-rbac" class="pipe-node-sub" x="356" y="160" text-anchor="middle">Role / Tool Gate</text>
-              </g>
-              <g id="t6-node-armor" class="pipe-node">
-                <rect class="pipe-node-box" x="526" y="76" width="220" height="108" />
-                <text class="pipe-node-kicker" x="636" y="104" text-anchor="middle">03 MODEL ARMOR</text>
-                <text class="pipe-node-title" x="636" y="132" text-anchor="middle">Indirect Injection Scan</text>
-                <text id="t6-sub-armor" class="pipe-node-sub" x="636" y="160" text-anchor="middle">SanitizeUserPrompt</text>
-              </g>
-              <g id="t6-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="806" y="76" width="294" height="108" />
-                <text class="pipe-node-kicker" x="953" y="104" text-anchor="middle">04 EXECUTION</text>
-                <text class="pipe-node-title" x="953" y="132" text-anchor="middle">MCP Server + Vertex AI</text>
-                <text id="t6-sub-llm" class="pipe-node-sub" x="953" y="160" text-anchor="middle">Governed Tool Result</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">MCP Gateway Verdict</span><div id="hero-t6-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t6-verdict-sub" class="hero-kpi-sub">Enforces tool RBAC &amp; indirect injection firewall</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Tool &amp; Agent Role</span><div id="hero-t6-tool" class="hero-kpi-value">search_kb</div><span id="hero-t6-tool-sub" class="hero-kpi-sub">Role: support-agent</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t6-lat" class="hero-kpi-value tone-savings">Native X</div><span id="hero-t6-lat-sub" class="hero-kpi-sub">Zero backend hit on HTTP 403 / 400 blocks</span></div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/mcp-governance</strong> &middot; Native Apigee X RaiseFault + Model Armor</span></div>
-            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-mcp" data-drawer-title="MCP Tool Governance — JSON-RPC &amp; Telemetry">Inspect JSON-RPC &rarr;</button></div>
-          </div>
+        <div class="kpi-strip">
+          <div class="kpi-cell"><span class="kpi-label">Resilience Outcome</span><span id="hero-t7-verdict" class="kpi-val tone-savings">Waiting...</span><span id="hero-t7-verdict-sub" class="kpi-sub">HTTP 200 even during 429</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Served Model</span><span id="hero-t7-model" class="kpi-val tone-blue">Gemini</span><span id="hero-t7-model-sub" class="kpi-sub">OpenAI chat.completion JSON</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Gateway Latency</span><span id="hero-t7-lat" class="kpi-val">Waiting...</span><span id="hero-t7-lat-sub" class="kpi-sub">Zero client retries</span></div>
         </div>
 
-        <div id="details-mcp" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">MCP Request Parameters</h3></div>
-              <div class="composer-grid">
-                <div class="field-group">
-                  <label class="field-label" for="mcp-role-select"><span>Agent Role (X-Agent-Role)</span></label>
-                  <select id="mcp-role-select" class="field-select">
-                    <option value="support-agent">support-agent (search_kb, get_ticket_status, create_ticket)</option>
-                    <option value="finance-admin">finance-admin (+ wire_transfer)</option>
-                    <option value="readonly-bot">readonly-bot (search_kb, get_ticket_status)</option>
-                  </select>
-                </div>
-                <div class="field-group">
-                  <label class="field-label" for="mcp-tool-input"><span>MCP Tool Name (params.name)</span></label>
-                  <input id="mcp-tool-input" class="field-input" type="text" value="search_kb" />
-                </div>
-                <label class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate Poisoned Tool Result</span><input type="checkbox" id="mcp-sim-poison" /></div><span class="toggle-desc">Injects hidden prompt-injection inside tool response</span></label>
-                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Model Armor Indirect Scan</span><input type="checkbox" id="mcp-enable-armor" checked /></div><span class="toggle-desc">Runs SUP-SanitizeUserPrompt inside Apigee X</span></label>
-              </div>
+        <div class="pipeline-section">
+          <svg id="t7-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 205" role="img" aria-label="OpenAI Facade and 429 Failover Pipeline">
+            <path id="t7-edge-1" class="pipe-edge" d="M 186 102 L 246 102" />
+            <path id="t7-edge-2" class="pipe-edge" d="M 466 102 L 526 102" />
+            <path id="t7-edge-primary" class="pipe-edge" d="M 736 82 C 776 82, 786 52, 826 52" />
+            <path id="t7-edge-failover" class="pipe-edge" d="M 736 122 C 776 122, 786 152, 826 152" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 102 L 736 102 L 826 152" /></circle>
+            <g id="t7-node-client" class="pipe-node"><rect class="pipe-node-box" x="16" y="62" width="170" height="80" /><text class="pipe-node-title" x="101" y="96" text-anchor="middle">OpenAI SDK</text><text id="t7-sub-client" class="pipe-node-sub" x="101" y="120" text-anchor="middle">gpt-4o Client</text></g>
+            <g id="t7-node-facade" class="pipe-node"><rect class="pipe-node-box" x="246" y="62" width="220" height="80" /><text class="pipe-node-title" x="356" y="96" text-anchor="middle">Schema Translator</text><text id="t7-sub-facade" class="pipe-node-sub" x="356" y="120" text-anchor="middle">OpenAI &harr; Vertex</text></g>
+            <g id="t7-node-router" class="pipe-node"><rect class="pipe-node-box" x="526" y="62" width="210" height="80" /><text class="pipe-node-title" x="631" y="96" text-anchor="middle">429 &amp; Canary Gate</text><text id="t7-sub-router" class="pipe-node-sub" x="631" y="120" text-anchor="middle">Multi-Region Pool</text></g>
+            <g id="t7-node-primary" class="pipe-node"><rect class="pipe-node-box" x="826" y="12" width="276" height="78" /><text class="pipe-node-title" x="964" y="46" text-anchor="middle">Gemini 2.5 Pro (global)</text><text id="t7-sub-primary" class="pipe-node-sub" x="964" y="68" text-anchor="middle">Primary / Canary</text></g>
+            <g id="t7-node-failover" class="pipe-node"><rect class="pipe-node-box" x="826" y="114" width="276" height="78" /><text class="pipe-node-title" x="964" y="148" text-anchor="middle">Gemini Flash (AU-SE1)</text><text id="t7-sub-failover" class="pipe-node-sub" x="964" y="170" text-anchor="middle">Stable / Failover</text></g>
+          </svg>
+        </div>
+
+        <div class="exec-body">
+          <div class="status-banner"><span id="res-status">Client sends standard OpenAI gpt-4o payload; Apigee X translates &amp; handles 429 failover.</span></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">OpenAI-Format Request Sent</h3><span class="model-pill">model: gpt-4o</span></div>
+              <pre id="res-req-box" class="code-block">Click Send OpenAI Request to inspect payload...</pre>
             </div>
-          </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">JSON-RPC 2.0 MCP Request</h3><span class="model-pill">tools/call</span></div>
-                <pre id="mcp-req-box" class="code-block">Click Execute MCP Call to inspect JSON-RPC 2.0 payload.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">Apigee X MCP Governance Response</h3><span id="mcp-resp-pill" class="model-pill">READY</span></div>
-                <pre id="mcp-resp-box" class="code-block">Click Execute MCP Call to inspect live Apigee X verdict.</pre>
-              </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">OpenAI-Format Response from Apigee X</h3><span id="res-resp-pill" class="model-pill">IDLE</span></div>
+              <pre id="res-resp-box" class="code-block">Click Send OpenAI Request to inspect translated response...</pre>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- ================================================================
-           TAB 7: 429 FAILOVER + UNIFIED OPENAI FACADE + CANARY ROUTING
-           ================================================================ -->
-      <section id="main-tab-resilient" role="tabpanel" aria-label="429 Failover and OpenAI Facade" style="display:none;">
-        <div class="keynote-action-bar">
-          <div id="res-scenario-list" class="scenario-pill-strip" aria-label="Resilience Scenarios">
-            <button type="button" class="scenario-item active" data-res-preset="openai" aria-pressed="true">
-              <div><div class="scenario-item-title">OpenAI Facade (gpt-4o &rarr; Gemini)</div><div class="scenario-item-sub">Zero-code OpenAI SDK drop-in translated by Apigee X</div></div>
-              <span class="scenario-badge">OPENAI FACADE</span>
-            </button>
-            <button type="button" class="scenario-item" data-res-preset="failover" aria-pressed="false">
-              <div><div class="scenario-item-title">429 Quota Failover (us &rarr; au)</div><div class="scenario-item-sub">Primary HTTP 429 auto-fails over to australia-southeast1</div></div>
-              <span class="scenario-badge">AUTO-FAILOVER</span>
-            </button>
-            <button type="button" class="scenario-item" data-res-preset="canary" aria-pressed="false">
-              <div><div class="scenario-item-title">Canary Split (50% Pro / 50% Flash)</div><div class="scenario-item-sub">Weighted traffic routing natively inside Apigee X</div></div>
-              <span class="scenario-badge">CANARY 50%</span>
-            </button>
+      <!-- ==================== TAB 8: REVERSIBLE PII VAULT ==================== -->
+      <section id="main-tab-pii-vault" class="exec-card" role="tabpanel" aria-label="Reversible PII Vault" style="display:none;">
+        <div class="exec-card-head">
+          <div class="exec-proxy-meta">
+            <div class="exec-badge-row"><span class="soft-pill pill-green">ZERO-PII LLM BOUNDARY</span><span class="soft-pill pill-blue">Reversible Token Vault</span><span class="soft-pill pill-purple">SSE Chunk Scan</span></div>
+            <span class="exec-proxy-name">pii-vault-flow</span>
+            <span class="exec-proxy-path">/v1/ai-economics/policies/pii-vault</span>
           </div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-res" class="btn-primary"><span>Send OpenAI Call</span><span aria-hidden="true">&rarr;</span></button>
-          </div>
+          <span id="t8-pipe-status" class="soft-pill pill-idle">IDLE</span>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t7-pipe-status" class="stage-story-badge">READY</span>
-              <span id="res-status">Client sends standard OpenAI /v1/chat/completions payload; Apigee X translates, fails over on 429 &amp; splits Canary traffic.</span>
-            </div>
-            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-resilient" data-drawer-title="429 Failover &amp; OpenAI Facade — Payloads &amp; Headers">
-              <span>Inspect OpenAI Payload &rarr;</span>
-            </button>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t7-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X OpenAI Facade and 429 Failover Pipeline">
-              <path id="t7-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
-              <path id="t7-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
-              <path id="t7-edge-primary" class="pipe-edge" d="M 736 104 C 776 104, 786 64, 826 64" />
-              <path id="t7-edge-failover" class="pipe-edge" d="M 736 156 C 776 156, 786 196, 826 196" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 736 130 L 826 196" /></circle>
-              <g id="t7-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
-                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 OPENAI SDK</text>
-                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">gpt-4o Client</text>
-                <text id="t7-sub-client" class="pipe-node-sub" x="101" y="160" text-anchor="middle">messages[]</text>
-              </g>
-              <g id="t7-node-facade" class="pipe-node">
-                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
-                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE X FACADE</text>
-                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">Schema Translator</text>
-                <text id="t7-sub-facade" class="pipe-node-sub" x="356" y="160" text-anchor="middle">OpenAI &harr; Vertex</text>
-              </g>
-              <g id="t7-node-router" class="pipe-node">
-                <rect class="pipe-node-box" x="526" y="76" width="210" height="108" />
-                <text class="pipe-node-kicker" x="631" y="104" text-anchor="middle">03 RESILIENCE</text>
-                <text class="pipe-node-title" x="631" y="132" text-anchor="middle">429 &amp; Canary Gate</text>
-                <text id="t7-sub-router" class="pipe-node-sub" x="631" y="160" text-anchor="middle">Multi-Region Pool</text>
-              </g>
-              <g id="t7-node-primary" class="pipe-node">
-                <rect class="pipe-node-box" x="826" y="16" width="276" height="96" />
-                <text class="pipe-node-kicker" x="964" y="42" text-anchor="middle">PRIMARY / CANARY</text>
-                <text class="pipe-node-title" x="964" y="68" text-anchor="middle">Gemini 2.5 Pro (global)</text>
-                <text id="t7-sub-primary" class="pipe-node-sub" x="964" y="94" text-anchor="middle">Standby</text>
-              </g>
-              <g id="t7-node-failover" class="pipe-node">
-                <rect class="pipe-node-box" x="826" y="148" width="276" height="96" />
-                <text class="pipe-node-kicker" x="964" y="174" text-anchor="middle">STABLE / FAILOVER</text>
-                <text class="pipe-node-title" x="964" y="200" text-anchor="middle">Gemini Flash (AU-SE1)</text>
-                <text id="t7-sub-failover" class="pipe-node-sub" x="964" y="226" text-anchor="middle">Zero-Downtime Pool</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">Resilience Outcome</span><div id="hero-t7-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t7-verdict-sub" class="hero-kpi-sub">HTTP 200 OK even during primary 429 exhaustion</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Served Model &amp; Region</span><div id="hero-t7-model" class="hero-kpi-value tone-cyan">Gemini</div><span id="hero-t7-model-sub" class="hero-kpi-sub">Translated back to OpenAI chat.completion</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Gateway Latency</span><div id="hero-t7-lat" class="hero-kpi-value">Zero Retries</div><span id="hero-t7-lat-sub" class="hero-kpi-sub">Handled transparently inside Apigee X</span></div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/resilient-chat</strong> &middot; Drop-in OpenAI SDK compatibility</span></div>
-            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-resilient" data-drawer-title="429 Failover &amp; OpenAI Facade — Payloads">Inspect OpenAI JSON &rarr;</button></div>
-          </div>
+        <div class="kpi-strip">
+          <div class="kpi-cell"><span class="kpi-label">Raw PII Sent to LLM</span><span id="hero-t8-leaks" class="kpi-val tone-savings">0 Bytes</span><span id="hero-t8-leaks-sub" class="kpi-sub">All PII vaulted inside Apigee X</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Entities Masked</span><span id="hero-t8-count" class="kpi-val tone-blue">Waiting...</span><span id="hero-t8-count-sub" class="kpi-sub">Email, Card, Gov ID, Phone</span></div>
+          <div class="kpi-cell"><span class="kpi-label">Rehydration &amp; SSE</span><span id="hero-t8-rehydrate" class="kpi-val">Reversible</span><span id="hero-t8-rehydrate-sub" class="kpi-sub">Chunk-by-chunk verification</span></div>
         </div>
 
-        <div id="details-resilient" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">OpenAI Facade &amp; Failover Controls</h3></div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="res-prompt-input"><span>OpenAI User Message</span></label><textarea id="res-prompt-input" class="field-textarea" rows="3">Explain how Apigee X provides zero-downtime LLM failover and OpenAI SDK compatibility in 2 concise sentences.</textarea></div>
-                <label class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate Primary HTTP 429</span><input type="checkbox" id="res-sim-429" /></div><span class="toggle-desc">Forces primary quota exhaustion &rarr; auto-failover to AU Flash</span></label>
-                <div class="field-group"><label class="field-label" for="res-canary-slider"><span>Canary Weight to Gemini 2.5 Pro</span><span id="res-canary-label">0%</span></label><input id="res-canary-slider" type="range" min="0" max="100" step="10" value="0" /></div>
-              </div>
-            </div>
-          </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">OpenAI-Format Request Sent</h3><span class="model-pill">model: gpt-4o</span></div>
-                <pre id="res-req-box" class="code-block">Click Send OpenAI Call to inspect OpenAI SDK request.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">OpenAI-Format Response from Apigee X</h3><span id="res-resp-pill" class="model-pill">READY</span></div>
-                <pre id="res-resp-box" class="code-block">Click Send OpenAI Call to inspect translated OpenAI chat.completion JSON.</pre>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- ================================================================
-           TAB 8: REVERSIBLE PII VAULT & SSE STREAMING INSPECTION
-           ================================================================ -->
-      <section id="main-tab-pii-vault" role="tabpanel" aria-label="Reversible PII Vault and SSE Inspection" style="display:none;">
-        <div class="keynote-action-bar">
-          <div id="pii-scenario-list" class="scenario-pill-strip" aria-label="PII Vault Scenarios">
-            <button type="button" class="scenario-item active" data-pii-preset="rehydrate" aria-pressed="true">
-              <div><div class="scenario-item-title">Banking PII (Mask &rarr; Rehydrate)</div><div class="scenario-item-sub">Zero raw PII reaches Gemini; authorized caller gets full reply</div></div>
-              <span class="scenario-badge">REVERSIBLE VAULT</span>
-            </button>
-            <button type="button" class="scenario-item" data-pii-preset="redact" aria-pressed="false">
-              <div><div class="scenario-item-title">Audit Mode (Permanent Redaction)</div><div class="scenario-item-sub">Keeps tokens masked in response for logs / unprivileged roles</div></div>
-              <span class="scenario-badge">PERMANENT MASK</span>
-            </button>
-          </div>
-          <div class="action-cta-group">
-            <button type="button" id="btn-run-pii" class="btn-primary"><span>Run PII Vault</span><span aria-hidden="true">&rarr;</span></button>
-          </div>
+        <div class="pipeline-section">
+          <svg id="t8-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 155" role="img" aria-label="Reversible PII Vault Pipeline">
+            <path id="t8-edge-1" class="pipe-edge" d="M 186 78 L 246 78" />
+            <path id="t8-edge-2" class="pipe-edge" d="M 466 78 L 526 78" />
+            <path id="t8-edge-3" class="pipe-edge" d="M 746 78 L 806 78" />
+            <circle class="pipe-photon" r="5"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 78 L 806 78" /></circle>
+            <g id="t8-node-client" class="pipe-node"><rect class="pipe-node-box" x="16" y="38" width="170" height="80" /><text class="pipe-node-title" x="101" y="72" text-anchor="middle">Banking App</text><text id="t8-sub-client" class="pipe-node-sub" x="101" y="96" text-anchor="middle">Raw PII Input</text></g>
+            <g id="t8-node-mask" class="pipe-node"><rect class="pipe-node-box" x="246" y="38" width="220" height="80" /><text class="pipe-node-title" x="356" y="72" text-anchor="middle">Apigee PII Vault</text><text id="t8-sub-mask" class="pipe-node-sub" x="356" y="96" text-anchor="middle">&lt;CARD_1&gt; &lt;EMAIL_1&gt;</text></g>
+            <g id="t8-node-llm" class="pipe-node"><rect class="pipe-node-box" x="526" y="38" width="220" height="80" /><text class="pipe-node-title" x="636" y="72" text-anchor="middle">Vertex AI Gemini</text><text id="t8-sub-llm" class="pipe-node-sub" x="636" y="96" text-anchor="middle">0 Bytes Raw PII</text></g>
+            <g id="t8-node-unmask" class="pipe-node"><rect class="pipe-node-box" x="806" y="38" width="294" height="80" /><text class="pipe-node-title" x="953" y="72" text-anchor="middle">Rehydrate &amp; SSE Scan</text><text id="t8-sub-unmask" class="pipe-node-sub" x="953" y="96" text-anchor="middle">Authorized Reply</text></g>
+          </svg>
         </div>
 
-        <div class="keynote-stage-card">
-          <div class="stage-top-strip">
-            <div class="stage-story-pill">
-              <span id="t8-pipe-status" class="stage-story-badge">READY</span>
-              <span id="pii-status">Apigee X tokenizes Emails, Cards, Gov IDs &amp; Phones before Vertex AI sees a single byte, then rehydrates safely.</span>
+        <div class="exec-body">
+          <div class="status-banner"><span id="pii-status">Click Run PII Vault to prove zero raw PII reaches Vertex AI.</span></div>
+          <div class="compare-grid">
+            <div class="compare-box">
+              <div class="compare-box-head"><h3 class="compare-box-title">Sanitized Prompt Sent to Vertex AI</h3><span class="model-pill pill-allowed">0 RAW PII</span></div>
+              <pre id="pii-sent-box" class="code-block">Click Run PII Vault to see sanitized prompt...</pre>
             </div>
-            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-pii" data-drawer-title="Reversible PII Vault — Before / Sent-to-LLM / After Proof">
-              <span>Inspect Zero-PII Proof &rarr;</span>
-            </button>
-          </div>
-
-          <div class="pipeline-svg-wrap">
-            <svg id="t8-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X Reversible PII Vault Pipeline">
-              <path id="t8-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
-              <path id="t8-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
-              <path id="t8-edge-3" class="pipe-edge" d="M 746 130 L 806 130" />
-              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 806 130" /></circle>
-              <g id="t8-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
-                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 RAW PII</text>
-                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">Banking App</text>
-                <text id="t8-sub-client" class="pipe-node-sub" x="101" y="160" text-anchor="middle">Email / Card / ID</text>
-              </g>
-              <g id="t8-node-mask" class="pipe-node">
-                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
-                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE VAULT</text>
-                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">PII Tokenization</text>
-                <text id="t8-sub-mask" class="pipe-node-sub" x="356" y="160" text-anchor="middle">&lt;CARD_1&gt; &lt;EMAIL_1&gt;</text>
-              </g>
-              <g id="t8-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="526" y="76" width="220" height="108" />
-                <text class="pipe-node-kicker" x="636" y="104" text-anchor="middle">03 ZERO-PII LLM</text>
-                <text class="pipe-node-title" x="636" y="132" text-anchor="middle">Vertex AI Gemini</text>
-                <text id="t8-sub-llm" class="pipe-node-sub" x="636" y="160" text-anchor="middle">0 Bytes Raw PII</text>
-              </g>
-              <g id="t8-node-unmask" class="pipe-node">
-                <rect class="pipe-node-box" x="806" y="76" width="294" height="108" />
-                <text class="pipe-node-kicker" x="953" y="104" text-anchor="middle">04 REHYDRATE + SSE</text>
-                <text class="pipe-node-title" x="953" y="132" text-anchor="middle">De-Tokenize &amp; Scan</text>
-                <text id="t8-sub-unmask" class="pipe-node-sub" x="953" y="160" text-anchor="middle">Authorized Reply</text>
-              </g>
-            </svg>
-          </div>
-
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">Raw PII Sent to LLM</span><div id="hero-t8-leaks" class="hero-kpi-value tone-savings">0 Bytes</div><span id="hero-t8-leaks-sub" class="hero-kpi-sub">All sensitive entities vaulted inside Apigee X</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Entities Masked</span><div id="hero-t8-count" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t8-count-sub" class="hero-kpi-sub">Email, PAN, Gov ID &amp; Phone detection</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Rehydration &amp; SSE</span><div id="hero-t8-rehydrate" class="hero-kpi-value">Reversible</div><span id="hero-t8-rehydrate-sub" class="hero-kpi-sub">Chunk-by-chunk guardrail verification</span></div>
-          </div>
-
-          <div class="stage-footer-bar">
-            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/pii-vault</strong> &middot; Sovereign data boundary inside Apigee X</span></div>
-            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-pii" data-drawer-title="Reversible PII Vault — Before / Sent-to-LLM / After Proof">Inspect Zero-PII Proof &rarr;</button></div>
-          </div>
-        </div>
-
-        <div id="details-pii" class="workbench-grid drawer-body-section" style="margin-top:20px;">
-          <div class="workbench-left architect-only">
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">PII Vault Controls</h3></div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="pii-prompt-input"><span>Sensitive Customer Prompt</span></label><textarea id="pii-prompt-input" class="field-textarea" rows="4">Draft a short confirmation email to Sarah Jenkins (sarah.jenkins@acme-bank.com, phone +61 412 555 890) confirming her replacement Visa card 4532-8910-4421-9901 linked to TFN 123-45-6789 is now active.</textarea></div>
-                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Pre-LLM PII Tokenization Vault</span><input type="checkbox" id="pii-enable-vault" checked /></div><span class="toggle-desc">Replaces PII with opaque tokens inside Apigee X</span></label>
-                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Rehydrate Tokens for Caller</span><input type="checkbox" id="pii-enable-rehydrate" checked /></div><span class="toggle-desc">Restores original PII on response for authorized user</span></label>
-              </div>
+            <div class="compare-box compare-box-apigee">
+              <div class="compare-box-head"><h3 class="compare-box-title">Final Response to Authorized User</h3><span id="pii-resp-pill" class="model-pill">IDLE</span></div>
+              <pre id="pii-final-box" class="code-block">Click Run PII Vault to see rehydrated response...</pre>
             </div>
           </div>
-          <div class="workbench-right">
-            <div class="compare-grid">
-              <div class="compare-panel">
-                <div class="compare-head"><h3 class="compare-head-title">Sanitized Prompt Sent to Vertex AI</h3><span class="model-pill pill-allowed">0 RAW PII</span></div>
-                <pre id="pii-sent-box" class="code-block">Click Run PII Vault to see exact sanitized prompt sent to Gemini.</pre>
-              </div>
-              <div class="compare-panel compare-panel-gateway">
-                <div class="compare-head"><h3 class="compare-head-title">Final Response to Authorized User</h3><span id="pii-resp-pill" class="model-pill">READY</span></div>
-                <pre id="pii-final-box" class="code-block">Click Run PII Vault to inspect rehydrated response.</pre>
-              </div>
-            </div>
-            <div class="surface-card">
-              <div class="surface-card-header"><h3 class="surface-card-title">Raw Masked LLM Reply &amp; Vault Telemetry</h3></div>
-              <pre id="pii-telemetry-box" class="code-block">—</pre>
-            </div>
-          </div>
+          <details class="audit-accordion"><summary>Raw Masked LLM Reply &amp; Vault Telemetry</summary><div class="audit-accordion-body"><pre id="pii-telemetry-box" class="code-block">—</pre></div></details>
         </div>
       </section>
     </div>
   </main>
 
   <!-- ====================================================================
-       SLIDE-OVER DETAILS DRAWER
-       ==================================================================== -->
-  <div id="drawer-scrim" class="drawer-scrim" aria-hidden="true"></div>
-  <aside id="keynote-drawer" class="keynote-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title-text" aria-hidden="true">
-    <div class="drawer-header">
-      <div>
-        <h2 id="drawer-title-text" class="drawer-title">Live Outputs &amp; Telemetry</h2>
-        <p class="drawer-subtitle">Side-by-side LLM responses, token breakdown, and session ledger</p>
-      </div>
-      <button type="button" id="btn-close-drawer" class="btn-secondary">Close &times;</button>
-    </div>
-    <div id="drawer-slot" class="drawer-content"></div>
-  </aside>
-
-  <!-- ====================================================================
-       MODALS
+       MODALS: ARCHITECTURE & PRICING + WHEN TO USE WHAT GLOSSARY
        ==================================================================== -->
   <div id="about-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Architecture and Pricing">
     <div class="modal-panel">
       <div class="modal-header"><h3 class="modal-title">Apigee X AI Gateway Architecture &amp; Pricing</h3><button type="button" id="btn-close-about" class="btn-secondary">Close</button></div>
       <div class="modal-body-grid">
-        <div class="glossary-item"><h4>Live Apigee X Endpoint</h4><p><code id="footer-apigee-url">https://eval-group.34-120-155-152.nip.io/v1/ai-economics</code></p></div>
-        <div class="glossary-item"><h4>Vertex AI Pricing Basis</h4><p>Gemini 2.5 Pro: $1.25 / 1M in, $10.00 / 1M out. Gemini 2.5 Flash: $0.30 / 1M in, $2.50 / 1M out. Gemini Decision 1: $0.10 / 1M in ($0 out). TypeSafe Jev: $0.042 / 1M in ($0 out).</p></div>
-        <div class="glossary-item"><h4>Pure Apigee X Policy Enforcement</h4><p>Quotas, Model Armor, Semantic Cache, and System 1 / System 2 Pre-Routing + Post-Verification run directly inside Apigee X using native policies, encrypted KVM, TargetServers, and ServiceCallouts.</p></div>
+        <div class="glossary-item"><h4>Live Apigee X Proxy (ai-gateway-v1 rev 17)</h4><p><code id="footer-apigee-url">https://eval-group.34-120-155-152.nip.io/v1/ai-economics</code></p></div>
+        <div class="glossary-item"><h4>Vertex AI Standard Pricing</h4><p>Gemini 2.5 Pro: $1.25 / 1M in, $10.00 / 1M out. Gemini 2.5 Flash: $0.30 / 1M in, $2.50 / 1M out. Gemini Decision 1: $0.10 / 1M in ($0 out). TypeSafe Jev: $0.042 / 1M in ($0 out).</p></div>
+        <div class="glossary-item"><h4>Pure Native Apigee X Execution</h4><p>Quotas, Model Armor, Semantic Cache, System 1/2 Pre-Routing &amp; Noul Verification, MCP Tool Governance, OpenAI Facade + 429 Failover, and Reversible PII Vault all execute directly inside Apigee X.</p></div>
       </div>
     </div>
   </div>
 
-  <div id="jev-glossary-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="System 1 and Noul Glossary">
+  <div id="jev-glossary-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="When to use what">
     <div class="modal-panel">
-      <div class="modal-header"><h3 class="modal-title">System 1 / System 2 &amp; Noul Glossary</h3><button type="button" id="btn-close-glossary" class="btn-secondary">Close</button></div>
+      <div class="modal-header"><h3 class="modal-title">When to Use Each Apigee X AI Gateway Layer</h3><button type="button" id="btn-close-glossary" class="btn-secondary">Close</button></div>
       <div class="modal-body-grid">
-        <div class="glossary-item"><h4>System 1 (Fast Classifier)</h4><p>Ultra-cheap classification pass (Gemini Decision 1 or TypeSafe Jev) that scores query complexity in milliseconds before an expensive reasoning LLM is called.</p></div>
-        <div class="glossary-item"><h4>System 2 (Deep Reasoner)</h4><p>High-capability model (Gemini 2.5 Pro) reserved only for complex queries or escalated defects.</p></div>
-        <div class="glossary-item"><h4>Noul Quality Gate</h4><p>Post-generation verification battery scoring L1 Flash responses for grounding, hallucination, completeness, and safety — automatically escalating to Gemini 2.5 Pro if any detector fires.</p></div>
+        <div class="glossary-item"><h4>FinOps (Cost, Quotas, Semantic Cache)</h4><p>Cut Gemini token spend up to 99% via vector cache hits, RAG compression, context pruning, and per-tenant token circuit breakers.</p></div>
+        <div class="glossary-item"><h4>Security &amp; Sovereignty (Model Armor, MCP Tools, PII Vault)</h4><p>Block prompt injection &amp; toxic output zero-code with Model Armor, enforce MCP JSON-RPC tool RBAC for AI agents, and keep raw PII inside Apigee X via reversible tokenization.</p></div>
+        <div class="glossary-item"><h4>Routing &amp; Resilience (System 1/2 + 429 Failover / OpenAI Facade)</h4><p>Fast-track simple queries to Flash with Noul quality verification, auto-failover HTTP 429s across regions, and accept drop-in OpenAI SDK traffic with zero app rewrites.</p></div>
       </div>
     </div>
   </div>
 
-  <script src="assets/app.js?v=11.0"></script>
+  <script src="assets/app.js?v=12.0"></script>
 </body>
 </html>
