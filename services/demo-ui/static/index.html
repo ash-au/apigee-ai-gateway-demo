@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Apigee X — AI Gateway Keynote Stage</title>
+  <title>Apigee X — AI Gateway Dual-Lens Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -17,20 +17,17 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=9.1" />
+  <link rel="stylesheet" href="assets/styles.css?v=10.0" />
 </head>
 <body>
   <!-- ====================================================================
-       KEYNOTE TOP HEADER BAR (Full-Width Widescreen Pill Dock)
+       TOP HEADER BAR (Slim 54px Dock + Dual-Lens Exec | Architect Toggle)
        ==================================================================== -->
   <header class="keynote-header" role="banner">
     <div class="keynote-header-inner">
       <div class="keynote-brand">
         <div class="brand-mark" aria-hidden="true">AX</div>
-        <div class="brand-text">
-          <span class="brand-title">Apigee X AI Gateway</span>
-          <span class="brand-sub">Vertex AI Control Plane</span>
-        </div>
+        <span class="brand-title">Apigee X AI Gateway</span>
       </div>
 
       <nav class="keynote-nav-dock" role="tablist" aria-label="AI Gateway Capabilities">
@@ -61,9 +58,10 @@
           <button type="button" id="btn-view-executive" class="view-mode-btn active" aria-pressed="true">Exec</button>
           <button type="button" id="btn-view-architect" class="view-mode-btn" aria-pressed="false">Architect</button>
         </div>
+        <button type="button" id="btn-reset-state" class="header-icon-btn" title="Reset session ledger and cache">Reset</button>
         <button type="button" id="btn-theme-toggle" class="header-icon-btn" aria-pressed="true" aria-label="Toggle Light or Dark theme">
-          <svg id="theme-icon-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-          <svg id="theme-icon-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          <svg id="theme-icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg id="theme-icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
           <span id="theme-toggle-label">Light</span>
         </button>
       </div>
@@ -71,24 +69,23 @@
   </header>
 
   <!-- ====================================================================
-       MAIN KEYNOTE STAGE
+       MAIN STAGE
        ==================================================================== -->
   <main class="keynote-main" role="main">
     <div class="keynote-container">
-      <!-- Dynamic Editorial Stage Headline -->
-      <section class="stage-headline-row" aria-label="Active Stage Overview">
+      <!-- Architect Workbench Header (Hidden in Exec Mode to give ~50% height to Topology!) -->
+      <section class="stage-headline-row" aria-label="Workbench Context">
         <div class="stage-headline-copy">
           <div class="stage-eyebrow">
             <span class="live-pulse-dot" aria-hidden="true"></span>
             <span id="stage-eyebrow-text">Live Executive Keynote &middot; Apigee X + Vertex AI</span>
           </div>
           <h1 id="stage-active-title" class="stage-title">Token Cost &amp; AI Optimization</h1>
-          <p id="stage-active-subtitle" class="stage-subtitle">Watch Apigee X slash Gemini token spend in real time with semantic caching, RAG compression, smart routing, and context pruning.</p>
+          <p id="stage-active-subtitle" class="stage-subtitle">Live Direct Vertex AI vs. Apigee X Gateway — Cache, Compress, Route &amp; Prune</p>
         </div>
         <div class="stage-utility-links">
-          <button type="button" id="btn-open-about" class="btn-ghost">Architecture &amp; Pricing</button>
-          <button type="button" id="btn-open-glossary" class="btn-ghost">Glossary</button>
-          <button type="button" id="btn-reset-state" class="btn-ghost">Reset Session</button>
+          <button type="button" id="btn-open-about" class="btn-secondary">Architecture &amp; Pricing</button>
+          <button type="button" id="btn-open-glossary" class="btn-secondary">System 1 Glossary</button>
         </div>
       </section>
 
@@ -96,7 +93,7 @@
            TAB 1: TOKEN COST & AI OPTIMIZATION
            ================================================================ -->
       <section id="main-tab-economics" class="is-active-panel" role="tabpanel" aria-label="Token Cost and AI Optimization">
-        <!-- Zone 1: 1-Row Scenario Pills + Radiant Run CTA -->
+        <!-- Zone 1: Scenario Pills + Radiant Run CTA -->
         <div class="keynote-action-bar">
           <div id="scenario-list" class="scenario-pill-strip" aria-label="Optimization Scenarios"></div>
           <div class="action-cta-group">
@@ -108,355 +105,250 @@
           </div>
         </div>
 
-        <!-- Zone 2: Centerpiece Living Stage + Giant Hero Outcome Strip -->
-        <div class="keynote-stage-card" style="margin-top:20px;">
+        <!-- Zone 2 + Zone 3: Large Interactive Topology + Hero KPIs + Permanent Annual ROI Card -->
+        <div class="keynote-stage-card">
           <div class="stage-top-strip">
             <div class="stage-story-pill">
               <span id="t1-pipe-status" class="stage-story-badge">READY</span>
               <span id="active-scenario-meta">Select a scenario and click Run Live to compare Direct Vertex AI vs. Apigee X Gateway.</span>
             </div>
-            <div style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:10px;">
               <span id="run-status-indicator" class="metric-sub"></span>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Side-by-Side &amp; Telemetry">
-                <span>Inspect Responses &amp; Telemetry</span>
-                <span aria-hidden="true">&rarr;</span>
+              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Side-by-Side Outputs &amp; Charts">
+                <span>Inspect Outputs &amp; Charts &rarr;</span>
               </button>
             </div>
           </div>
 
+          <!-- LARGE 1120x260 Topology Canvas -->
           <div class="pipeline-svg-wrap">
-            <svg id="t1-pipeline-svg" class="pipeline-svg" viewBox="0 0 1080 175" role="img" aria-label="Apigee X AI Optimization Pipeline">
-              <!-- Paths -->
-              <path id="t1-edge-1" class="pipe-edge" d="M 134 88 L 176 88" />
-              <path id="t1-edge-2" class="pipe-edge" d="M 310 88 L 352 88" />
-              <path id="t1-edge-3" class="pipe-edge" d="M 486 88 L 528 88" />
-              <path id="t1-edge-4" class="pipe-edge" d="M 662 88 L 704 88" />
-              <path id="t1-edge-5" class="pipe-edge" d="M 838 88 L 880 88" />
-              <path id="t1-edge-shortcircuit" class="pipe-edge" d="M 243 54 C 243 12, 955 12, 955 54" stroke-dasharray="5 5" />
+            <svg id="t1-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X AI Optimization Pipeline">
+              <!-- Connectors -->
+              <path id="t1-edge-1" class="pipe-edge" d="M 156 142 L 194 142" />
+              <path id="t1-edge-2" class="pipe-edge" d="M 344 142 L 382 142" />
+              <path id="t1-edge-3" class="pipe-edge" d="M 532 142 L 570 142" />
+              <path id="t1-edge-4" class="pipe-edge" d="M 720 142 L 758 142" />
+              <path id="t1-edge-5" class="pipe-edge" d="M 908 142 L 946 142" />
+              <!-- Cache Hit Short-Circuit Arc -->
+              <path id="t1-edge-shortcircuit" class="pipe-edge" d="M 269 90 C 269 18, 1026 18, 1026 90" stroke-dasharray="8 6" />
+              <text class="pipe-node-kicker" x="647" y="34" text-anchor="middle">SEMANTIC CACHE SHORT-CIRCUIT (0 LLM TOKENS)</text>
 
-              <!-- Animated Photon Orbs -->
-              <circle class="pipe-photon" r="4">
-                <animateMotion dur="1.4s" repeatCount="indefinite" path="M 134 88 L 880 88" />
+              <!-- Glowing Traveling Photon Orbs -->
+              <circle class="pipe-photon" r="6">
+                <animateMotion dur="1.4s" repeatCount="indefinite" path="M 156 142 L 946 142" />
               </circle>
-              <circle class="pipe-photon" r="3">
-                <animateMotion dur="1.4s" begin="0.7s" repeatCount="indefinite" path="M 134 88 L 880 88" />
+              <circle class="pipe-photon" r="4.5">
+                <animateMotion dur="1.4s" begin="0.7s" repeatCount="indefinite" path="M 156 142 L 946 142" />
               </circle>
 
-              <!-- Nodes -->
+              <!-- Large Crisp Node Cards -->
               <g id="t1-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="12" y="54" width="122" height="68" />
-                <text class="pipe-node-title" x="73" y="82" text-anchor="middle">Client App</text>
-                <text id="t1-sub-client" class="pipe-node-sub" x="73" y="102" text-anchor="middle">Dual Call</text>
+                <rect class="pipe-node-box" x="14" y="90" width="142" height="104" />
+                <text class="pipe-node-kicker" x="85" y="116" text-anchor="middle">01 ENTRY</text>
+                <text class="pipe-node-title" x="85" y="144" text-anchor="middle">Client App</text>
+                <text id="t1-sub-client" class="pipe-node-sub" x="85" y="172" text-anchor="middle">Dual Call</text>
               </g>
               <g id="t1-node-cache" class="pipe-node">
-                <rect class="pipe-node-box" x="176" y="54" width="134" height="68" />
-                <text class="pipe-node-title" x="243" y="82" text-anchor="middle">Semantic Cache</text>
-                <text id="t1-sub-cache" class="pipe-node-sub" x="243" y="102" text-anchor="middle">Vector Match</text>
+                <rect class="pipe-node-box" x="194" y="90" width="150" height="104" />
+                <text class="pipe-node-kicker" x="269" y="116" text-anchor="middle">02 CACHE</text>
+                <text class="pipe-node-title" x="269" y="144" text-anchor="middle">Semantic Cache</text>
+                <text id="t1-sub-cache" class="pipe-node-sub" x="269" y="172" text-anchor="middle">Vector Match</text>
               </g>
               <g id="t1-node-compress" class="pipe-node">
-                <rect class="pipe-node-box" x="352" y="54" width="134" height="68" />
-                <text class="pipe-node-title" x="419" y="82" text-anchor="middle">RAG Compress</text>
-                <text id="t1-sub-compress" class="pipe-node-sub" x="419" y="102" text-anchor="middle">Token Trim</text>
+                <rect class="pipe-node-box" x="382" y="90" width="150" height="104" />
+                <text class="pipe-node-kicker" x="457" y="116" text-anchor="middle">03 COMPRESS</text>
+                <text class="pipe-node-title" x="457" y="144" text-anchor="middle">RAG Compress</text>
+                <text id="t1-sub-compress" class="pipe-node-sub" x="457" y="172" text-anchor="middle">Token Trim</text>
               </g>
               <g id="t1-node-prune" class="pipe-node">
-                <rect class="pipe-node-box" x="528" y="54" width="134" height="68" />
-                <text class="pipe-node-title" x="595" y="82" text-anchor="middle">Context Prune</text>
-                <text id="t1-sub-prune" class="pipe-node-sub" x="595" y="102" text-anchor="middle">Dedup History</text>
+                <rect class="pipe-node-box" x="570" y="90" width="150" height="104" />
+                <text class="pipe-node-kicker" x="645" y="116" text-anchor="middle">04 PRUNE</text>
+                <text class="pipe-node-title" x="645" y="144" text-anchor="middle">Context Prune</text>
+                <text id="t1-sub-prune" class="pipe-node-sub" x="645" y="172" text-anchor="middle">Dedup History</text>
               </g>
               <g id="t1-node-router" class="pipe-node">
-                <rect class="pipe-node-box" x="704" y="54" width="134" height="68" />
-                <text class="pipe-node-title" x="771" y="82" text-anchor="middle">Smart Router</text>
-                <text id="t1-sub-router" class="pipe-node-sub" x="771" y="102" text-anchor="middle">Flash / Pro</text>
+                <rect class="pipe-node-box" x="758" y="90" width="150" height="104" />
+                <text class="pipe-node-kicker" x="833" y="116" text-anchor="middle">05 ROUTE</text>
+                <text class="pipe-node-title" x="833" y="144" text-anchor="middle">Smart Router</text>
+                <text id="t1-sub-router" class="pipe-node-sub" x="833" y="172" text-anchor="middle">Flash / Pro</text>
               </g>
               <g id="t1-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="880" y="54" width="150" height="68" />
-                <text class="pipe-node-title" x="955" y="82" text-anchor="middle">Vertex AI</text>
-                <text id="t1-sub-llm" class="pipe-node-sub" x="955" y="102" text-anchor="middle">Gemini 2.5</text>
+                <rect class="pipe-node-box" x="946" y="90" width="160" height="104" />
+                <text class="pipe-node-kicker" x="1026" y="116" text-anchor="middle">06 MODEL</text>
+                <text class="pipe-node-title" x="1026" y="144" text-anchor="middle">Vertex AI</text>
+                <text id="t1-sub-llm" class="pipe-node-sub" x="1026" y="172" text-anchor="middle">Gemini 2.5</text>
               </g>
             </svg>
           </div>
 
-          <!-- Giant Keynote Hero Outcome Band -->
-          <div class="hero-outcome-band">
+          <!-- Zone 3: 3 Live KPIs + PERMANENT ANNUALIZED ROI VALUE CARD -->
+          <div class="hero-outcome-band hero-outcome-band-4">
             <div class="hero-kpi">
               <span class="hero-kpi-label">Cost Saved vs. Direct</span>
               <div id="hero-t1-savings" class="hero-kpi-value tone-savings">Ready</div>
-              <span id="hero-t1-savings-sub" class="hero-kpi-sub">Run any scenario to measure live USD savings</span>
+              <span id="hero-t1-savings-sub" class="hero-kpi-sub">Run any scenario for live USD savings</span>
             </div>
             <div class="hero-kpi">
               <span class="hero-kpi-label">Tokens Eliminated</span>
               <div id="hero-t1-tokens" class="hero-kpi-value tone-cyan">Live</div>
-              <span id="hero-t1-tokens-sub" class="hero-kpi-sub">Includes prompt, output &amp; thinking tokens</span>
+              <span id="hero-t1-tokens-sub" class="hero-kpi-sub">Prompt, output &amp; thinking tokens</span>
             </div>
             <div class="hero-kpi">
-              <span class="hero-kpi-label">Model &amp; Latency</span>
+              <span class="hero-kpi-label">Route &amp; Latency</span>
               <div id="hero-t1-route" class="hero-kpi-value">Apigee X</div>
-              <span id="hero-t1-route-sub" class="hero-kpi-sub">Direct Vertex AI vs. Apigee X Gateway</span>
+              <span id="hero-t1-route-sub" class="hero-kpi-sub">Direct Vertex AI vs. Apigee X</span>
+            </div>
+            <!-- ALWAYS-VISIBLE ANNUALIZED ROI CARD -->
+            <div id="ledger-annual-cell" class="hero-roi-card">
+              <div class="roi-hero-head">
+                <span class="hero-kpi-label">Projected Annual Savings</span>
+                <span id="scale-slider-label" class="metric-sub">At 10M req/mo (120M/yr)</span>
+              </div>
+              <div id="ledger-annual-savings" class="roi-hero-value">$0 / yr</div>
+              <div class="roi-slider-row">
+                <label for="scale-slider" class="metric-label">Volume</label>
+                <input id="scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="Monthly requests in millions" />
+              </div>
             </div>
           </div>
 
           <div class="stage-footer-bar">
             <div class="stage-footer-summary">
-              <span>Session Total Saved: <strong id="hero-t1-session-saved">$0.000000</strong></span>
+              <span>Session Saved: <strong id="hero-t1-session-saved">$0.000000</strong></span>
               <span>&middot;</span>
-              <span id="presenter-note">Tip: Toggle <strong>Architect</strong> in the header to edit prompts, flip optimization headers, or inspect raw XML/JSON.</span>
+              <span id="presenter-note">Select a scenario above and press <strong>Run Live</strong> to update Annualized ROI in real time.</span>
             </div>
             <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Responses, Charts &amp; ROI Ledger">
-                View Side-by-Side &amp; ROI Ledger &rarr;
+              <button type="button" class="btn-secondary" data-open-drawer="details-economics" data-drawer-title="Token Cost &amp; AI Optimization — Side-by-Side Outputs &amp; Charts">
+                Inspect Outputs &amp; Charts &rarr;
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Deep-Dive Details (Hidden in Keynote Mode; slides open in Drawer or expands in Architect Mode) -->
-        <div id="details-economics" class="deep-dive-stack drawer-body-section" style="margin-top:24px;">
-          <!-- Architect Controls: Toggles + Prompt Composer -->
-          <div class="surface-card architect-only">
-            <div class="surface-card-header">
-              <div>
-                <h2 class="surface-card-title">Apigee X Optimization Controls</h2>
-                <p class="surface-card-sub">Toggle gateway headers live to isolate each FinOps lever.</p>
+        <!-- 2-Column Architect Workbench (Hidden in Exec Mode; slides open in Drawer or expands inline in Architect Mode) -->
+        <div id="details-economics" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <!-- Left Column: Controls & Prompt Composer -->
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header">
+                <div>
+                  <h2 class="surface-card-title">Optimization Headers</h2>
+                  <p class="surface-card-sub">Isolate individual Apigee X FinOps policies.</p>
+                </div>
+                <div style="display:flex;gap:6px;">
+                  <button type="button" id="btn-toggles-all-on" class="btn-secondary">All On</button>
+                  <button type="button" id="btn-toggles-all-off" class="btn-ghost">Off</button>
+                </div>
               </div>
-              <div style="display:flex;gap:8px;">
-                <button type="button" id="btn-toggles-all-on" class="btn-secondary">All On</button>
-                <button type="button" id="btn-toggles-all-off" class="btn-ghost">All Off</button>
+              <div class="toggle-grid">
+                <label id="card-toggle-cache" class="toggle-card enabled">
+                  <div class="toggle-card-top"><span class="toggle-title">Semantic Cache</span><input type="checkbox" id="toggle-cache" checked /></div>
+                  <span class="toggle-header-tag">X-Opt-Cache: true</span>
+                </label>
+                <label id="card-toggle-compress" class="toggle-card enabled">
+                  <div class="toggle-card-top"><span class="toggle-title">Prompt Compress</span><input type="checkbox" id="toggle-compress" checked /></div>
+                  <span class="toggle-header-tag">X-Opt-Compress: true</span>
+                </label>
+                <label id="card-toggle-route" class="toggle-card enabled">
+                  <div class="toggle-card-top"><span class="toggle-title">Smart Routing</span><input type="checkbox" id="toggle-route" checked /></div>
+                  <span class="toggle-header-tag">X-Opt-Route: true</span>
+                </label>
+                <label id="card-toggle-prune" class="toggle-card enabled">
+                  <div class="toggle-card-top"><span class="toggle-title">Context Pruning</span><input type="checkbox" id="toggle-prune" checked /></div>
+                  <span class="toggle-header-tag">X-Opt-Prune: true</span>
+                </label>
               </div>
-            </div>
-            <div class="toggle-grid">
-              <label id="card-toggle-cache" class="toggle-card enabled">
-                <div class="toggle-card-top">
-                  <span class="toggle-title">Semantic Cache</span>
-                  <input type="checkbox" id="toggle-cache" checked />
-                </div>
-                <span class="toggle-desc">Zero-LLM vector cache hit</span>
-                <span class="toggle-header-tag">X-Opt-Cache: true</span>
-              </label>
-              <label id="card-toggle-compress" class="toggle-card enabled">
-                <div class="toggle-card-top">
-                  <span class="toggle-title">Prompt Compression</span>
-                  <input type="checkbox" id="toggle-compress" checked />
-                </div>
-                <span class="toggle-desc">Extractive RAG chunk pruning</span>
-                <span class="toggle-header-tag">X-Opt-Compress: true</span>
-              </label>
-              <label id="card-toggle-route" class="toggle-card enabled">
-                <div class="toggle-card-top">
-                  <span class="toggle-title">Model Routing</span>
-                  <input type="checkbox" id="toggle-route" checked />
-                </div>
-                <span class="toggle-desc">Flash vs. Pro complexity gate</span>
-                <span class="toggle-header-tag">X-Opt-Route: true</span>
-              </label>
-              <label id="card-toggle-prune" class="toggle-card enabled">
-                <div class="toggle-card-top">
-                  <span class="toggle-title">Context Pruning</span>
-                  <input type="checkbox" id="toggle-prune" checked />
-                </div>
-                <span class="toggle-desc">Two-tier history deduplication</span>
-                <span class="toggle-header-tag">X-Opt-Prune: true</span>
-              </label>
             </div>
 
-            <div class="composer-grid" style="margin-top:16px;">
-              <div class="field-group">
-                <label class="field-label" for="input-prompt"><span>User Prompt</span></label>
-                <textarea id="input-prompt" class="field-textarea" rows="3"></textarea>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label>
-                <textarea id="input-system" class="field-textarea" rows="3"></textarea>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label>
-                <textarea id="input-rag" class="field-textarea" rows="3"></textarea>
-              </div>
-              <div class="field-group">
-                <label class="field-label" for="input-history"><span>Chat History (JSON)</span><span id="meta-history-turns">0 turns</span></label>
-                <textarea id="input-history" class="field-textarea" rows="3"></textarea>
+            <div class="surface-card">
+              <div class="surface-card-header"><h2 class="surface-card-title">Live Prompt Composer</h2></div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="input-prompt"><span>User Prompt</span></label><textarea id="input-prompt" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label><textarea id="input-system" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label><textarea id="input-rag" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="input-history"><span>Chat History (JSON)</span><span id="meta-history-turns">0 turns</span></label><textarea id="input-history" class="field-textarea" rows="2"></textarea></div>
               </div>
             </div>
           </div>
 
-          <!-- Side-by-Side Comparison -->
-          <div class="compare-grid">
-            <div class="compare-panel">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Direct to Vertex AI (Unoptimized)</h3>
-                <span id="direct-model-pill" class="model-pill">gemini-2.5-pro</span>
+          <!-- Right Column: Side-by-Side Outputs, Charts, Ledger & Audit Inspector -->
+          <div class="workbench-right">
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-head">
+                  <h3 class="compare-head-title">Direct Vertex AI (Baseline)</h3>
+                  <span id="direct-model-pill" class="model-pill">gemini-2.5-pro</span>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Billed Tokens</span><span id="direct-total-tokens" class="metric-main">—</span><span id="direct-thinking-tokens" class="metric-sub">Thinking: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Request Cost</span><span id="direct-total-cost" class="metric-main">—</span><span id="direct-finish-reason" class="metric-sub">Finish: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Latency</span><span id="direct-latency" class="metric-main">—</span><span class="metric-sub">Unoptimized direct</span></div>
+                  <div class="metric-tile"><span class="metric-label">Breakdown</span><span class="metric-sub">P: <strong id="direct-prompt-tok">—</strong> &middot; O: <strong id="direct-cand-tok">—</strong> &middot; T: <strong id="direct-thought-tok">—</strong></span></div>
+                </div>
+                <pre id="direct-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
               </div>
-              <div class="metric-grid">
-                <div class="metric-tile">
-                  <span class="metric-label">Total Billed Tokens</span>
-                  <span id="direct-total-tokens" class="metric-main">—</span>
-                  <span id="direct-thinking-tokens" class="metric-sub">Thinking: —</span>
+
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head">
+                  <h3 class="compare-head-title">Apigee X AI Gateway</h3>
+                  <span id="gateway-model-pill" class="model-pill pill-allowed">apigee-x</span>
                 </div>
-                <div class="metric-tile">
-                  <span class="metric-label">Request Cost (USD)</span>
-                  <span id="direct-total-cost" class="metric-main">—</span>
-                  <span id="direct-finish-reason" class="metric-sub">Finish: —</span>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Billed Tokens</span><span id="gateway-total-tokens" class="metric-main">—</span><span id="gateway-token-delta" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Request Cost</span><span id="gateway-total-cost" class="metric-main">—</span><span id="gateway-cost-delta" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Latency</span><span id="gateway-latency" class="metric-main">—</span><span id="gateway-cache-badge" class="metric-sub">Cache: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Overhead</span><span id="gateway-overhead-tokens" class="metric-main">0 tok</span><span id="gateway-overhead-cost" class="metric-sub">Overhead: $0.0000000</span></div>
                 </div>
-                <div class="metric-tile">
-                  <span class="metric-label">End-to-End Latency</span>
-                  <span id="direct-latency" class="metric-main">—</span>
-                  <span class="metric-sub">Baseline direct call</span>
-                </div>
-                <div class="metric-tile">
-                  <span class="metric-label">Token Breakdown</span>
-                  <span class="metric-sub">Prompt: <strong id="direct-prompt-tok">—</strong> &middot; Out: <strong id="direct-cand-tok">—</strong> &middot; Think: <strong id="direct-thought-tok">—</strong></span>
-                </div>
+                <div class="metric-sub">P: <strong id="gw-prompt-tok">—</strong> &middot; O: <strong id="gw-cand-tok">—</strong> &middot; T: <strong id="gw-thought-tok">—</strong> &middot; Emb: <strong id="gw-embed-tok">—</strong> &middot; Prune: <strong id="gw-prune-tok">—</strong></div>
+                <pre id="gateway-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
               </div>
-              <pre id="direct-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
             </div>
 
-            <div class="compare-panel compare-panel-gateway">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Via Apigee X AI Gateway</h3>
-                <span id="gateway-model-pill" class="model-pill pill-allowed">apigee-x</span>
+            <div class="surface-card">
+              <div class="surface-card-header">
+                <h3 class="surface-card-title">Cost &amp; Token Breakdown</h3>
+                <span id="viz-cost-delta-pill" class="model-pill">—</span>
               </div>
-              <div class="metric-grid">
-                <div class="metric-tile">
-                  <span class="metric-label">Total Billed Tokens</span>
-                  <span id="gateway-total-tokens" class="metric-main">—</span>
-                  <span id="gateway-token-delta" class="metric-sub">—</span>
-                </div>
-                <div class="metric-tile">
-                  <span class="metric-label">Request Cost (USD)</span>
-                  <span id="gateway-total-cost" class="metric-main">—</span>
-                  <span id="gateway-cost-delta" class="metric-sub">—</span>
-                </div>
-                <div class="metric-tile">
-                  <span class="metric-label">End-to-End Latency</span>
-                  <span id="gateway-latency" class="metric-main">—</span>
-                  <span id="gateway-cache-badge" class="metric-sub">Cache: —</span>
-                </div>
-                <div class="metric-tile">
-                  <span class="metric-label">Gateway Overhead</span>
-                  <span id="gateway-overhead-tokens" class="metric-main">0 tok</span>
-                  <span id="gateway-overhead-cost" class="metric-sub">Overhead: $0.0000000</span>
+              <div class="viz-stack">
+                <div class="viz-row"><div class="viz-row-head"><span>Direct Cost</span><span id="viz-cost-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-cost-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Apigee Gateway Cost</span><span id="viz-cost-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-cost-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Direct Tokens</span><span id="viz-tok-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-tok-direct-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div><div id="viz-tok-direct-out" class="viz-fill viz-fill-savings" style="width:0%"></div><div id="viz-tok-direct-think" class="viz-fill viz-fill-amber" style="width:0%"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Gateway Tokens</span><span id="viz-tok-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-tok-gw-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div><div id="viz-tok-gw-out" class="viz-fill viz-fill-savings" style="width:0%"></div><div id="viz-tok-gw-think" class="viz-fill viz-fill-amber" style="width:0%"></div><div id="viz-tok-gw-overhead" class="viz-fill viz-fill-violet" style="width:0%"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>RAG Compression</span><span id="viz-comp-val" class="viz-val">—</span></div><div class="viz-track"><div id="viz-comp-bar" class="viz-fill viz-fill-scale viz-fill-blue" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-legend">
+                  <span class="legend-item"><span class="legend-swatch" style="background:#38bdf8"></span>Prompt</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:#34d399"></span>Output</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:#fbbf24"></span>Thinking</span>
+                  <span class="legend-item"><span class="legend-swatch" style="background:#a78bfa"></span>Overhead</span>
                 </div>
               </div>
-              <div class="metric-sub">
-                Prompt: <strong id="gw-prompt-tok">—</strong> &middot;
-                Out: <strong id="gw-cand-tok">—</strong> &middot;
-                Think: <strong id="gw-thought-tok">—</strong> &middot;
-                Embed: <strong id="gw-embed-tok">—</strong> &middot;
-                Prune: <strong id="gw-prune-tok">—</strong>
-              </div>
-              <pre id="gateway-response-body" class="response-box">Run a scenario to compare live outputs.</pre>
             </div>
-          </div>
 
-          <!-- Visual Cost & Token Charts -->
-          <div class="surface-card">
-            <div class="surface-card-header">
-              <h3 class="surface-card-title">Cost &amp; Token Breakdown</h3>
-              <span id="viz-cost-delta-pill" class="model-pill">—</span>
-            </div>
-            <div class="viz-stack">
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Direct Cost</span><span id="viz-cost-direct-val" class="viz-val">—</span></div>
-                <div class="viz-track"><div id="viz-cost-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div>
-              </div>
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Apigee Gateway Cost</span><span id="viz-cost-gw-val" class="viz-val">—</span></div>
-                <div class="viz-track"><div id="viz-cost-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div>
-              </div>
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Direct Tokens</span><span id="viz-tok-direct-val" class="viz-val">—</span></div>
-                <div class="viz-track">
-                  <div id="viz-tok-direct-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div>
-                  <div id="viz-tok-direct-out" class="viz-fill viz-fill-savings" style="width:0%"></div>
-                  <div id="viz-tok-direct-think" class="viz-fill viz-fill-amber" style="width:0%"></div>
-                </div>
-              </div>
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Gateway Tokens</span><span id="viz-tok-gw-val" class="viz-val">—</span></div>
-                <div class="viz-track">
-                  <div id="viz-tok-gw-prompt" class="viz-fill viz-fill-blue" style="width:0%"></div>
-                  <div id="viz-tok-gw-out" class="viz-fill viz-fill-savings" style="width:0%"></div>
-                  <div id="viz-tok-gw-think" class="viz-fill viz-fill-amber" style="width:0%"></div>
-                  <div id="viz-tok-gw-overhead" class="viz-fill viz-fill-violet" style="width:0%"></div>
-                </div>
-              </div>
-              <div class="viz-row">
-                <div class="viz-row-head"><span>RAG Compression Ratio</span><span id="viz-comp-val" class="viz-val">—</span></div>
-                <div class="viz-track"><div id="viz-comp-bar" class="viz-fill viz-fill-scale viz-fill-blue" style="transform:scaleX(0.02)"></div></div>
-              </div>
-              <div class="viz-legend">
-                <span class="legend-item"><span class="legend-swatch" style="background:#38bdf8"></span>Prompt</span>
-                <span class="legend-item"><span class="legend-swatch" style="background:#34d399"></span>Output</span>
-                <span class="legend-item"><span class="legend-swatch" style="background:#fbbf24"></span>Thinking</span>
-                <span class="legend-item"><span class="legend-swatch" style="background:#a78bfa"></span>Gateway Overhead</span>
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">Cumulative Session Ledger</h3></div>
+              <div class="ledger-grid">
+                <div class="ledger-card"><span class="ledger-label">Direct Baseline</span><span id="ledger-direct-cost" class="ledger-value">$0.000000</span><span id="ledger-direct-tokens" class="ledger-sub">0 tokens</span></div>
+                <div class="ledger-card"><span class="ledger-label">Apigee Gateway</span><span id="ledger-gateway-cost" class="ledger-value">$0.000000</span><span id="ledger-gateway-tokens" class="ledger-sub">0 tokens</span></div>
+                <div class="ledger-card"><span class="ledger-label">Net Saved</span><span id="ledger-cost-saved" class="ledger-value delta-positive">$0.000000</span><span class="ledger-sub"><strong id="ledger-cost-pct">0%</strong> &middot; <strong id="ledger-tokens-saved">0</strong> (<span id="ledger-token-pct">0%</span>) tok</span></div>
               </div>
             </div>
-          </div>
 
-          <!-- Session Cumulative Ledger & Annual ROI -->
-          <div class="surface-card">
-            <div class="surface-card-header">
-              <h3 class="surface-card-title">Session ROI Ledger &amp; Enterprise Scale Projection</h3>
-            </div>
-            <div class="ledger-grid">
-              <div class="ledger-card">
-                <span class="ledger-label">Direct Baseline</span>
-                <span id="ledger-direct-cost" class="ledger-value">$0.000000</span>
-                <span id="ledger-direct-tokens" class="ledger-sub">0 tokens</span>
+            <div class="surface-card architect-only">
+              <div class="surface-card-header"><h3 class="surface-card-title">Deep Audit Inspector</h3></div>
+              <div class="audit-tab-bar" role="tablist">
+                <button type="button" class="audit-tab active" role="tab" aria-selected="true" data-tab="tab-compression">Compression Diff</button>
+                <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-cascade">Routing Cascade</button>
+                <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-cache-prune">Cache &amp; Pruning</button>
+                <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-headers-raw">Headers &amp; JSON</button>
               </div>
-              <div class="ledger-card">
-                <span class="ledger-label">Apigee Gateway</span>
-                <span id="ledger-gateway-cost" class="ledger-value">$0.000000</span>
-                <span id="ledger-gateway-tokens" class="ledger-sub">0 tokens</span>
+              <div id="tab-compression">
+                <div class="metric-sub" style="margin-bottom:8px;">Method: <strong id="comp-method-label">—</strong> &middot; Before: <strong id="comp-before-count">—</strong> &middot; After: <strong id="comp-after-count">—</strong> &middot; <span id="comp-stats-summary">—</span></div>
+                <div class="compare-grid"><pre id="comp-original-box" class="code-block">Original</pre><pre id="comp-compressed-box" class="code-block">Compressed</pre></div>
               </div>
-              <div class="ledger-card">
-                <span class="ledger-label">Net Savings</span>
-                <span id="ledger-cost-saved" class="ledger-value delta-positive">$0.000000</span>
-                <span class="ledger-sub"><strong id="ledger-cost-pct">0%</strong> cost &middot; <strong id="ledger-tokens-saved">0</strong> (<span id="ledger-token-pct">0%</span>) tok</span>
-              </div>
-              <div id="ledger-annual-cell" class="ledger-card">
-                <span class="ledger-label">Projected Annual Savings</span>
-                <span id="ledger-annual-savings" class="ledger-value delta-positive">$0 / yr</span>
-                <span id="scale-slider-label" class="ledger-sub">At 1,000,000 req/mo</span>
-              </div>
-            </div>
-            <div class="scale-bar">
-              <label for="scale-slider" class="metric-label">Monthly Enterprise Volume</label>
-              <div class="scale-slider-wrap">
-                <input id="scale-slider" type="range" min="100000" max="50000000" step="100000" value="1000000" />
-              </div>
-            </div>
-          </div>
-
-          <!-- Architect Audit Drawer -->
-          <div class="surface-card architect-only">
-            <div class="surface-card-header">
-              <h3 class="surface-card-title">Deep Audit Inspector</h3>
-            </div>
-            <div class="audit-tab-bar" role="tablist">
-              <button type="button" class="audit-tab active" role="tab" aria-selected="true" data-tab="tab-compression">Compression Diff</button>
-              <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-cascade">Routing Cascade</button>
-              <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-cache-prune">Cache &amp; Pruning</button>
-              <button type="button" class="audit-tab" role="tab" aria-selected="false" data-tab="tab-headers-raw">Headers &amp; JSON</button>
-            </div>
-            <div id="tab-compression">
-              <div class="metric-sub" style="margin-bottom:8px;">
-                Method: <strong id="comp-method-label">—</strong> &middot;
-                Before: <strong id="comp-before-count">—</strong> &middot;
-                After: <strong id="comp-after-count">—</strong> &middot;
-                <span id="comp-stats-summary">—</span>
-              </div>
-              <div class="compare-grid">
-                <pre id="comp-original-box" class="code-block">Original payload</pre>
-                <pre id="comp-compressed-box" class="code-block">Compressed payload</pre>
-              </div>
-            </div>
-            <div id="tab-cascade" style="display:none;"><pre id="cascade-audit-body" class="code-block">—</pre></div>
-            <div id="tab-cache-prune" style="display:none;"><pre id="cache-prune-audit-body" class="code-block">—</pre></div>
-            <div id="tab-headers-raw" style="display:none;">
-              <div class="compare-grid">
-                <pre id="raw-headers-box" class="code-block">—</pre>
-                <pre id="raw-json-box" class="code-block">—</pre>
-              </div>
+              <div id="tab-cascade" style="display:none;"><pre id="cascade-audit-body" class="code-block">—</pre></div>
+              <div id="tab-cache-prune" style="display:none;"><pre id="cache-prune-audit-body" class="code-block">—</pre></div>
+              <div id="tab-headers-raw" style="display:none;"><div class="compare-grid"><pre id="raw-headers-box" class="code-block">—</pre><pre id="raw-json-box" class="code-block">—</pre></div></div>
             </div>
           </div>
         </div>
@@ -469,76 +361,64 @@
         <div class="keynote-action-bar">
           <div id="tg-scenario-list" class="scenario-pill-strip" aria-label="Token Quota Scenarios"></div>
           <div class="action-cta-group">
-            <button type="button" id="btn-run-tg" class="btn-primary">
-              <span>Test Quota Policy</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
+            <button type="button" id="btn-run-tg" class="btn-primary"><span>Test Quota Policy</span><span aria-hidden="true">&rarr;</span></button>
           </div>
         </div>
 
-        <div class="keynote-stage-card" style="margin-top:20px;">
+        <div class="keynote-stage-card">
           <div class="stage-top-strip">
             <div class="stage-story-pill">
               <span id="t2-pipe-status" class="stage-story-badge">READY</span>
               <span id="tg-status">Native Apigee X ExtractVariables + Quota / Prompt Token Limit circuit breaker.</span>
             </div>
             <button type="button" class="stage-drawer-trigger" data-open-drawer="details-finops" data-drawer-title="Token Quotas &amp; FinOps — Responses &amp; Policy XML">
-              <span>Inspect Responses &amp; XML</span>
-              <span aria-hidden="true">&rarr;</span>
+              <span>Inspect Outputs &amp; XML &rarr;</span>
             </button>
           </div>
 
           <div class="pipeline-svg-wrap">
-            <svg id="t2-pipeline-svg" class="pipeline-svg" viewBox="0 0 980 165" role="img" aria-label="Token Quota Enforcement Pipeline">
-              <path id="t2-edge-1" class="pipe-edge" d="M 166 82 L 245 82" />
-              <path id="t2-edge-2" class="pipe-edge" d="M 435 82 L 515 82" />
-              <path id="t2-edge-3" class="pipe-edge" d="M 695 82 L 775 82" />
-              <circle class="pipe-photon" r="4"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 166 82 L 775 82" /></circle>
+            <svg id="t2-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 240" role="img" aria-label="Token Quota Enforcement Pipeline">
+              <path id="t2-edge-1" class="pipe-edge" d="M 218 122 L 298 122" />
+              <path id="t2-edge-2" class="pipe-edge" d="M 518 122 L 598 122" />
+              <path id="t2-edge-3" class="pipe-edge" d="M 818 122 L 898 122" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 218 122 L 898 122" /></circle>
               <g id="t2-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="16" y="48" width="150" height="68" />
-                <text class="pipe-node-title" x="91" y="76" text-anchor="middle">Tenant App</text>
-                <text id="t2-sub-client" class="pipe-node-sub" x="91" y="96" text-anchor="middle">API Key</text>
+                <rect class="pipe-node-box" x="18" y="68" width="200" height="108" />
+                <text class="pipe-node-kicker" x="118" y="96" text-anchor="middle">01 TENANT</text>
+                <text class="pipe-node-title" x="118" y="124" text-anchor="middle">Client App</text>
+                <text id="t2-sub-client" class="pipe-node-sub" x="118" y="152" text-anchor="middle">API Key</text>
               </g>
               <g id="t2-node-ptl" class="pipe-node">
-                <rect class="pipe-node-box" x="245" y="48" width="190" height="68" />
-                <text class="pipe-node-title" x="340" y="76" text-anchor="middle">Prompt Limit</text>
-                <text id="t2-sub-ptl" class="pipe-node-sub" x="340" y="96" text-anchor="middle">Pre-flight Gate</text>
+                <rect class="pipe-node-box" x="298" y="68" width="220" height="108" />
+                <text class="pipe-node-kicker" x="408" y="96" text-anchor="middle">02 PRE-FLIGHT</text>
+                <text class="pipe-node-title" x="408" y="124" text-anchor="middle">Prompt Token Limit</text>
+                <text id="t2-sub-ptl" class="pipe-node-sub" x="408" y="152" text-anchor="middle">Spike Cap</text>
               </g>
               <g id="t2-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="515" y="48" width="180" height="68" />
-                <text class="pipe-node-title" x="605" y="76" text-anchor="middle">Vertex AI</text>
-                <text id="t2-sub-llm" class="pipe-node-sub" x="605" y="96" text-anchor="middle">Gemini 2.5</text>
+                <rect class="pipe-node-box" x="598" y="68" width="220" height="108" />
+                <text class="pipe-node-kicker" x="708" y="96" text-anchor="middle">03 INFERENCE</text>
+                <text class="pipe-node-title" x="708" y="124" text-anchor="middle">Vertex AI</text>
+                <text id="t2-sub-llm" class="pipe-node-sub" x="708" y="152" text-anchor="middle">Gemini 2.5</text>
               </g>
               <g id="t2-node-ltq" class="pipe-node">
-                <rect class="pipe-node-box" x="775" y="48" width="185" height="68" />
-                <text class="pipe-node-title" x="867" y="76" text-anchor="middle">Token Quota</text>
-                <text id="t2-sub-ltq" class="pipe-node-sub" x="867" y="96" text-anchor="middle">Rolling Window</text>
+                <rect class="pipe-node-box" x="898" y="68" width="204" height="108" />
+                <text class="pipe-node-kicker" x="1000" y="96" text-anchor="middle">04 METERING</text>
+                <text class="pipe-node-title" x="1000" y="124" text-anchor="middle">Token Quota</text>
+                <text id="t2-sub-ltq" class="pipe-node-sub" x="1000" y="152" text-anchor="middle">Rolling Window</text>
               </g>
             </svg>
           </div>
 
           <div class="hero-outcome-band">
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Apigee Policy Verdict</span>
-              <div id="hero-t2-verdict" class="hero-kpi-value tone-cyan">Ready</div>
-              <span id="hero-t2-verdict-sub" class="hero-kpi-sub">HTTP 429 / 413 circuit breaker at the edge</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Tenant Quota Consumed</span>
-              <div id="hero-t2-quota" class="hero-kpi-value">0%</div>
-              <span id="hero-t2-quota-sub" class="hero-kpi-sub">Live rolling token budget gauge</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Direct vs. Edge Cost</span>
-              <div id="hero-t2-cost" class="hero-kpi-value tone-savings">Protected</div>
-              <span id="hero-t2-cost-sub" class="hero-kpi-sub">Blocked calls incur $0.00 Vertex AI spend</span>
-            </div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Apigee Policy Verdict</span><div id="hero-t2-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t2-verdict-sub" class="hero-kpi-sub">HTTP 429 / 413 circuit breaker at edge</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Tenant Quota Consumed</span><div id="hero-t2-quota" class="hero-kpi-value">0%</div><span id="hero-t2-quota-sub" class="hero-kpi-sub">Live rolling token budget gauge</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Direct vs. Edge Cost</span><div id="hero-t2-cost" class="hero-kpi-value tone-savings">Protected</div><span id="hero-t2-cost-sub" class="hero-kpi-sub">Blocked calls incur $0.00 Vertex AI spend</span></div>
           </div>
 
           <div class="stage-footer-bar">
             <div class="stage-footer-summary" style="flex:1;min-width:260px;">
               <div style="flex:1;">
-                <div class="viz-row-head" style="margin-bottom:6px;">
+                <div class="viz-row-head" style="margin-bottom:4px;">
                   <span id="t2-quota-used-label">Quota Used: 0 tokens</span>
                   <span id="t2-quota-pct" class="viz-val">0%</span>
                   <span id="t2-quota-rem-label">Remaining: —</span>
@@ -549,62 +429,46 @@
               </div>
             </div>
             <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-finops" data-drawer-title="Token Quotas &amp; FinOps — Side-by-Side &amp; Policy XML">
-                Inspect Details &rarr;
-              </button>
+              <button type="button" class="btn-secondary" data-open-drawer="details-finops" data-drawer-title="Token Quotas &amp; FinOps — Side-by-Side &amp; Policy XML">Inspect Outputs &rarr;</button>
             </div>
           </div>
         </div>
 
-        <div id="details-finops" class="deep-dive-stack drawer-body-section" style="margin-top:24px;">
-          <div class="surface-card architect-only">
-            <div class="surface-card-header"><h3 class="surface-card-title">Quota Policy Configuration</h3></div>
-            <div class="composer-grid">
-              <div class="field-group">
-                <label class="field-label" for="tg-prompt"><span>Test Prompt</span></label>
-                <textarea id="tg-prompt" class="field-textarea" rows="3"></textarea>
-              </div>
-              <div class="field-group">
-                <label class="field-label"><input type="checkbox" id="tg-enable-ptl" checked /> Enable Prompt Token Limit</label>
-                <input id="tg-prompt-limit" class="field-input" type="number" value="120" />
-                <label class="field-label" style="margin-top:8px;"><input type="checkbox" id="tg-enable-ltq" checked /> Enable Rolling Token Quota</label>
-                <div style="display:flex;gap:8px;">
-                  <input id="tg-quota-id" class="field-input" type="text" value="tenant-finops-demo" />
-                  <input id="tg-quota-limit" class="field-input" type="number" value="350" />
-                </div>
+        <div id="details-finops" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">Quota Policy Configuration</h3></div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="tg-prompt"><span>Test Prompt</span></label><textarea id="tg-prompt" class="field-textarea" rows="3"></textarea></div>
+                <div class="field-group"><label class="field-label"><input type="checkbox" id="tg-enable-ptl" checked /> Prompt Token Limit</label><input id="tg-prompt-limit" class="field-input" type="number" value="120" /></div>
+                <div class="field-group"><label class="field-label"><input type="checkbox" id="tg-enable-ltq" checked /> Rolling Token Quota</label><input id="tg-quota-id" class="field-input" type="text" value="tenant-finops-demo" /><input id="tg-quota-limit" class="field-input" type="number" value="350" /></div>
               </div>
             </div>
           </div>
-
-          <div class="compare-grid">
-            <div class="compare-panel">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Direct Vertex AI (No Quotas)</h3>
-                <span id="tg-direct-pill" class="model-pill">UNPROTECTED</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Total Tokens</span><span id="tg-direct-total-tok" class="metric-main">—</span><span id="tg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="tg-direct-cost" class="metric-main">—</span><span id="tg-direct-lat" class="metric-sub">—</span></div>
-              </div>
-              <pre id="tg-direct-body" class="response-box">Run a quota test to inspect live output.</pre>
-            </div>
-            <div class="compare-panel compare-panel-gateway">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Apigee X Token Governance</h3>
-                <span id="tg-gw-pill" class="model-pill pill-allowed">PROTECTED</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Policy Verdict</span><span id="tg-gw-verdict" class="metric-main">—</span><span id="tg-gw-verdict-sub" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Quota State</span><span id="tg-gw-tok" class="metric-main">—</span><span class="metric-sub">Used: <strong id="tg-gw-quota-used">—</strong> &middot; Rem: <strong id="tg-gw-quota-rem">—</strong></span></div>
-              </div>
-              <pre id="tg-gw-body" class="response-box">Run a quota test to inspect live output.</pre>
-            </div>
-          </div>
-
-          <div class="surface-card architect-only">
+          <div class="workbench-right">
             <div class="compare-grid">
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="tg-xml-box" class="code-block">—</pre></div>
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="tg-telemetry-box" class="code-block">—</pre></div>
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI</h3><span id="tg-direct-pill" class="model-pill">UNPROTECTED</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Total Tokens</span><span id="tg-direct-total-tok" class="metric-main">—</span><span id="tg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="tg-direct-cost" class="metric-main">—</span><span id="tg-direct-lat" class="metric-sub">—</span></div>
+                </div>
+                <pre id="tg-direct-body" class="response-box">Run a quota test to inspect live output.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">Apigee X Token Governance</h3><span id="tg-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Verdict</span><span id="tg-gw-verdict" class="metric-main">—</span><span id="tg-gw-verdict-sub" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Quota State</span><span id="tg-gw-tok" class="metric-main">—</span><span class="metric-sub">Used: <strong id="tg-gw-quota-used">—</strong> &middot; Rem: <strong id="tg-gw-quota-rem">—</strong></span></div>
+                </div>
+                <pre id="tg-gw-body" class="response-box">Run a quota test to inspect live output.</pre>
+              </div>
+            </div>
+            <div class="surface-card architect-only">
+              <div class="compare-grid">
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="tg-xml-box" class="code-block">—</pre></div>
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="tg-telemetry-box" class="code-block">—</pre></div>
+              </div>
             </div>
           </div>
         </div>
@@ -617,140 +481,112 @@
         <div class="keynote-action-bar">
           <div id="ma-scenario-list" class="scenario-pill-strip" aria-label="Model Armor Attack Scenarios"></div>
           <div class="action-cta-group">
-            <button type="button" id="btn-run-ma" class="btn-primary">
-              <span>Test Model Armor</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
+            <button type="button" id="btn-run-ma" class="btn-primary"><span>Test Model Armor</span><span aria-hidden="true">&rarr;</span></button>
           </div>
         </div>
 
-        <div class="keynote-stage-card" style="margin-top:20px;">
+        <div class="keynote-stage-card">
           <div class="stage-top-strip">
             <div class="stage-story-pill">
               <span id="t3-pipe-status" class="stage-story-badge">READY</span>
               <span id="ma-status">Zero-code Apigee X SanitizeUserPrompt &amp; SanitizeModelResponse inspection.</span>
             </div>
             <button type="button" class="stage-drawer-trigger" data-open-drawer="details-armor" data-drawer-title="Model Armor Safety — Attack vs. Intercepted Output">
-              <span>Inspect Responses &amp; XML</span>
-              <span aria-hidden="true">&rarr;</span>
+              <span>Inspect Outputs &amp; XML &rarr;</span>
             </button>
           </div>
 
           <div class="pipeline-svg-wrap">
-            <svg id="t3-pipeline-svg" class="pipeline-svg" viewBox="0 0 1040 165" role="img" aria-label="Model Armor Security Pipeline">
-              <path id="t3-edge-1" class="pipe-edge" d="M 142 82 L 188 82" />
-              <path id="t3-edge-2" class="pipe-edge" d="M 368 82 L 414 82" />
-              <path id="t3-edge-3" class="pipe-edge" d="M 574 82 L 620 82" />
-              <path id="t3-edge-4" class="pipe-edge" d="M 820 82 L 866 82" />
-              <circle class="pipe-photon" r="4"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 142 82 L 866 82" /></circle>
+            <svg id="t3-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 240" role="img" aria-label="Model Armor Security Pipeline">
+              <path id="t3-edge-1" class="pipe-edge" d="M 176 122 L 222 122" />
+              <path id="t3-edge-2" class="pipe-edge" d="M 432 122 L 478 122" />
+              <path id="t3-edge-3" class="pipe-edge" d="M 658 122 L 704 122" />
+              <path id="t3-edge-4" class="pipe-edge" d="M 914 122 L 952 122" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 122 L 952 122" /></circle>
               <g id="t3-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="12" y="48" width="130" height="68" />
-                <text class="pipe-node-title" x="77" y="76" text-anchor="middle">User Prompt</text>
-                <text id="t3-sub-client" class="pipe-node-sub" x="77" y="96" text-anchor="middle">Untrusted Input</text>
+                <rect class="pipe-node-box" x="14" y="68" width="162" height="108" />
+                <text class="pipe-node-kicker" x="95" y="96" text-anchor="middle">01 INPUT</text>
+                <text class="pipe-node-title" x="95" y="124" text-anchor="middle">User Prompt</text>
+                <text id="t3-sub-client" class="pipe-node-sub" x="95" y="152" text-anchor="middle">Untrusted</text>
               </g>
               <g id="t3-node-sup" class="pipe-node">
-                <rect class="pipe-node-box" x="188" y="48" width="180" height="68" />
-                <text class="pipe-node-title" x="278" y="76" text-anchor="middle">SanitizeUserPrompt</text>
-                <text id="t3-sub-sup" class="pipe-node-sub" x="278" y="96" text-anchor="middle">Jailbreak / PII / RAI</text>
+                <rect class="pipe-node-box" x="222" y="68" width="210" height="108" />
+                <text class="pipe-node-kicker" x="327" y="96" text-anchor="middle">02 PRE-LLM SHIELD</text>
+                <text class="pipe-node-title" x="327" y="124" text-anchor="middle">SanitizeUserPrompt</text>
+                <text id="t3-sub-sup" class="pipe-node-sub" x="327" y="152" text-anchor="middle">Jailbreak / PII / RAI</text>
               </g>
               <g id="t3-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="414" y="48" width="160" height="68" />
-                <text class="pipe-node-title" x="494" y="76" text-anchor="middle">Vertex AI</text>
-                <text id="t3-sub-llm" class="pipe-node-sub" x="494" y="96" text-anchor="middle">Gemini 2.5</text>
+                <rect class="pipe-node-box" x="478" y="68" width="180" height="108" />
+                <text class="pipe-node-kicker" x="568" y="96" text-anchor="middle">03 MODEL</text>
+                <text class="pipe-node-title" x="568" y="124" text-anchor="middle">Vertex AI</text>
+                <text id="t3-sub-llm" class="pipe-node-sub" x="568" y="152" text-anchor="middle">Gemini 2.5</text>
               </g>
               <g id="t3-node-smr" class="pipe-node">
-                <rect class="pipe-node-box" x="620" y="48" width="200" height="68" />
-                <text class="pipe-node-title" x="720" y="76" text-anchor="middle">SanitizeModelResponse</text>
-                <text id="t3-sub-smr" class="pipe-node-sub" x="720" y="96" text-anchor="middle">Output Guardrail</text>
+                <rect class="pipe-node-box" x="704" y="68" width="210" height="108" />
+                <text class="pipe-node-kicker" x="809" y="96" text-anchor="middle">04 POST-LLM SHIELD</text>
+                <text class="pipe-node-title" x="809" y="124" text-anchor="middle">SanitizeResponse</text>
+                <text id="t3-sub-smr" class="pipe-node-sub" x="809" y="152" text-anchor="middle">Output Guardrail</text>
               </g>
               <g id="t3-node-out" class="pipe-node">
-                <rect class="pipe-node-box" x="866" y="48" width="154" height="68" />
-                <text class="pipe-node-title" x="943" y="76" text-anchor="middle">Client Output</text>
-                <text id="t3-sub-out" class="pipe-node-sub" x="943" y="96" text-anchor="middle">Safe Response</text>
+                <rect class="pipe-node-box" x="952" y="68" width="154" height="108" />
+                <text class="pipe-node-kicker" x="1029" y="96" text-anchor="middle">05 OUTPUT</text>
+                <text class="pipe-node-title" x="1029" y="124" text-anchor="middle">Safe Reply</text>
+                <text id="t3-sub-out" class="pipe-node-sub" x="1029" y="152" text-anchor="middle">Verified</text>
               </g>
             </svg>
           </div>
 
           <div class="hero-outcome-band">
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Model Armor Verdict</span>
-              <div id="hero-t3-verdict" class="hero-kpi-value tone-cyan">Ready</div>
-              <span id="hero-t3-verdict-sub" class="hero-kpi-sub">Blocks prompt injection, PII &amp; toxic output</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Threat Stage</span>
-              <div id="hero-t3-stage" class="hero-kpi-value">Zero-Code</div>
-              <span id="hero-t3-stage-sub" class="hero-kpi-sub">Enforced in Apigee X before LLM execution</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Edge Latency</span>
-              <div id="hero-t3-latency" class="hero-kpi-value tone-savings">Sub-Second</div>
-              <span id="hero-t3-latency-sub" class="hero-kpi-sub">Zero tokens billed on intercepted attacks</span>
-            </div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Model Armor Verdict</span><div id="hero-t3-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t3-verdict-sub" class="hero-kpi-sub">Blocks prompt injection, PII &amp; toxic output</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Threat Stage</span><div id="hero-t3-stage" class="hero-kpi-value">Zero-Code</div><span id="hero-t3-stage-sub" class="hero-kpi-sub">Enforced in Apigee X before LLM call</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t3-latency" class="hero-kpi-value tone-savings">Sub-Second</div><span id="hero-t3-latency-sub" class="hero-kpi-sub">Zero tokens billed on intercepted attacks</span></div>
           </div>
 
           <div class="stage-footer-bar">
-            <div class="stage-footer-summary">
-              <span>Zero application code changes &middot; Centralized enterprise Model Armor template</span>
-            </div>
+            <div class="stage-footer-summary"><span>Zero application code changes &middot; Centralized enterprise Model Armor template</span></div>
             <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-armor" data-drawer-title="Model Armor Safety — Side-by-Side &amp; Policy XML">
-                Inspect Responses &amp; XML &rarr;
-              </button>
+              <button type="button" class="btn-secondary" data-open-drawer="details-armor" data-drawer-title="Model Armor Safety — Side-by-Side &amp; Policy XML">Inspect Outputs &rarr;</button>
             </div>
           </div>
         </div>
 
-        <div id="details-armor" class="deep-dive-stack drawer-body-section" style="margin-top:24px;">
-          <div class="surface-card architect-only">
-            <div class="surface-card-header"><h3 class="surface-card-title">Model Armor Inspection Controls</h3></div>
-            <div class="composer-grid">
-              <div class="field-group">
-                <label class="field-label" for="ma-prompt"><span>Prompt Payload</span></label>
-                <textarea id="ma-prompt" class="field-textarea" rows="3"></textarea>
-              </div>
-              <div class="toggle-grid" style="grid-template-columns:repeat(2,minmax(0,1fr));">
-                <label id="card-ma-prompt" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">SanitizeUserPrompt</span><input type="checkbox" id="ma-enable-prompt" checked /></div>
-                  <span class="toggle-desc">Pre-LLM prompt inspection</span>
-                </label>
-                <label id="card-ma-response" class="toggle-card enabled">
-                  <div class="toggle-card-top"><span class="toggle-title">SanitizeModelResponse</span><input type="checkbox" id="ma-enable-response" checked /></div>
-                  <span class="toggle-desc">Post-LLM response inspection</span>
-                </label>
+        <div id="details-armor" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">Model Armor Controls</h3></div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="ma-prompt"><span>Prompt Payload</span></label><textarea id="ma-prompt" class="field-textarea" rows="3"></textarea></div>
+                <div class="toggle-grid">
+                  <label id="card-ma-prompt" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">SanitizeUserPrompt</span><input type="checkbox" id="ma-enable-prompt" checked /></div><span class="toggle-desc">Pre-LLM inspection</span></label>
+                  <label id="card-ma-response" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">SanitizeResponse</span><input type="checkbox" id="ma-enable-response" checked /></div><span class="toggle-desc">Post-LLM inspection</span></label>
+                </div>
               </div>
             </div>
           </div>
-
-          <div class="compare-grid">
-            <div class="compare-panel">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Direct Vertex AI (No Model Armor)</h3>
-                <span id="ma-direct-pill" class="model-pill">UNPROTECTED</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Tokens</span><span id="ma-direct-total-tok" class="metric-main">—</span><span id="ma-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="ma-direct-cost" class="metric-main">—</span><span id="ma-direct-lat" class="metric-sub">—</span></div>
-              </div>
-              <pre id="ma-direct-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
-            </div>
-            <div class="compare-panel compare-panel-gateway">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Apigee X + Model Armor</h3>
-                <span id="ma-gw-pill" class="model-pill pill-allowed">PROTECTED</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Verdict</span><span id="ma-gw-verdict" class="metric-main">—</span><span id="ma-gw-verdict-sub" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Fault / Latency</span><span id="ma-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="ma-gw-fault-sub">—</span> &middot; <span id="ma-gw-lat">—</span> &middot; <span id="ma-gw-tok">—</span></span></div>
-              </div>
-              <pre id="ma-gw-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
-            </div>
-          </div>
-
-          <div class="surface-card architect-only">
+          <div class="workbench-right">
             <div class="compare-grid">
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="ma-xml-box" class="code-block">—</pre></div>
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="ma-telemetry-box" class="code-block">—</pre></div>
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI (Unprotected)</h3><span id="ma-direct-pill" class="model-pill">UNPROTECTED</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="ma-direct-total-tok" class="metric-main">—</span><span id="ma-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="ma-direct-cost" class="metric-main">—</span><span id="ma-direct-lat" class="metric-sub">—</span></div>
+                </div>
+                <pre id="ma-direct-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">Apigee X + Model Armor</h3><span id="ma-gw-pill" class="model-pill pill-allowed">PROTECTED</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Verdict</span><span id="ma-gw-verdict" class="metric-main">—</span><span id="ma-gw-verdict-sub" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Fault / Latency</span><span id="ma-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="ma-gw-fault-sub">—</span> &middot; <span id="ma-gw-lat">—</span> &middot; <span id="ma-gw-tok">—</span></span></div>
+                </div>
+                <pre id="ma-gw-body" class="response-box">Run an attack scenario to compare live outputs.</pre>
+              </div>
+            </div>
+            <div class="surface-card architect-only">
+              <div class="compare-grid">
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="ma-xml-box" class="code-block">—</pre></div>
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="ma-telemetry-box" class="code-block">—</pre></div>
+              </div>
             </div>
           </div>
         </div>
@@ -761,7 +597,7 @@
            ================================================================ -->
       <section id="main-tab-semantic-gov" role="tabpanel" aria-label="Semantic Cache and Safety" style="display:none;">
         <div class="keynote-action-bar">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;">
             <div class="provider-segmented" role="group" aria-label="Native Policy Mode">
               <button type="button" id="btn-submode-nc" class="provider-seg-btn active">Semantic Cache</button>
               <button type="button" id="btn-submode-sg" class="provider-seg-btn">Semantic Guardrail</button>
@@ -769,14 +605,11 @@
             <div id="sg-scenario-list" class="scenario-pill-strip" aria-label="Semantic Scenarios"></div>
           </div>
           <div class="action-cta-group">
-            <button type="button" id="btn-run-sg" class="btn-primary">
-              <span>Run Semantic Policy</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
+            <button type="button" id="btn-run-sg" class="btn-primary"><span>Run Semantic Policy</span><span aria-hidden="true">&rarr;</span></button>
           </div>
         </div>
 
-        <div class="keynote-stage-card" style="margin-top:20px;">
+        <div class="keynote-stage-card">
           <div class="stage-top-strip">
             <div class="stage-story-pill">
               <span id="t4-pipe-status" class="stage-story-badge">READY</span>
@@ -787,122 +620,97 @@
               <button type="button" id="btn-vs-wake" class="btn-secondary">Wake Node</button>
               <button type="button" id="btn-vs-suspend" class="btn-ghost">Suspend</button>
               <button type="button" id="btn-vs-refresh" class="btn-ghost">Refresh</button>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Side-by-Side &amp; Vector Telemetry">
-                <span>Inspect Details &rarr;</span>
+              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Responses &amp; Vector Telemetry">
+                <span>Inspect Outputs &rarr;</span>
               </button>
             </div>
           </div>
 
           <div class="pipeline-svg-wrap">
-            <svg id="t4-pipeline-svg" class="pipeline-svg" viewBox="0 0 1040 165" role="img" aria-label="Native Semantic Cache Pipeline">
-              <path id="t4-edge-1" class="pipe-edge" d="M 142 82 L 188 82" />
-              <path id="t4-edge-2" class="pipe-edge" d="M 378 82 L 424 82" />
-              <path id="t4-edge-3" class="pipe-edge" d="M 584 82 L 630 82" />
-              <path id="t4-edge-4" class="pipe-edge" d="M 825 82 L 870 82" />
-              <path id="t4-edge-hit" class="pipe-edge" d="M 283 48 C 283 12, 945 12, 945 48" stroke-dasharray="5 5" />
-              <circle class="pipe-photon" r="4"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 142 82 L 870 82" /></circle>
+            <svg id="t4-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Native Semantic Cache Pipeline">
+              <path id="t4-edge-1" class="pipe-edge" d="M 176 142 L 222 142" />
+              <path id="t4-edge-2" class="pipe-edge" d="M 432 142 L 478 142" />
+              <path id="t4-edge-3" class="pipe-edge" d="M 658 142 L 704 142" />
+              <path id="t4-edge-4" class="pipe-edge" d="M 914 142 L 952 142" />
+              <path id="t4-edge-hit" class="pipe-edge" d="M 327 90 C 327 18, 1029 18, 1029 90" stroke-dasharray="8 6" />
+              <text class="pipe-node-kicker" x="678" y="34" text-anchor="middle">NATIVE VECTOR CACHE HIT — BYPASSES VERTEX AI</text>
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 176 142 L 952 142" /></circle>
               <g id="t4-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="12" y="48" width="130" height="68" />
-                <text class="pipe-node-title" x="77" y="76" text-anchor="middle">Client App</text>
-                <text id="t4-sub-client" class="pipe-node-sub" x="77" y="96" text-anchor="middle">Paraphrase Query</text>
+                <rect class="pipe-node-box" x="14" y="90" width="162" height="104" />
+                <text class="pipe-node-kicker" x="95" y="116" text-anchor="middle">01 QUERY</text>
+                <text class="pipe-node-title" x="95" y="144" text-anchor="middle">Client App</text>
+                <text id="t4-sub-client" class="pipe-node-sub" x="95" y="172" text-anchor="middle">Paraphrase</text>
               </g>
               <g id="t4-node-pre" class="pipe-node">
-                <rect class="pipe-node-box" x="188" y="48" width="190" height="68" />
-                <text id="t4-title-pre" class="pipe-node-title" x="283" y="76" text-anchor="middle">SemanticCacheLookup</text>
-                <text id="t4-sub-pre" class="pipe-node-sub" x="283" y="96" text-anchor="middle">Vector Similarity</text>
+                <rect class="pipe-node-box" x="222" y="90" width="210" height="104" />
+                <text class="pipe-node-kicker" x="327" y="116" text-anchor="middle">02 LOOKUP</text>
+                <text id="t4-title-pre" class="pipe-node-title" x="327" y="144" text-anchor="middle">SemanticCacheLookup</text>
+                <text id="t4-sub-pre" class="pipe-node-sub" x="327" y="172" text-anchor="middle">Vector Similarity</text>
               </g>
               <g id="t4-node-llm" class="pipe-node">
-                <rect class="pipe-node-box" x="424" y="48" width="160" height="68" />
-                <text class="pipe-node-title" x="504" y="76" text-anchor="middle">Vertex AI</text>
-                <text id="t4-sub-llm" class="pipe-node-sub" x="504" y="96" text-anchor="middle">Gemini 2.5</text>
+                <rect class="pipe-node-box" x="478" y="90" width="180" height="104" />
+                <text class="pipe-node-kicker" x="568" y="116" text-anchor="middle">03 MODEL</text>
+                <text class="pipe-node-title" x="568" y="144" text-anchor="middle">Vertex AI</text>
+                <text id="t4-sub-llm" class="pipe-node-sub" x="568" y="172" text-anchor="middle">Gemini 2.5</text>
               </g>
               <g id="t4-node-post" class="pipe-node">
-                <rect class="pipe-node-box" x="630" y="48" width="195" height="68" />
-                <text id="t4-title-post" class="pipe-node-title" x="727" y="76" text-anchor="middle">SemanticCachePopulate</text>
-                <text id="t4-sub-post" class="pipe-node-sub" x="727" y="96" text-anchor="middle">Vector Store</text>
+                <rect class="pipe-node-box" x="704" y="90" width="210" height="104" />
+                <text class="pipe-node-kicker" x="809" y="116" text-anchor="middle">04 POPULATE</text>
+                <text id="t4-title-post" class="pipe-node-title" x="809" y="144" text-anchor="middle">SemanticCachePopulate</text>
+                <text id="t4-sub-post" class="pipe-node-sub" x="809" y="172" text-anchor="middle">Vector Store</text>
               </g>
               <g id="t4-node-out" class="pipe-node">
-                <rect class="pipe-node-box" x="870" y="48" width="150" height="68" />
-                <text class="pipe-node-title" x="945" y="76" text-anchor="middle">Response</text>
-                <text id="t4-sub-out" class="pipe-node-sub" x="945" y="96" text-anchor="middle">Delivered</text>
+                <rect class="pipe-node-box" x="952" y="90" width="154" height="104" />
+                <text class="pipe-node-kicker" x="1029" y="116" text-anchor="middle">05 REPLY</text>
+                <text class="pipe-node-title" x="1029" y="144" text-anchor="middle">Response</text>
+                <text id="t4-sub-out" class="pipe-node-sub" x="1029" y="172" text-anchor="middle">Delivered</text>
               </g>
             </svg>
           </div>
 
           <div class="hero-outcome-band">
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Semantic Policy Outcome</span>
-              <div id="hero-t4-verdict" class="hero-kpi-value tone-savings">Ready</div>
-              <span id="hero-t4-verdict-sub" class="hero-kpi-sub">Native Apigee X vector lookup &amp; cache populate</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Edge Latency</span>
-              <div id="hero-t4-latency" class="hero-kpi-value tone-cyan">Live</div>
-              <span id="hero-t4-latency-sub" class="hero-kpi-sub">Bypass Vertex AI completely on semantic hit</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Vector Search Node</span>
-              <div id="vs-cost-badge" class="hero-kpi-value">—</div>
-              <span id="vs-resource-details" class="hero-kpi-sub">Checking Vertex AI Vector Search status...</span>
-            </div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Semantic Policy Outcome</span><div id="hero-t4-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t4-verdict-sub" class="hero-kpi-sub">Native Apigee X vector lookup &amp; cache populate</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t4-latency" class="hero-kpi-value tone-cyan">Live</div><span id="hero-t4-latency-sub" class="hero-kpi-sub">Bypass Vertex AI completely on semantic hit</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Vector Search Node</span><div id="vs-cost-badge" class="hero-kpi-value">—</div><span id="vs-resource-details" class="hero-kpi-sub">Checking Vertex AI Vector Search status...</span></div>
           </div>
 
           <div class="stage-footer-bar">
-            <div class="stage-footer-summary">
-              <span id="sg-flow-footer">Native Apigee X Policy Flow</span>
-              <span>&middot;</span>
-              <span id="vs-domain-label">—</span>
-              <span>&middot;</span>
-              <span id="vs-shard-label">—</span>
-            </div>
-            <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Responses &amp; XML">
-                Inspect Details &rarr;
-              </button>
-            </div>
+            <div class="stage-footer-summary"><span id="sg-flow-footer">Native Apigee X Policy Flow</span><span>&middot;</span><span id="vs-domain-label">—</span><span>&middot;</span><span id="vs-shard-label">—</span></div>
+            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-semantic" data-drawer-title="Semantic Cache &amp; Safety — Responses &amp; XML">Inspect Outputs &rarr;</button></div>
           </div>
         </div>
 
-        <div id="details-semantic" class="deep-dive-stack drawer-body-section" style="margin-top:24px;">
-          <div class="surface-card architect-only">
-            <div class="surface-card-header">
-              <div>
-                <h3 id="sg-composer-title" class="surface-card-title">Semantic Policy Prompt</h3>
-                <p id="sg-policy-explanation" class="surface-card-sub">Native Apigee X SemanticCacheLookup / Populate flow.</p>
-              </div>
-            </div>
-            <textarea id="sg-prompt" class="field-textarea" rows="3"></textarea>
-          </div>
-
-          <div class="compare-grid">
-            <div class="compare-panel">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Direct Vertex AI (Uncached)</h3>
-                <span id="sg-direct-pill" class="model-pill">DIRECT</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Tokens</span><span id="sg-direct-total-tok" class="metric-main">—</span><span id="sg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
-                <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="sg-direct-cost" class="metric-main">—</span><span id="sg-direct-lat" class="metric-sub">—</span></div>
-              </div>
-              <pre id="sg-direct-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
-            </div>
-            <div class="compare-panel compare-panel-gateway">
-              <div class="compare-head">
-                <h3 id="sg-gw-heading" class="compare-head-title">Apigee X Native Semantic Cache</h3>
-                <span id="sg-gw-pill" class="model-pill pill-allowed">NATIVE</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Outcome</span><span id="sg-gw-verdict" class="metric-main">—</span><span id="sg-gw-verdict-sub" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Detail / Latency</span><span id="sg-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="sg-gw-fault-sub">—</span> &middot; <span id="sg-gw-lat">—</span> &middot; <span id="sg-gw-tok">—</span></span></div>
-              </div>
-              <pre id="sg-gw-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
+        <div id="details-semantic" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><div><h3 id="sg-composer-title" class="surface-card-title">Semantic Policy Prompt</h3><p id="sg-policy-explanation" class="surface-card-sub">Native Apigee X SemanticCacheLookup / Populate flow.</p></div></div>
+              <textarea id="sg-prompt" class="field-textarea" rows="4"></textarea>
             </div>
           </div>
-
-          <div class="surface-card architect-only">
+          <div class="workbench-right">
             <div class="compare-grid">
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="sg-xml-box" class="code-block">—</pre></div>
-              <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="sg-telemetry-box" class="code-block">—</pre></div>
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">Direct Vertex AI (Uncached)</h3><span id="sg-direct-pill" class="model-pill">DIRECT</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="sg-direct-total-tok" class="metric-main">—</span><span id="sg-direct-prompt-tok" class="metric-sub">Prompt: —</span></div>
+                  <div class="metric-tile"><span class="metric-label">Cost &amp; Latency</span><span id="sg-direct-cost" class="metric-main">—</span><span id="sg-direct-lat" class="metric-sub">—</span></div>
+                </div>
+                <pre id="sg-direct-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 id="sg-gw-heading" class="compare-head-title">Apigee X Native Semantic Cache</h3><span id="sg-gw-pill" class="model-pill pill-allowed">NATIVE</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Outcome</span><span id="sg-gw-verdict" class="metric-main">—</span><span id="sg-gw-verdict-sub" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Detail / Latency</span><span id="sg-gw-fault" class="metric-main">—</span><span class="metric-sub"><span id="sg-gw-fault-sub">—</span> &middot; <span id="sg-gw-lat">—</span> &middot; <span id="sg-gw-tok">—</span></span></div>
+                </div>
+                <pre id="sg-gw-body" class="response-box">Run a semantic scenario to inspect live output.</pre>
+              </div>
+            </div>
+            <div class="surface-card architect-only">
+              <div class="compare-grid">
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Apigee Policy XML</h4><pre id="sg-xml-box" class="code-block">—</pre></div>
+                <div><h4 class="surface-card-title" style="margin-bottom:8px;">Gateway Telemetry</h4><pre id="sg-telemetry-box" class="code-block">—</pre></div>
+              </div>
             </div>
           </div>
         </div>
@@ -913,7 +721,7 @@
            ================================================================ -->
       <section id="main-tab-system1-jev" role="tabpanel" aria-label="System 1 and System 2 Routing" style="display:none;">
         <div class="keynote-action-bar">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;flex:1;">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;flex:1;">
             <div class="provider-segmented" role="group" aria-label="System 1 Decision Engine">
               <button type="button" id="btn-s1-provider-gemini" class="provider-seg-btn active">Gemini Decision 1</button>
               <button type="button" id="btn-s1-provider-jev" class="provider-seg-btn">TypeSafe Jev</button>
@@ -921,14 +729,11 @@
             <div id="s1-scenario-list" class="scenario-pill-strip" aria-label="System 1 Scenarios"></div>
           </div>
           <div class="action-cta-group">
-            <button type="button" id="btn-run-s1" class="btn-primary">
-              <span>Run System 1</span>
-              <span aria-hidden="true">&rarr;</span>
-            </button>
+            <button type="button" id="btn-run-s1" class="btn-primary"><span>Run System 1</span><span aria-hidden="true">&rarr;</span></button>
           </div>
         </div>
 
-        <div class="keynote-stage-card" style="margin-top:20px;">
+        <div class="keynote-stage-card">
           <div class="stage-top-strip">
             <div class="stage-story-pill">
               <span id="t5-pipe-status" class="stage-story-badge">READY</span>
@@ -936,166 +741,125 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
               <button type="button" id="btn-open-glossary-tab5" class="btn-ghost">What is Noul?</button>
-              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Telemetry &amp; Responses">
-                <span>Inspect Noul &amp; Responses &rarr;</span>
+              <button type="button" class="stage-drawer-trigger" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Telemetry &amp; Outputs">
+                <span>Inspect Noul &amp; Outputs &rarr;</span>
               </button>
             </div>
           </div>
 
           <div class="pipeline-svg-wrap">
-            <svg id="t5-pipeline-svg" class="pipeline-svg" viewBox="0 0 980 180" role="img" aria-label="System 1 System 2 Apigee X Pipeline">
-              <path id="t5-edge-1" class="pipe-edge" d="M 145 90 L 205 90" />
-              <path id="t5-edge-2" class="pipe-edge" d="M 370 72 C 405 72, 415 44, 455 44" />
-              <path id="t5-edge-fasttrack" class="pipe-edge" d="M 370 108 C 405 108, 415 136, 455 136" />
-              <path id="t5-edge-3" class="pipe-edge" d="M 605 44 L 665 44" />
-              <path id="t5-edge-4" class="pipe-edge" d="M 760 78 C 760 136, 650 136, 605 136" stroke-dasharray="5 5" />
-              <circle class="pipe-photon" r="4"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 145 90 L 370 90 L 455 44 L 665 44" /></circle>
+            <svg id="t5-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="System 1 System 2 Apigee X Pipeline">
+              <path id="t5-edge-1" class="pipe-edge" d="M 176 130 L 236 130" />
+              <path id="t5-edge-2" class="pipe-edge" d="M 446 104 C 492 104, 502 66, 548 66" />
+              <path id="t5-edge-fasttrack" class="pipe-edge" d="M 446 156 C 492 156, 502 194, 548 194" />
+              <path id="t5-edge-3" class="pipe-edge" d="M 748 66 L 818 66" />
+              <path id="t5-edge-4" class="pipe-edge" d="M 948 118 C 948 194, 804 194, 748 194" stroke-dasharray="8 6" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.4s" repeatCount="indefinite" path="M 176 130 L 446 130 L 548 66 L 818 66" /></circle>
               <g id="t5-node-client" class="pipe-node">
-                <rect class="pipe-node-box" x="16" y="56" width="129" height="68" />
-                <text class="pipe-node-title" x="80" y="84" text-anchor="middle">Client App</text>
-                <text id="t5-sub-client" class="pipe-node-sub" x="80" y="104" text-anchor="middle">Prompt</text>
+                <rect class="pipe-node-box" x="14" y="76" width="162" height="108" />
+                <text class="pipe-node-kicker" x="95" y="104" text-anchor="middle">01 ENTRY</text>
+                <text class="pipe-node-title" x="95" y="132" text-anchor="middle">Client App</text>
+                <text id="t5-sub-client" class="pipe-node-sub" x="95" y="160" text-anchor="middle">Prompt</text>
               </g>
               <g id="t5-node-stage1" class="pipe-node">
-                <rect class="pipe-node-box" x="205" y="56" width="165" height="68" />
-                <text class="pipe-node-title" x="287" y="84" text-anchor="middle">Stage 1: System 1</text>
-                <text id="t5-sub-stage1" class="pipe-node-sub" x="287" y="104" text-anchor="middle">Apigee Pre-Router</text>
+                <rect class="pipe-node-box" x="236" y="76" width="210" height="108" />
+                <text class="pipe-node-kicker" x="341" y="104" text-anchor="middle">02 APIGEE SERVICECALLOUT</text>
+                <text class="pipe-node-title" x="341" y="132" text-anchor="middle">Stage 1: System 1</text>
+                <text id="t5-sub-stage1" class="pipe-node-sub" x="341" y="160" text-anchor="middle">Pre-Router</text>
               </g>
               <g id="t5-node-flash" class="pipe-node">
-                <rect class="pipe-node-box" x="455" y="12" width="150" height="64" />
-                <text class="pipe-node-title" x="530" y="38" text-anchor="middle">L1: Flash</text>
-                <text id="t5-sub-flash" class="pipe-node-sub" x="530" y="58" text-anchor="middle">Fast-Track</text>
+                <rect class="pipe-node-box" x="548" y="16" width="200" height="100" />
+                <text class="pipe-node-kicker" x="648" y="42" text-anchor="middle">FAST-TRACK L1</text>
+                <text class="pipe-node-title" x="648" y="68" text-anchor="middle">Gemini Flash</text>
+                <text id="t5-sub-flash" class="pipe-node-sub" x="648" y="94" text-anchor="middle">Low-Cost Path</text>
               </g>
               <g id="t5-node-stage2" class="pipe-node">
-                <rect class="pipe-node-box" x="665" y="12" width="190" height="64" />
-                <text class="pipe-node-title" x="760" y="38" text-anchor="middle">Stage 2: Verifier</text>
-                <text id="t5-sub-stage2" class="pipe-node-sub" x="760" y="58" text-anchor="middle">Noul Quality Gate</text>
+                <rect class="pipe-node-box" x="818" y="16" width="260" height="100" />
+                <text class="pipe-node-kicker" x="948" y="42" text-anchor="middle">03 QUALITY GATE</text>
+                <text class="pipe-node-title" x="948" y="68" text-anchor="middle">Stage 2: Noul Verifier</text>
+                <text id="t5-sub-stage2" class="pipe-node-sub" x="948" y="94" text-anchor="middle">Hallucination Check</text>
               </g>
               <g id="t5-node-pro" class="pipe-node">
-                <rect class="pipe-node-box" x="455" y="104" width="150" height="64" />
-                <text class="pipe-node-title" x="530" y="130" text-anchor="middle">L2: Pro</text>
-                <text id="t5-sub-pro" class="pipe-node-sub" x="530" y="150" text-anchor="middle">System 2 Escalation</text>
+                <rect class="pipe-node-box" x="548" y="144" width="200" height="100" />
+                <text class="pipe-node-kicker" x="648" y="170" text-anchor="middle">SYSTEM 2 ESCALATION</text>
+                <text class="pipe-node-title" x="648" y="196" text-anchor="middle">Gemini 2.5 Pro</text>
+                <text id="t5-sub-pro" class="pipe-node-sub" x="648" y="222" text-anchor="middle">Deep Reasoning</text>
               </g>
             </svg>
           </div>
 
           <div class="hero-outcome-band">
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">System 1 Cost Savings</span>
-              <div id="hero-t5-savings" class="hero-kpi-value tone-savings">Ready</div>
-              <span id="hero-t5-savings-sub" class="hero-kpi-sub">Routes simple tasks to Flash, verifies quality, escalates defects</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Routing Decision</span>
-              <div id="hero-t5-route" class="hero-kpi-value tone-violet">Apigee X</div>
-              <span id="hero-t5-route-sub" class="hero-kpi-sub">Native ServiceCallout + TargetServer pooling</span>
-            </div>
-            <div class="hero-kpi">
-              <span class="hero-kpi-label">Noul Quality Gate</span>
-              <div id="hero-t5-gate" class="hero-kpi-value">Standby</div>
-              <span id="hero-t5-gate-sub" class="hero-kpi-sub">Checks hallucination, grounding &amp; safety</span>
-            </div>
+            <div class="hero-kpi"><span class="hero-kpi-label">System 1 Cost Savings</span><div id="hero-t5-savings" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t5-savings-sub" class="hero-kpi-sub">Fast-tracks simple tasks, escalates defects</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Routing Decision</span><div id="hero-t5-route" class="hero-kpi-value tone-violet">Apigee X</div><span id="hero-t5-route-sub" class="hero-kpi-sub">Native ServiceCallout + TargetServer</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Noul Quality Gate</span><div id="hero-t5-gate" class="hero-kpi-value">Standby</div><span id="hero-t5-gate-sub" class="hero-kpi-sub">Checks hallucination, grounding &amp; safety</span></div>
           </div>
 
           <div class="stage-footer-bar">
-            <div class="stage-footer-summary">
-              <span>Pure Apigee X (Zero Cloud Run proxy hops) &middot; Encrypted Apigee KVM API Keys</span>
-            </div>
-            <div class="stage-footer-actions">
-              <button type="button" class="btn-secondary" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Battery &amp; Responses">
-                Inspect Noul &amp; Responses &rarr;
-              </button>
-            </div>
+            <div class="stage-footer-summary"><span>Pure Apigee X (Zero Cloud Run proxy hops) &middot; Encrypted Apigee KVM API Keys</span></div>
+            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-system1" data-drawer-title="System 1 / System 2 Routing — Noul Battery &amp; Outputs">Inspect Noul &amp; Outputs &rarr;</button></div>
           </div>
         </div>
 
-        <div id="details-system1" class="deep-dive-stack drawer-body-section" style="margin-top:24px;">
-          <div class="surface-card architect-only">
-            <div class="surface-card-header"><h3 class="surface-card-title">System 1 Routing &amp; Noul Threshold Controls</h3></div>
-            <div class="toggle-grid" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:16px;">
-              <label id="s1-card-fast-track" class="toggle-card enabled">
-                <div class="toggle-card-top"><span class="toggle-title">Stage 1 Fast-Track</span><input type="checkbox" id="s1-enable-fast-track" checked /></div>
-                <span class="toggle-desc">Route simple queries to Flash</span>
-              </label>
-              <label id="s1-card-verifier" class="toggle-card enabled">
-                <div class="toggle-card-top"><span class="toggle-title">Stage 2 Verifier</span><input type="checkbox" id="s1-enable-verifier" checked /></div>
-                <span class="toggle-desc">Verify L1 output &amp; escalate defects</span>
-              </label>
-              <label id="s1-card-defect" class="toggle-card">
-                <div class="toggle-card-top"><span class="toggle-title">Simulate L1 Defect</span><input type="checkbox" id="s1-simulate-defect" /></div>
-                <span class="toggle-desc">Force hallucination to test escalation</span>
-              </label>
-            </div>
-            <div class="composer-grid">
-              <div class="field-group"><label class="field-label" for="s1-query"><span>User Query</span></label><textarea id="s1-query" class="field-textarea" rows="2"></textarea></div>
-              <div class="field-group"><label class="field-label" for="s1-sys"><span>System Instruction</span></label><textarea id="s1-sys" class="field-textarea" rows="2"></textarea></div>
-              <div class="field-group"><label class="field-label" for="s1-rag"><span>Grounding Context</span></label><textarea id="s1-rag" class="field-textarea" rows="2"></textarea></div>
-              <div class="field-group">
-                <label class="field-label" for="s1-conf-threshold"><span>Confidence Threshold</span></label>
-                <input id="s1-conf-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.75" />
-                <label class="field-label" for="s1-fire-threshold" style="margin-top:8px;"><span>Noul Defect Fire Threshold</span></label>
-                <input id="s1-fire-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.50" />
+        <div id="details-system1" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">System 1 &amp; Noul Controls</h3></div>
+              <div class="toggle-grid" style="margin-bottom:12px;">
+                <label id="s1-card-fast-track" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Stage 1 Fast-Track</span><input type="checkbox" id="s1-enable-fast-track" checked /></div></label>
+                <label id="s1-card-verifier" class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Stage 2 Verifier</span><input type="checkbox" id="s1-enable-verifier" checked /></div></label>
+                <label id="s1-card-defect" class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate L1 Defect</span><input type="checkbox" id="s1-simulate-defect" /></div></label>
+              </div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="s1-query"><span>User Query</span></label><textarea id="s1-query" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="s1-sys"><span>System Instruction</span></label><textarea id="s1-sys" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="s1-rag"><span>Grounding Context</span></label><textarea id="s1-rag" class="field-textarea" rows="2"></textarea></div>
+                <div class="field-group"><label class="field-label" for="s1-conf-threshold"><span>Confidence Threshold</span></label><input id="s1-conf-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.75" /></div>
+                <div class="field-group"><label class="field-label" for="s1-fire-threshold"><span>Noul Fire Threshold</span></label><input id="s1-fire-threshold" class="field-input" type="number" step="0.05" min="0.1" max="0.99" value="0.50" /></div>
               </div>
             </div>
           </div>
+          <div class="workbench-right">
+            <div class="surface-card">
+              <div class="surface-card-header">
+                <h3 class="surface-card-title">Stage 2 Noul Quality Battery</h3>
+                <div style="display:flex;gap:8px;"><span id="noul-gate-badge" class="model-pill">—</span><span id="noul-verdict-pill" class="model-pill pill-jev">STANDBY</span></div>
+              </div>
+              <div id="noul-bars-container" class="noul-grid"></div>
+            </div>
 
-          <div class="surface-card">
-            <div class="surface-card-header">
-              <h3 class="surface-card-title">Stage 2 Noul Quality Battery</h3>
-              <div style="display:flex;gap:8px;align-items:center;">
-                <span id="noul-gate-badge" class="model-pill">—</span>
-                <span id="noul-verdict-pill" class="model-pill pill-jev">STANDBY</span>
-              </div>
-            </div>
-            <div id="noul-bars-container" class="noul-grid"></div>
-          </div>
-
-          <div class="compare-grid">
-            <div class="compare-panel">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Direct Gemini 2.5 Pro (Always System 2)</h3>
-                <span class="model-pill">gemini-2.5-pro</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Total Cost</span><span id="s1-direct-cost" class="metric-main">—</span><span id="s1-direct-lat" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Tokens</span><span id="s1-direct-prompt-tok" class="metric-main">—</span><span id="s1-direct-out-tok" class="metric-sub">—</span></div>
-              </div>
-              <pre id="s1-direct-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
-            </div>
-            <div class="compare-panel compare-panel-gateway">
-              <div class="compare-head">
-                <h3 class="compare-head-title">Apigee X System 1 / System 2</h3>
-                <span id="s1-gw-pill" class="model-pill pill-jev">SYSTEM 1</span>
-              </div>
-              <div class="metric-grid">
-                <div class="metric-tile"><span class="metric-label">Net Savings</span><span id="s1-gw-savings" class="metric-main">—</span><span id="s1-gw-savings-sub" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Route Taken</span><span id="s1-gw-route" class="metric-main">—</span><span id="s1-gw-route-sub" class="metric-sub">—</span></div>
-                <div class="metric-tile"><span class="metric-label">Total Cost</span><span id="s1-gw-total-cost" class="metric-main">—</span><span id="s1-gw-jev-cost" class="metric-sub">Classifier: —</span></div>
-              </div>
-              <pre id="s1-gw-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
-            </div>
-          </div>
-
-          <div class="surface-card">
-            <div class="surface-card-header">
-              <h3 class="surface-card-title">Cost Comparison</h3>
-              <span id="s1-viz-delta-pill" class="model-pill">—</span>
-            </div>
-            <div class="viz-stack">
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Direct Pro</span><span id="s1-viz-direct-val" class="viz-val">—</span></div>
-                <div class="viz-track"><div id="s1-viz-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div>
-              </div>
-              <div class="viz-row">
-                <div class="viz-row-head"><span>Apigee X System 1</span><span id="s1-viz-gw-val" class="viz-val">—</span></div>
-                <div class="viz-track"><div id="s1-viz-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="surface-card architect-only">
             <div class="compare-grid">
-              <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 1 Pre-Router</h4><p id="s1-stage1-meta" class="metric-sub">—</p><pre id="s1-stage1-box" class="code-block">—</pre></div>
-              <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 2 Verifier</h4><p id="s1-stage2-meta" class="metric-sub">—</p><pre id="s1-stage2-box" class="code-block">—</pre></div>
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">Direct Gemini 2.5 Pro</h3><span class="model-pill">gemini-2.5-pro</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Cost</span><span id="s1-direct-cost" class="metric-main">—</span><span id="s1-direct-lat" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Tokens</span><span id="s1-direct-prompt-tok" class="metric-main">—</span><span id="s1-direct-out-tok" class="metric-sub">—</span></div>
+                </div>
+                <pre id="s1-direct-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">Apigee X System 1 / 2</h3><span id="s1-gw-pill" class="model-pill pill-jev">SYSTEM 1</span></div>
+                <div class="metric-grid">
+                  <div class="metric-tile"><span class="metric-label">Savings</span><span id="s1-gw-savings" class="metric-main">—</span><span id="s1-gw-savings-sub" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Route</span><span id="s1-gw-route" class="metric-main">—</span><span id="s1-gw-route-sub" class="metric-sub">—</span></div>
+                  <div class="metric-tile"><span class="metric-label">Total Cost</span><span id="s1-gw-total-cost" class="metric-main">—</span><span id="s1-gw-jev-cost" class="metric-sub">Classifier: —</span></div>
+                </div>
+                <pre id="s1-gw-body" class="response-box">Run a System 1 scenario to inspect outputs.</pre>
+              </div>
+            </div>
+
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">Cost Comparison</h3><span id="s1-viz-delta-pill" class="model-pill">—</span></div>
+              <div class="viz-stack">
+                <div class="viz-row"><div class="viz-row-head"><span>Direct Pro</span><span id="s1-viz-direct-val" class="viz-val">—</span></div><div class="viz-track"><div id="s1-viz-direct-bar" class="viz-fill viz-fill-scale viz-fill-direct" style="transform:scaleX(0.02)"></div></div></div>
+                <div class="viz-row"><div class="viz-row-head"><span>Apigee X System 1</span><span id="s1-viz-gw-val" class="viz-val">—</span></div><div class="viz-track"><div id="s1-viz-gw-bar" class="viz-fill viz-fill-scale viz-fill-savings" style="transform:scaleX(0.02)"></div></div></div>
+              </div>
+            </div>
+
+            <div class="surface-card architect-only">
+              <div class="compare-grid">
+                <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 1 Pre-Router</h4><p id="s1-stage1-meta" class="metric-sub">—</p><pre id="s1-stage1-box" class="code-block">—</pre></div>
+                <div><h4 class="surface-card-title" style="margin-bottom:4px;">Stage 2 Verifier</h4><p id="s1-stage2-meta" class="metric-sub">—</p><pre id="s1-stage2-box" class="code-block">—</pre></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1104,14 +868,14 @@
   </main>
 
   <!-- ====================================================================
-       SLIDE-OVER DETAILS DRAWER (Mounts active tab's deep-dive cleanly)
+       SLIDE-OVER DETAILS DRAWER
        ==================================================================== -->
   <div id="drawer-scrim" class="drawer-scrim" aria-hidden="true"></div>
   <aside id="keynote-drawer" class="keynote-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title-text" aria-hidden="true">
     <div class="drawer-header">
       <div>
-        <h2 id="drawer-title-text" class="drawer-title">Live Responses &amp; Telemetry</h2>
-        <p class="drawer-subtitle">Side-by-side LLM outputs, token breakdown, and ROI ledger</p>
+        <h2 id="drawer-title-text" class="drawer-title">Live Outputs &amp; Telemetry</h2>
+        <p class="drawer-subtitle">Side-by-side LLM responses, token breakdown, and session ledger</p>
       </div>
       <button type="button" id="btn-close-drawer" class="btn-secondary">Close &times;</button>
     </div>
@@ -1119,54 +883,30 @@
   </aside>
 
   <!-- ====================================================================
-       MODALS: ARCHITECTURE & PRICING + SYSTEM 1 GLOSSARY
+       MODALS
        ==================================================================== -->
   <div id="about-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="Architecture and Pricing">
     <div class="modal-panel">
-      <div class="modal-header">
-        <h3 class="modal-title">Apigee X AI Gateway Architecture &amp; Pricing</h3>
-        <button type="button" id="btn-close-about" class="btn-secondary">Close</button>
-      </div>
+      <div class="modal-header"><h3 class="modal-title">Apigee X AI Gateway Architecture &amp; Pricing</h3><button type="button" id="btn-close-about" class="btn-secondary">Close</button></div>
       <div class="modal-body-grid">
-        <div class="glossary-item">
-          <h4>Live Apigee X Endpoint</h4>
-          <p><code id="footer-apigee-url">https://eval-group.34-120-155-152.nip.io/v1/ai-economics</code></p>
-        </div>
-        <div class="glossary-item">
-          <h4>Vertex AI Pricing Basis (Standard)</h4>
-          <p>Gemini 2.5 Pro: $1.25 / 1M input, $10.00 / 1M output (incl. thinking). Gemini 2.5 Flash: $0.30 / 1M input, $2.50 / 1M output. Gemini Decision 1: $0.10 / 1M input ($0 output). TypeSafe Jev: $0.042 / 1M input ($0 output).</p>
-        </div>
-        <div class="glossary-item">
-          <h4>Pure Apigee X Policy Enforcement</h4>
-          <p>Quotas, Model Armor, Semantic Cache, and System 1 / System 2 Pre-Routing + Post-Verification run directly inside Apigee X using native policies, encrypted KVM, TargetServers, and ServiceCallouts.</p>
-        </div>
+        <div class="glossary-item"><h4>Live Apigee X Endpoint</h4><p><code id="footer-apigee-url">https://eval-group.34-120-155-152.nip.io/v1/ai-economics</code></p></div>
+        <div class="glossary-item"><h4>Vertex AI Pricing Basis</h4><p>Gemini 2.5 Pro: $1.25 / 1M in, $10.00 / 1M out. Gemini 2.5 Flash: $0.30 / 1M in, $2.50 / 1M out. Gemini Decision 1: $0.10 / 1M in ($0 out). TypeSafe Jev: $0.042 / 1M in ($0 out).</p></div>
+        <div class="glossary-item"><h4>Pure Apigee X Policy Enforcement</h4><p>Quotas, Model Armor, Semantic Cache, and System 1 / System 2 Pre-Routing + Post-Verification run directly inside Apigee X using native policies, encrypted KVM, TargetServers, and ServiceCallouts.</p></div>
       </div>
     </div>
   </div>
 
   <div id="jev-glossary-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-label="System 1 and Noul Glossary">
     <div class="modal-panel">
-      <div class="modal-header">
-        <h3 class="modal-title">System 1 / System 2 &amp; Noul Glossary</h3>
-        <button type="button" id="btn-close-glossary" class="btn-secondary">Close</button>
-      </div>
+      <div class="modal-header"><h3 class="modal-title">System 1 / System 2 &amp; Noul Glossary</h3><button type="button" id="btn-close-glossary" class="btn-secondary">Close</button></div>
       <div class="modal-body-grid">
-        <div class="glossary-item">
-          <h4>System 1 (Fast Classifier)</h4>
-          <p>Ultra-cheap classification pass (Gemini Decision 1 or TypeSafe Jev) that scores query complexity in milliseconds before an expensive reasoning LLM is called.</p>
-        </div>
-        <div class="glossary-item">
-          <h4>System 2 (Deep Reasoner)</h4>
-          <p>High-capability model (Gemini 2.5 Pro) reserved only for complex queries or escalated defects.</p>
-        </div>
-        <div class="glossary-item">
-          <h4>Noul Quality Gate</h4>
-          <p>Post-generation verification battery scoring L1 Flash responses for grounding, hallucination, completeness, and safety — automatically escalating to Gemini 2.5 Pro if any detector fires.</p>
-        </div>
+        <div class="glossary-item"><h4>System 1 (Fast Classifier)</h4><p>Ultra-cheap classification pass (Gemini Decision 1 or TypeSafe Jev) that scores query complexity in milliseconds before an expensive reasoning LLM is called.</p></div>
+        <div class="glossary-item"><h4>System 2 (Deep Reasoner)</h4><p>High-capability model (Gemini 2.5 Pro) reserved only for complex queries or escalated defects.</p></div>
+        <div class="glossary-item"><h4>Noul Quality Gate</h4><p>Post-generation verification battery scoring L1 Flash responses for grounding, hallucination, completeness, and safety — automatically escalating to Gemini 2.5 Pro if any detector fires.</p></div>
       </div>
     </div>
   </div>
 
-  <script src="assets/app.js?v=9.1"></script>
+  <script src="assets/app.js?v=10.0"></script>
 </body>
 </html>
