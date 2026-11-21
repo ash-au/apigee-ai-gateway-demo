@@ -156,7 +156,7 @@
     });
   }
 
-  // Theme Switcher (Archival Paper Light <-> Carbon Obsidian Dark)
+  // Theme Switcher (Dark-First Obsidian Command Center <-> Crisp Cloud Light)
   function initThemeSwitcher() {
     const btn = document.getElementById("btn-theme-toggle");
     if (!btn) return;
@@ -167,15 +167,13 @@
     function getCurrentTheme() {
       const explicit = document.documentElement.getAttribute("data-theme");
       if (explicit === "light" || explicit === "dark") return explicit;
-      return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
+      return "dark";
     }
 
     function applyThemeUI(theme) {
       const isDark = theme === "dark";
       btn.setAttribute("aria-pressed", isDark ? "true" : "false");
-      if (label) label.textContent = isDark ? "Archival Light" : "Obsidian Dark";
+      if (label) label.textContent = isDark ? "Light Mode" : "Dark Mode";
       if (iconMoon) iconMoon.style.display = isDark ? "none" : "block";
       if (iconSun) iconSun.style.display = isDark ? "block" : "none";
     }
@@ -192,11 +190,45 @@
     });
   }
 
+  // Executive View <-> Architect Inspector Switcher
+  function initViewModeSwitcher() {
+    const btnExec = document.getElementById("btn-view-executive");
+    const btnArch = document.getElementById("btn-view-architect");
+    if (!btnExec || !btnArch) return;
+
+    function applyViewMode(mode) {
+      const normalized = mode === "architect" ? "architect" : "executive";
+      document.documentElement.setAttribute("data-view", normalized);
+      btnExec.classList.toggle("active", normalized === "executive");
+      btnExec.setAttribute("aria-pressed", normalized === "executive" ? "true" : "false");
+      btnArch.classList.toggle("active", normalized === "architect");
+      btnArch.setAttribute("aria-pressed", normalized === "architect" ? "true" : "false");
+      try {
+        localStorage.setItem("apigee-demo-view", normalized);
+      } catch (e) {}
+    }
+
+    const current = document.documentElement.getAttribute("data-view") || "executive";
+    applyViewMode(current);
+
+    btnExec.addEventListener("click", () => applyViewMode("executive"));
+    btnArch.addEventListener("click", () => applyViewMode("architect"));
+  }
+
+  // Kinetic Metric Pop Micro-Animation
+  function popMetric(el) {
+    if (!el) return;
+    el.classList.remove("metric-pop");
+    void el.offsetWidth;
+    el.classList.add("metric-pop");
+  }
+
   // Live SVG Pipeline Helpers
   function setPipeRunning(svgId, running) {
     const svg = document.getElementById(svgId);
     if (!svg) return;
     svg.classList.toggle("is-running", Boolean(running));
+    svg.classList.toggle("pipe-running", Boolean(running));
   }
 
   function resetPipeSvg(svgId) {
@@ -737,7 +769,30 @@
     s1DeltaPill.className = `model-pill tabular-nums ${isSavings ? "pill-allowed" : "pill-blocked"}`;
   }
 
-  // Primary Multi-Tab Navigation
+  // Primary Multi-Tab Navigation + Dynamic Topbar Context
+  const STAGE_HEADERS = {
+    "main-tab-economics": {
+      title: "Token Cost & AI Optimization",
+      subtitle: "Live Direct Vertex AI vs. Apigee X Gateway — Cache, Compress, Route & Prune",
+    },
+    "main-tab-token-finops": {
+      title: "Token Quotas & FinOps",
+      subtitle: "Native Apigee X ExtractVariables + Quota / SpikeArrest circuit breakers",
+    },
+    "main-tab-model-armor": {
+      title: "Model Armor Safety",
+      subtitle: "Zero-code Apigee X SanitizeUserPrompt & SanitizeModelResponse inspection",
+    },
+    "main-tab-semantic-gov": {
+      title: "Semantic Cache & Safety",
+      subtitle: "Native Apigee X SemanticCacheLookup / Populate + Vertex AI Vector Search",
+    },
+    "main-tab-system1-jev": {
+      title: "System 1 / System 2 Routing",
+      subtitle: "Pure Apigee X ServiceCallout pre-router & post-verifier (Gemini Decision 1 / TypeSafe Jev)",
+    },
+  };
+
   document.querySelectorAll(".primary-tab-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".primary-tab-btn").forEach((b) => {
@@ -747,6 +802,13 @@
       btn.classList.add("active");
       btn.setAttribute("aria-selected", "true");
       const targetId = btn.dataset.maintab;
+      const meta = STAGE_HEADERS[targetId];
+      if (meta) {
+        const elTitle = document.getElementById("stage-active-title");
+        const elSub = document.getElementById("stage-active-subtitle");
+        if (elTitle) elTitle.textContent = meta.title;
+        if (elSub) elSub.textContent = meta.subtitle;
+      }
       [
         "main-tab-economics",
         "main-tab-token-finops",
@@ -1029,6 +1091,8 @@
     elGwCostDelta.textContent =
       `${costSign}${Math.abs(cmp.cost_reduction_pct)}% (${fmtUsd(Math.abs(cmp.cost_saved_usd), 6)} ${cmp.cost_saved_usd >= 0 ? "saved" : "added"})`;
     setDeltaClass(elGwCostDelta, cmp.cost_saved_usd >= 0);
+    popMetric(elGwCostDelta);
+    popMetric(document.getElementById("gateway-total-cost"));
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
@@ -1810,6 +1874,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
 
   wireTablistKeyboardNav();
   initThemeSwitcher();
+  initViewModeSwitcher();
   syncPolicySwitches();
   syncNoulThresholdLines();
 
@@ -2217,6 +2282,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         elS1SavingsSub.textContent = `${fmtUsd(Math.abs(costSaved), 6)} ${isSavings ? "saved" : "added"}`;
         setDeltaClass(elS1Savings, isSavings);
         setDeltaClass(elS1SavingsSub, isSavings);
+        popMetric(elS1Savings);
 
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {
