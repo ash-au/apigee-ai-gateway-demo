@@ -4,6 +4,7 @@ import asyncio
 import json
 import os
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -960,6 +961,123 @@ async def passthrough_gateway_chat(
     res["authenticated_via"] = "Apigee X Developer App Consumer Key (x-api-key)"
     res["consumer_key_prefix"] = f"{api_key[:8]}..."
     return res
+
+
+class McpGovernanceRequest(BaseModel):
+    agent_role: str = "support-agent"
+    tool_name: str = "search_kb"
+    tool_arguments: Dict[str, Any] = Field(default_factory=lambda: {"query": "VPN reset"})
+    simulate_poisoned_tool: bool = False
+    enable_model_armor: bool = True
+
+
+class ResilientChatRequest(BaseModel):
+    model: str = "gpt-4o"
+    prompt: str = "Explain how Apigee X handles multi-region LLM failover in 2 concise sentences."
+    simulate_429: bool = False
+    canary_pct: int = 0
+
+
+class PiiVaultRequest(BaseModel):
+    prompt: str = "Customer Sarah Jenkins (sarah.jenkins@acme-bank.com, phone +61 412 555 890, card 4532-8910-4421-9901, SSN 123-45-6789) wants to confirm her new card activation."
+    enable_vault: bool = True
+    rehydrate_response: bool = True
+
+
+@app.post("/api/mcp/execute")
+async def execute_mcp_governance(req: McpGovernanceRequest) -> Dict[str, Any]:
+    target_url = f"{APIGEE_GATEWAY_URL}/policies/mcp-governance"
+    jsonrpc_payload = {
+        "jsonrpc": "2.0",
+        "id": f"mcp-{int(time.time() * 1000)}",
+        "method": "tools/call",
+        "params": {"name": req.tool_name, "arguments": req.tool_arguments},
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "X-Agent-Role": req.agent_role,
+        "X-Simulate-Poisoned-Tool": "true" if req.simulate_poisoned_tool else "false",
+        "X-Enable-Mcp-Armor": "true" if req.enable_model_armor else "false",
+    }
+    t0 = time.perf_counter()
+    async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+        resp = await client.post(target_url, headers=headers, json=jsonrpc_payload)
+    latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+    try:
+        data = resp.json()
+    except Exception:
+        data = {"raw_body": resp.text[:1000]}
+    return {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "http_status_code": resp.status_code,
+        "blocked": resp.status_code >= 400,
+        "latency_ms": latency_ms,
+        "jsonrpc_request": jsonrpc_payload,
+        "apigee_response": data,
+        "apigee_headers": {k: v for k, v in resp.headers.items() if k.lower().startswith("x-apigee")},
+        "apigee_endpoint": target_url,
+    }
+
+
+@app.post("/api/resilient/execute")
+async def execute_resilient_chat(req: ResilientChatRequest) -> Dict[str, Any]:
+    target_url = f"{APIGEE_GATEWAY_URL}/policies/resilient-chat"
+    openai_payload = {
+        "model": req.model,
+        "messages": [{"role": "user", "content": req.prompt}],
+        "temperature": 0.2,
+        "max_tokens": 256,
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "X-Simulate-429": "true" if req.simulate_429 else "false",
+        "X-Canary-Pct": str(max(0, min(100, int(req.canary_pct)))),
+    }
+    t0 = time.perf_counter()
+    async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+        resp = await client.post(target_url, headers=headers, json=openai_payload)
+    latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+    try:
+        data = resp.json()
+    except Exception:
+        data = {"raw_body": resp.text[:1000]}
+    return {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "http_status_code": resp.status_code,
+        "latency_ms": latency_ms,
+        "openai_request": openai_payload,
+        "openai_response": data,
+        "apigee_headers": {k: v for k, v in resp.headers.items() if k.lower().startswith("x-apigee")},
+        "apigee_endpoint": target_url,
+    }
+
+
+@app.post("/api/pii-vault/execute")
+async def execute_pii_vault(req: PiiVaultRequest) -> Dict[str, Any]:
+    target_url = f"{APIGEE_GATEWAY_URL}/policies/pii-vault"
+    payload = {"prompt": req.prompt}
+    headers = {
+        "Content-Type": "application/json",
+        "X-Enable-Pii-Vault": "true" if req.enable_vault else "false",
+        "X-Pii-Rehydrate": "true" if req.rehydrate_response else "false",
+    }
+    t0 = time.perf_counter()
+    async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+        resp = await client.post(target_url, headers=headers, json=payload)
+    latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+    try:
+        data = resp.json()
+    except Exception:
+        data = {"raw_body": resp.text[:1000]}
+    return {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "http_status_code": resp.status_code,
+        "latency_ms": latency_ms,
+        "original_prompt": req.prompt,
+        "apigee_response": data,
+        "apigee_headers": {k: v for k, v in resp.headers.items() if k.lower().startswith("x-apigee")},
+        "apigee_endpoint": target_url,
+    }
 
 
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"

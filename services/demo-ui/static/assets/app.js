@@ -857,6 +857,18 @@
       title: "System 1 / System 2 Routing",
       subtitle: "Pure Apigee X ServiceCallout pre-router & post-verifier (Gemini Decision 1 / TypeSafe Jev)",
     },
+    "main-tab-mcp-gov": {
+      title: "MCP Tool Governance",
+      subtitle: "Native Apigee X JSON-RPC 2.0 RBAC Allowlist + Model Armor Indirect Prompt Injection Shield",
+    },
+    "main-tab-resilient": {
+      title: "429 Failover & OpenAI Facade",
+      subtitle: "Drop-in OpenAI SDK compatibility, automatic 429 multi-region failover & Canary routing in Apigee X",
+    },
+    "main-tab-pii-vault": {
+      title: "Reversible PII Vault & SSE",
+      subtitle: "Zero raw PII reaches Vertex AI — Apigee X tokenizes pre-LLM and rehydrates authorized responses",
+    },
   };
 
   document.querySelectorAll(".primary-tab-btn").forEach((btn) => {
@@ -881,6 +893,9 @@
         "main-tab-model-armor",
         "main-tab-semantic-gov",
         "main-tab-system1-jev",
+        "main-tab-mcp-gov",
+        "main-tab-resilient",
+        "main-tab-pii-vault",
       ].forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
@@ -2096,6 +2111,12 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
       "t4-node-post": { drawer: "details-semantic", title: "Native SemanticCachePopulate" },
       "t5-node-stage1": { drawer: "details-system1", title: "Stage 1 System 1 Pre-Router" },
       "t5-node-stage2": { drawer: "details-system1", title: "Stage 2 Noul Quality Verifier" },
+      "t6-node-rbac": { drawer: "details-mcp", title: "MCP RBAC Allowlist & JSON-RPC" },
+      "t6-node-armor": { drawer: "details-mcp", title: "Model Armor Indirect Injection Scan" },
+      "t7-node-facade": { drawer: "details-resilient", title: "OpenAI Facade Schema Translation" },
+      "t7-node-router": { drawer: "details-resilient", title: "429 Failover & Canary Routing" },
+      "t8-node-mask": { drawer: "details-pii", title: "Pre-LLM PII Tokenization Vault" },
+      "t8-node-unmask": { drawer: "details-pii", title: "Reversible PII De-Tokenization" },
     };
     Object.entries(nodeMap).forEach(([nodeId, cfg]) => {
       const node = document.getElementById(nodeId);
@@ -2141,12 +2162,348 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     });
   }
 
+  function initNewEnterpriseTabs() {
+    // --- TAB 6: MCP TOOL GOVERNANCE ---
+    const mcpRole = document.getElementById("mcp-role-select");
+    const mcpTool = document.getElementById("mcp-tool-input");
+    const mcpPoison = document.getElementById("mcp-sim-poison");
+    const mcpArmor = document.getElementById("mcp-enable-armor");
+    const btnRunMcp = document.getElementById("btn-run-mcp");
+
+    document.querySelectorAll("#mcp-scenario-list .scenario-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#mcp-scenario-list .scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
+        const p = btn.dataset.mcpPreset;
+        if (p === "safe") {
+          if (mcpRole) mcpRole.value = "support-agent";
+          if (mcpTool) mcpTool.value = "search_kb";
+          if (mcpPoison) mcpPoison.checked = false;
+        } else if (p === "forbidden") {
+          if (mcpRole) mcpRole.value = "support-agent";
+          if (mcpTool) mcpTool.value = "drop_production_db";
+          if (mcpPoison) mcpPoison.checked = false;
+        } else if (p === "poisoned") {
+          if (mcpRole) mcpRole.value = "support-agent";
+          if (mcpTool) mcpTool.value = "search_kb";
+          if (mcpPoison) mcpPoison.checked = true;
+        }
+        const hTool = document.getElementById("hero-t6-tool");
+        const hToolSub = document.getElementById("hero-t6-tool-sub");
+        if (hTool && mcpTool) hTool.textContent = mcpTool.value;
+        if (hToolSub && mcpRole) hToolSub.textContent = `Role: ${mcpRole.value}`;
+      });
+    });
+
+    if (btnRunMcp) {
+      btnRunMcp.addEventListener("click", async () => {
+        btnRunMcp.disabled = true;
+        setPipeRunning("t6-pipeline-svg", true);
+        resetPipeSvg("t6-pipeline-svg");
+        const statusEl = document.getElementById("mcp-status");
+        const pipeBadge = document.getElementById("t6-pipe-status");
+        if (pipeBadge) pipeBadge.textContent = "RUNNING";
+        if (statusEl) statusEl.textContent = "Executing live JSON-RPC 2.0 MCP call through Apigee X...";
+        try {
+          const resp = await apiFetch("/api/mcp/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              agent_role: mcpRole ? mcpRole.value : "support-agent",
+              tool_name: mcpTool ? mcpTool.value.trim() : "search_kb",
+              tool_arguments: { query: "VPN SSO reset" },
+              simulate_poisoned_tool: Boolean(mcpPoison && mcpPoison.checked),
+              enable_model_armor: Boolean(!mcpArmor || mcpArmor.checked),
+            }),
+          });
+          const data = await resp.json();
+          const blocked = Boolean(data.blocked);
+          const isRbacBlock = data.http_status_code === 403;
+          setNodeState("t6-node-agent", "state-active", "t6-sub-agent", mcpRole ? mcpRole.value : "agent");
+          setEdgeState("t6-edge-1", isRbacBlock ? "edge-alert" : "edge-active");
+          if (isRbacBlock) {
+            setNodeState("t6-node-rbac", "state-alert", "t6-sub-rbac", "BLOCKED 403");
+            setNodeState("t6-node-armor", "state-bypass", "t6-sub-armor", "Skipped");
+            setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Never called");
+          } else if (blocked) {
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "Allowed");
+            setEdgeState("t6-edge-2", "edge-alert");
+            setNodeState("t6-node-armor", "state-alert", "t6-sub-armor", `BLOCKED ${data.http_status_code}`);
+            setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Injection stopped");
+          } else {
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "Allowed");
+            setEdgeState("t6-edge-2", "edge-savings");
+            setNodeState("t6-node-armor", "state-savings", "t6-sub-armor", "Clean");
+            setEdgeState("t6-edge-3", "edge-savings");
+            setNodeState("t6-node-llm", "state-savings", "t6-sub-llm", "Executed 200");
+          }
+
+          const hv = document.getElementById("hero-t6-verdict");
+          const hvs = document.getElementById("hero-t6-verdict-sub");
+          const ht = document.getElementById("hero-t6-tool");
+          const hts = document.getElementById("hero-t6-tool-sub");
+          const hl = document.getElementById("hero-t6-lat");
+          const hls = document.getElementById("hero-t6-lat-sub");
+          if (hv) {
+            hv.textContent = isRbacBlock ? "403 BLOCKED" : blocked ? "ARMOR BLOCK" : "ALLOWED";
+            hv.className = `hero-kpi-value ${blocked ? "tone-alert" : "tone-savings"}`;
+            popMetric(hv);
+          }
+          if (hvs) hvs.textContent = isRbacBlock ? "Blocked by Apigee X MCP RBAC Allowlist" : blocked ? "Indirect prompt injection caught by Model Armor" : "Tool authorized & scanned clean";
+          if (ht && mcpTool) ht.textContent = mcpTool.value;
+          if (hts && mcpRole) hts.textContent = `Role: ${mcpRole.value}`;
+          if (hl) {
+            hl.textContent = `${fmtInt(data.latency_ms)} ms`;
+            popMetric(hl);
+          }
+          if (hls) hls.textContent = `HTTP ${data.http_status_code} from Apigee X`;
+          if (pipeBadge) pipeBadge.textContent = blocked ? `HTTP ${data.http_status_code}` : "HTTP 200";
+          if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
+          document.getElementById("mcp-req-box").textContent = JSON.stringify(data.jsonrpc_request || {}, null, 2);
+          document.getElementById("mcp-resp-box").textContent = JSON.stringify(data.apigee_response || {}, null, 2);
+          const pill = document.getElementById("mcp-resp-pill");
+          if (pill) {
+            pill.textContent = `HTTP ${data.http_status_code}`;
+            pill.className = `model-pill ${blocked ? "pill-blocked" : "pill-allowed"}`;
+          }
+        } catch (e) {
+          if (statusEl) statusEl.textContent = `Error: ${e.message}`;
+        } finally {
+          setPipeRunning("t6-pipeline-svg", false);
+          btnRunMcp.disabled = false;
+        }
+      });
+    }
+
+    // --- TAB 7: 429 FAILOVER + OPENAI FACADE + CANARY ---
+    const resPrompt = document.getElementById("res-prompt-input");
+    const resSim429 = document.getElementById("res-sim-429");
+    const resCanary = document.getElementById("res-canary-slider");
+    const resCanaryLbl = document.getElementById("res-canary-label");
+    const btnRunRes = document.getElementById("btn-run-res");
+
+    if (resCanary && resCanaryLbl) {
+      resCanary.addEventListener("input", () => { resCanaryLbl.textContent = `${resCanary.value}%`; });
+    }
+
+    document.querySelectorAll("#res-scenario-list .scenario-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#res-scenario-list .scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
+        const p = btn.dataset.resPreset;
+        if (p === "openai") {
+          if (resSim429) resSim429.checked = false;
+          if (resCanary) resCanary.value = "0";
+        } else if (p === "failover") {
+          if (resSim429) resSim429.checked = true;
+          if (resCanary) resCanary.value = "0";
+        } else if (p === "canary") {
+          if (resSim429) resSim429.checked = false;
+          if (resCanary) resCanary.value = "50";
+        }
+        if (resCanaryLbl && resCanary) resCanaryLbl.textContent = `${resCanary.value}%`;
+      });
+    });
+
+    if (btnRunRes) {
+      btnRunRes.addEventListener("click", async () => {
+        btnRunRes.disabled = true;
+        setPipeRunning("t7-pipeline-svg", true);
+        resetPipeSvg("t7-pipeline-svg");
+        const statusEl = document.getElementById("res-status");
+        const pipeBadge = document.getElementById("t7-pipe-status");
+        if (pipeBadge) pipeBadge.textContent = "RUNNING";
+        if (statusEl) statusEl.textContent = "Sending OpenAI gpt-4o payload to Apigee X resilient facade...";
+        try {
+          const resp = await apiFetch("/api/resilient/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              prompt: resPrompt ? resPrompt.value : "Explain Apigee X LLM failover.",
+              simulate_429: Boolean(resSim429 && resSim429.checked),
+              canary_pct: Number(resCanary ? resCanary.value : 0),
+            }),
+          });
+          const data = await resp.json();
+          const tel = (data.openai_response && data.openai_response.apigee_resilience_telemetry) || {};
+          const failover = Boolean(tel.failover_triggered);
+          const canary = Boolean(tel.canary_selected);
+
+          setNodeState("t7-node-client", "state-active", "t7-sub-client", "gpt-4o SDK");
+          setEdgeState("t7-edge-1", "edge-active");
+          setNodeState("t7-node-facade", "state-active", "t7-sub-facade", "Translated");
+          setEdgeState("t7-edge-2", "edge-active");
+          setNodeState("t7-node-router", failover ? "state-amber" : "state-savings", "t7-sub-router", failover ? "429 Failover" : canary ? "Canary Pro" : "Stable AU");
+          if (canary) {
+            setEdgeState("t7-edge-primary", "edge-jev");
+            setNodeState("t7-node-primary", "state-jev", "t7-sub-primary", "Served 200 (Canary)");
+            setNodeState("t7-node-failover", "state-bypass", "t7-sub-failover", "Standby");
+          } else if (failover) {
+            setEdgeState("t7-edge-primary", "edge-alert");
+            setNodeState("t7-node-primary", "state-alert", "t7-sub-primary", "429 Exhausted");
+            setEdgeState("t7-edge-failover", "edge-savings");
+            setNodeState("t7-node-failover", "state-savings", "t7-sub-failover", "Recovered 200 OK");
+          } else {
+            setEdgeState("t7-edge-failover", "edge-savings");
+            setNodeState("t7-node-failover", "state-savings", "t7-sub-failover", "Served 200 OK");
+            setNodeState("t7-node-primary", "state-bypass", "t7-sub-primary", "Standby");
+          }
+
+          const hv = document.getElementById("hero-t7-verdict");
+          const hvs = document.getElementById("hero-t7-verdict-sub");
+          const hm = document.getElementById("hero-t7-model");
+          const hms = document.getElementById("hero-t7-model-sub");
+          const hl = document.getElementById("hero-t7-lat");
+          const hls = document.getElementById("hero-t7-lat-sub");
+          if (hv) {
+            hv.textContent = failover ? "FAILOVER 200" : canary ? "CANARY 200" : "OPENAI 200";
+            hv.className = `hero-kpi-value ${failover ? "tone-cyan" : canary ? "tone-violet" : "tone-savings"}`;
+            popMetric(hv);
+          }
+          if (hvs) hvs.textContent = failover ? "Primary 429 auto-recovered via AU Flash" : canary ? "Routed to Gemini 2.5 Pro Canary bucket" : "Translated gpt-4o → Gemini Flash seamlessly";
+          if (hm) {
+            hm.textContent = String(tel.served_model || "gemini-2.5-flash").replace("gemini-", "");
+            popMetric(hm);
+          }
+          if (hms) hms.textContent = `Region: ${tel.served_region || "australia-southeast1"}`;
+          if (hl) {
+            hl.textContent = `${fmtInt(data.latency_ms)} ms`;
+            popMetric(hl);
+          }
+          if (hls) hls.textContent = "Standard OpenAI chat.completion JSON returned";
+          if (pipeBadge) pipeBadge.textContent = `HTTP ${data.http_status_code}`;
+          if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
+          document.getElementById("res-req-box").textContent = JSON.stringify(data.openai_request || {}, null, 2);
+          document.getElementById("res-resp-box").textContent = JSON.stringify(data.openai_response || {}, null, 2);
+          const pill = document.getElementById("res-resp-pill");
+          if (pill) {
+            pill.textContent = `HTTP ${data.http_status_code} · ${tel.served_model || "gemini"}`;
+            pill.className = "model-pill pill-allowed";
+          }
+        } catch (e) {
+          if (statusEl) statusEl.textContent = `Error: ${e.message}`;
+        } finally {
+          setPipeRunning("t7-pipeline-svg", false);
+          btnRunRes.disabled = false;
+        }
+      });
+    }
+
+    // --- TAB 8: REVERSIBLE PII VAULT + SSE ---
+    const piiPrompt = document.getElementById("pii-prompt-input");
+    const piiEnable = document.getElementById("pii-enable-vault");
+    const piiRehydrate = document.getElementById("pii-enable-rehydrate");
+    const btnRunPii = document.getElementById("btn-run-pii");
+
+    document.querySelectorAll("#pii-scenario-list .scenario-item").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#pii-scenario-list .scenario-item").forEach((b) => {
+          b.classList.remove("active");
+          b.setAttribute("aria-pressed", "false");
+        });
+        btn.classList.add("active");
+        btn.setAttribute("aria-pressed", "true");
+        const p = btn.dataset.piiPreset;
+        if (piiEnable) piiEnable.checked = true;
+        if (piiRehydrate) piiRehydrate.checked = p !== "redact";
+      });
+    });
+
+    if (btnRunPii) {
+      btnRunPii.addEventListener("click", async () => {
+        btnRunPii.disabled = true;
+        setPipeRunning("t8-pipeline-svg", true);
+        resetPipeSvg("t8-pipeline-svg");
+        const statusEl = document.getElementById("pii-status");
+        const pipeBadge = document.getElementById("t8-pipe-status");
+        if (pipeBadge) pipeBadge.textContent = "RUNNING";
+        if (statusEl) statusEl.textContent = "Tokenizing PII inside Apigee X Vault before calling Vertex AI...";
+        try {
+          const resp = await apiFetch("/api/pii-vault/execute", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              prompt: piiPrompt ? piiPrompt.value : "",
+              enable_vault: Boolean(!piiEnable || piiEnable.checked),
+              rehydrate_response: Boolean(!piiRehydrate || piiRehydrate.checked),
+            }),
+          });
+          const data = await resp.json();
+          const body = data.apigee_response || {};
+          const tel = body.apigee_pii_vault_telemetry || {};
+          const count = Number(tel.entities_masked_count || 0);
+          const rehydrated = Boolean(tel.rehydration_enabled);
+
+          setNodeState("t8-node-client", "state-active", "t8-sub-client", `${count} PII entities`);
+          setEdgeState("t8-edge-1", "edge-active");
+          setNodeState("t8-node-mask", "state-savings", "t8-sub-mask", `${count} Vaulted`);
+          setEdgeState("t8-edge-2", "edge-savings");
+          setNodeState("t8-node-llm", "state-savings", "t8-sub-llm", "0 Bytes Raw PII");
+          setEdgeState("t8-edge-3", "edge-savings");
+          setNodeState("t8-node-unmask", rehydrated ? "state-active" : "state-amber", "t8-sub-unmask", rehydrated ? `Rehydrated (${tel.tokens_rehydrated_count || 0})` : "Kept Masked");
+
+          const hl = document.getElementById("hero-t8-leaks");
+          const hls = document.getElementById("hero-t8-leaks-sub");
+          const hc = document.getElementById("hero-t8-count");
+          const hcs = document.getElementById("hero-t8-count-sub");
+          const hr = document.getElementById("hero-t8-rehydrate");
+          const hrs = document.getElementById("hero-t8-rehydrate-sub");
+          if (hl) {
+            hl.textContent = tel.vault_enabled ? "0 Bytes" : "EXPOSED";
+            hl.className = `hero-kpi-value ${tel.vault_enabled ? "tone-savings" : "tone-alert"}`;
+            popMetric(hl);
+          }
+          if (hls) hls.textContent = tel.vault_enabled ? "Vertex AI only saw opaque <TOKEN_N> placeholders" : "Vault disabled — raw PII sent to LLM";
+          if (hc) {
+            hc.textContent = `${count} Masked`;
+            popMetric(hc);
+          }
+          if (hcs) hcs.textContent = (tel.entities_detected || []).map((e) => e.token).join(" ") || "No PII detected";
+          if (hr) {
+            hr.textContent = rehydrated ? "Rehydrated" : "Redacted";
+            popMetric(hr);
+          }
+          if (hrs) hrs.textContent = `${fmtInt(tel.sse_chunks_inspected || 1)} SSE chunks scanned · ${fmtInt(data.latency_ms)} ms`;
+          if (pipeBadge) pipeBadge.textContent = `HTTP ${data.http_status_code}`;
+          if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
+          document.getElementById("pii-sent-box").textContent = body.sanitized_prompt_sent_to_llm || "";
+          document.getElementById("pii-final-box").textContent = body.response_text || "";
+          document.getElementById("pii-telemetry-box").textContent = JSON.stringify(
+            { llm_raw_response_masked: body.llm_raw_response_masked, telemetry: tel },
+            null,
+            2
+          );
+          const pill = document.getElementById("pii-resp-pill");
+          if (pill) {
+            pill.textContent = rehydrated ? "REHYDRATED" : "REDACTED";
+            pill.className = `model-pill ${rehydrated ? "pill-allowed" : "pill-warning"}`;
+          }
+        } catch (e) {
+          if (statusEl) statusEl.textContent = `Error: ${e.message}`;
+        } finally {
+          setPipeRunning("t8-pipeline-svg", false);
+          btnRunPii.disabled = false;
+        }
+      });
+    }
+  }
+
   wireTablistKeyboardNav();
   initThemeSwitcher();
   initKeynoteDrawer();
   initViewModeSwitcher();
   initClickableNodes();
   initCopyCurl();
+  initNewEnterpriseTabs();
   syncPolicySwitches();
   const elT5Slider = document.getElementById("t5-scale-slider");
   if (elT5Slider) elT5Slider.addEventListener("input", updateTab5AnnualROI);

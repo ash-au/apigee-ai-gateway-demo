@@ -17,7 +17,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=10.1" />
+  <link rel="stylesheet" href="assets/styles.css?v=11.0" />
 </head>
 <body>
   <!-- ====================================================================
@@ -33,23 +33,35 @@
       <nav class="keynote-nav-dock" role="tablist" aria-label="AI Gateway Capabilities">
         <button type="button" class="primary-tab-btn active" role="tab" aria-selected="true" data-maintab="main-tab-economics">
           <span class="nav-dot nav-dot-blue" aria-hidden="true"></span>
-          <span>Cost &amp; Optimization</span>
+          <span>Cost</span>
         </button>
         <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-token-finops">
           <span class="nav-dot nav-dot-amber" aria-hidden="true"></span>
-          <span>Token Quotas</span>
+          <span>Quotas</span>
         </button>
         <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-model-armor">
           <span class="nav-dot nav-dot-alert" aria-hidden="true"></span>
-          <span>Model Armor</span>
+          <span>Armor</span>
         </button>
         <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-semantic-gov">
           <span class="nav-dot nav-dot-savings" aria-hidden="true"></span>
-          <span>Semantic Cache</span>
+          <span>Cache</span>
         </button>
         <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-system1-jev">
           <span class="nav-dot nav-dot-violet" aria-hidden="true"></span>
-          <span>System 1 Routing</span>
+          <span>System 1</span>
+        </button>
+        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-mcp-gov">
+          <span class="nav-dot nav-dot-alert" aria-hidden="true"></span>
+          <span>MCP Tools</span>
+        </button>
+        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-resilient">
+          <span class="nav-dot nav-dot-blue" aria-hidden="true"></span>
+          <span>Failover</span>
+        </button>
+        <button type="button" class="primary-tab-btn" role="tab" aria-selected="false" data-maintab="main-tab-pii-vault">
+          <span class="nav-dot nav-dot-savings" aria-hidden="true"></span>
+          <span>PII Vault</span>
         </button>
       </nav>
 
@@ -904,6 +916,342 @@
           </div>
         </div>
       </section>
+
+      <!-- ================================================================
+           TAB 6: MCP TOOL GOVERNANCE (JSON-RPC RBAC + MODEL ARMOR INDIRECT SCAN)
+           ================================================================ -->
+      <section id="main-tab-mcp-gov" role="tabpanel" aria-label="MCP Tool Governance" style="display:none;">
+        <div class="keynote-action-bar">
+          <div id="mcp-scenario-list" class="scenario-pill-strip" aria-label="MCP Governance Scenarios">
+            <button type="button" class="scenario-item active" data-mcp-preset="safe" aria-pressed="true">
+              <div><div class="scenario-item-title">Allowed Tool (search_kb)</div><div class="scenario-item-sub">Support agent calls approved KB search tool</div></div>
+              <span class="scenario-badge">RBAC ALLOW</span>
+            </button>
+            <button type="button" class="scenario-item" data-mcp-preset="forbidden" aria-pressed="false">
+              <div><div class="scenario-item-title">Rogue Tool (drop_production_db)</div><div class="scenario-item-sub">Support agent attempts destructive tool call</div></div>
+              <span class="scenario-badge">HTTP 403 BLOCK</span>
+            </button>
+            <button type="button" class="scenario-item" data-mcp-preset="poisoned" aria-pressed="false">
+              <div><div class="scenario-item-title">Poisoned Tool Output (Indirect Injection)</div><div class="scenario-item-sub">Tool returns hidden jailbreak caught by Model Armor</div></div>
+              <span class="scenario-badge">MODEL ARMOR 400</span>
+            </button>
+          </div>
+          <div class="action-cta-group">
+            <button type="button" id="btn-run-mcp" class="btn-primary"><span>Execute MCP Call</span><span aria-hidden="true">&rarr;</span></button>
+          </div>
+        </div>
+
+        <div class="keynote-stage-card">
+          <div class="stage-top-strip">
+            <div class="stage-story-pill">
+              <span id="t6-pipe-status" class="stage-story-badge">READY</span>
+              <span id="mcp-status">Native Apigee X JSON-RPC 2.0 RBAC Allowlist + Model Armor Indirect Prompt Injection Shield.</span>
+            </div>
+            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-mcp" data-drawer-title="MCP Tool Governance — JSON-RPC Payload &amp; Apigee Telemetry">
+              <span>Inspect JSON-RPC &amp; Telemetry &rarr;</span>
+            </button>
+          </div>
+
+          <div class="pipeline-svg-wrap">
+            <svg id="t6-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X MCP Tool Governance Pipeline">
+              <path id="t6-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
+              <path id="t6-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
+              <path id="t6-edge-3" class="pipe-edge" d="M 746 130 L 806 130" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 806 130" /></circle>
+              <g id="t6-node-agent" class="pipe-node">
+                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
+                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 AI AGENT</text>
+                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">MCP Client</text>
+                <text id="t6-sub-agent" class="pipe-node-sub" x="101" y="160" text-anchor="middle">JSON-RPC 2.0</text>
+              </g>
+              <g id="t6-node-rbac" class="pipe-node">
+                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
+                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE X POLICY</text>
+                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">MCP RBAC Allowlist</text>
+                <text id="t6-sub-rbac" class="pipe-node-sub" x="356" y="160" text-anchor="middle">Role / Tool Gate</text>
+              </g>
+              <g id="t6-node-armor" class="pipe-node">
+                <rect class="pipe-node-box" x="526" y="76" width="220" height="108" />
+                <text class="pipe-node-kicker" x="636" y="104" text-anchor="middle">03 MODEL ARMOR</text>
+                <text class="pipe-node-title" x="636" y="132" text-anchor="middle">Indirect Injection Scan</text>
+                <text id="t6-sub-armor" class="pipe-node-sub" x="636" y="160" text-anchor="middle">SanitizeUserPrompt</text>
+              </g>
+              <g id="t6-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="806" y="76" width="294" height="108" />
+                <text class="pipe-node-kicker" x="953" y="104" text-anchor="middle">04 EXECUTION</text>
+                <text class="pipe-node-title" x="953" y="132" text-anchor="middle">MCP Server + Vertex AI</text>
+                <text id="t6-sub-llm" class="pipe-node-sub" x="953" y="160" text-anchor="middle">Governed Tool Result</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="hero-outcome-band">
+            <div class="hero-kpi"><span class="hero-kpi-label">MCP Gateway Verdict</span><div id="hero-t6-verdict" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t6-verdict-sub" class="hero-kpi-sub">Enforces tool RBAC &amp; indirect injection firewall</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Tool &amp; Agent Role</span><div id="hero-t6-tool" class="hero-kpi-value">search_kb</div><span id="hero-t6-tool-sub" class="hero-kpi-sub">Role: support-agent</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t6-lat" class="hero-kpi-value tone-savings">Native X</div><span id="hero-t6-lat-sub" class="hero-kpi-sub">Zero backend hit on HTTP 403 / 400 blocks</span></div>
+          </div>
+
+          <div class="stage-footer-bar">
+            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/mcp-governance</strong> &middot; Native Apigee X RaiseFault + Model Armor</span></div>
+            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-mcp" data-drawer-title="MCP Tool Governance — JSON-RPC &amp; Telemetry">Inspect JSON-RPC &rarr;</button></div>
+          </div>
+        </div>
+
+        <div id="details-mcp" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">MCP Request Parameters</h3></div>
+              <div class="composer-grid">
+                <div class="field-group">
+                  <label class="field-label" for="mcp-role-select"><span>Agent Role (X-Agent-Role)</span></label>
+                  <select id="mcp-role-select" class="field-select">
+                    <option value="support-agent">support-agent (search_kb, get_ticket_status, create_ticket)</option>
+                    <option value="finance-admin">finance-admin (+ wire_transfer)</option>
+                    <option value="readonly-bot">readonly-bot (search_kb, get_ticket_status)</option>
+                  </select>
+                </div>
+                <div class="field-group">
+                  <label class="field-label" for="mcp-tool-input"><span>MCP Tool Name (params.name)</span></label>
+                  <input id="mcp-tool-input" class="field-input" type="text" value="search_kb" />
+                </div>
+                <label class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate Poisoned Tool Result</span><input type="checkbox" id="mcp-sim-poison" /></div><span class="toggle-desc">Injects hidden prompt-injection inside tool response</span></label>
+                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Model Armor Indirect Scan</span><input type="checkbox" id="mcp-enable-armor" checked /></div><span class="toggle-desc">Runs SUP-SanitizeUserPrompt inside Apigee X</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="workbench-right">
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">JSON-RPC 2.0 MCP Request</h3><span class="model-pill">tools/call</span></div>
+                <pre id="mcp-req-box" class="code-block">Click Execute MCP Call to inspect JSON-RPC 2.0 payload.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">Apigee X MCP Governance Response</h3><span id="mcp-resp-pill" class="model-pill">READY</span></div>
+                <pre id="mcp-resp-box" class="code-block">Click Execute MCP Call to inspect live Apigee X verdict.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 7: 429 FAILOVER + UNIFIED OPENAI FACADE + CANARY ROUTING
+           ================================================================ -->
+      <section id="main-tab-resilient" role="tabpanel" aria-label="429 Failover and OpenAI Facade" style="display:none;">
+        <div class="keynote-action-bar">
+          <div id="res-scenario-list" class="scenario-pill-strip" aria-label="Resilience Scenarios">
+            <button type="button" class="scenario-item active" data-res-preset="openai" aria-pressed="true">
+              <div><div class="scenario-item-title">OpenAI Facade (gpt-4o &rarr; Gemini)</div><div class="scenario-item-sub">Zero-code OpenAI SDK drop-in translated by Apigee X</div></div>
+              <span class="scenario-badge">OPENAI FACADE</span>
+            </button>
+            <button type="button" class="scenario-item" data-res-preset="failover" aria-pressed="false">
+              <div><div class="scenario-item-title">429 Quota Failover (us &rarr; au)</div><div class="scenario-item-sub">Primary HTTP 429 auto-fails over to australia-southeast1</div></div>
+              <span class="scenario-badge">AUTO-FAILOVER</span>
+            </button>
+            <button type="button" class="scenario-item" data-res-preset="canary" aria-pressed="false">
+              <div><div class="scenario-item-title">Canary Split (50% Pro / 50% Flash)</div><div class="scenario-item-sub">Weighted traffic routing natively inside Apigee X</div></div>
+              <span class="scenario-badge">CANARY 50%</span>
+            </button>
+          </div>
+          <div class="action-cta-group">
+            <button type="button" id="btn-run-res" class="btn-primary"><span>Send OpenAI Call</span><span aria-hidden="true">&rarr;</span></button>
+          </div>
+        </div>
+
+        <div class="keynote-stage-card">
+          <div class="stage-top-strip">
+            <div class="stage-story-pill">
+              <span id="t7-pipe-status" class="stage-story-badge">READY</span>
+              <span id="res-status">Client sends standard OpenAI /v1/chat/completions payload; Apigee X translates, fails over on 429 &amp; splits Canary traffic.</span>
+            </div>
+            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-resilient" data-drawer-title="429 Failover &amp; OpenAI Facade — Payloads &amp; Headers">
+              <span>Inspect OpenAI Payload &rarr;</span>
+            </button>
+          </div>
+
+          <div class="pipeline-svg-wrap">
+            <svg id="t7-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X OpenAI Facade and 429 Failover Pipeline">
+              <path id="t7-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
+              <path id="t7-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
+              <path id="t7-edge-primary" class="pipe-edge" d="M 736 104 C 776 104, 786 64, 826 64" />
+              <path id="t7-edge-failover" class="pipe-edge" d="M 736 156 C 776 156, 786 196, 826 196" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 736 130 L 826 196" /></circle>
+              <g id="t7-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
+                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 OPENAI SDK</text>
+                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">gpt-4o Client</text>
+                <text id="t7-sub-client" class="pipe-node-sub" x="101" y="160" text-anchor="middle">messages[]</text>
+              </g>
+              <g id="t7-node-facade" class="pipe-node">
+                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
+                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE X FACADE</text>
+                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">Schema Translator</text>
+                <text id="t7-sub-facade" class="pipe-node-sub" x="356" y="160" text-anchor="middle">OpenAI &harr; Vertex</text>
+              </g>
+              <g id="t7-node-router" class="pipe-node">
+                <rect class="pipe-node-box" x="526" y="76" width="210" height="108" />
+                <text class="pipe-node-kicker" x="631" y="104" text-anchor="middle">03 RESILIENCE</text>
+                <text class="pipe-node-title" x="631" y="132" text-anchor="middle">429 &amp; Canary Gate</text>
+                <text id="t7-sub-router" class="pipe-node-sub" x="631" y="160" text-anchor="middle">Multi-Region Pool</text>
+              </g>
+              <g id="t7-node-primary" class="pipe-node">
+                <rect class="pipe-node-box" x="826" y="16" width="276" height="96" />
+                <text class="pipe-node-kicker" x="964" y="42" text-anchor="middle">PRIMARY / CANARY</text>
+                <text class="pipe-node-title" x="964" y="68" text-anchor="middle">Gemini 2.5 Pro (global)</text>
+                <text id="t7-sub-primary" class="pipe-node-sub" x="964" y="94" text-anchor="middle">Standby</text>
+              </g>
+              <g id="t7-node-failover" class="pipe-node">
+                <rect class="pipe-node-box" x="826" y="148" width="276" height="96" />
+                <text class="pipe-node-kicker" x="964" y="174" text-anchor="middle">STABLE / FAILOVER</text>
+                <text class="pipe-node-title" x="964" y="200" text-anchor="middle">Gemini Flash (AU-SE1)</text>
+                <text id="t7-sub-failover" class="pipe-node-sub" x="964" y="226" text-anchor="middle">Zero-Downtime Pool</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="hero-outcome-band">
+            <div class="hero-kpi"><span class="hero-kpi-label">Resilience Outcome</span><div id="hero-t7-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t7-verdict-sub" class="hero-kpi-sub">HTTP 200 OK even during primary 429 exhaustion</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Served Model &amp; Region</span><div id="hero-t7-model" class="hero-kpi-value tone-cyan">Gemini</div><span id="hero-t7-model-sub" class="hero-kpi-sub">Translated back to OpenAI chat.completion</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Gateway Latency</span><div id="hero-t7-lat" class="hero-kpi-value">Zero Retries</div><span id="hero-t7-lat-sub" class="hero-kpi-sub">Handled transparently inside Apigee X</span></div>
+          </div>
+
+          <div class="stage-footer-bar">
+            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/resilient-chat</strong> &middot; Drop-in OpenAI SDK compatibility</span></div>
+            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-resilient" data-drawer-title="429 Failover &amp; OpenAI Facade — Payloads">Inspect OpenAI JSON &rarr;</button></div>
+          </div>
+        </div>
+
+        <div id="details-resilient" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">OpenAI Facade &amp; Failover Controls</h3></div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="res-prompt-input"><span>OpenAI User Message</span></label><textarea id="res-prompt-input" class="field-textarea" rows="3">Explain how Apigee X provides zero-downtime LLM failover and OpenAI SDK compatibility in 2 concise sentences.</textarea></div>
+                <label class="toggle-card"><div class="toggle-card-top"><span class="toggle-title">Simulate Primary HTTP 429</span><input type="checkbox" id="res-sim-429" /></div><span class="toggle-desc">Forces primary quota exhaustion &rarr; auto-failover to AU Flash</span></label>
+                <div class="field-group"><label class="field-label" for="res-canary-slider"><span>Canary Weight to Gemini 2.5 Pro</span><span id="res-canary-label">0%</span></label><input id="res-canary-slider" type="range" min="0" max="100" step="10" value="0" /></div>
+              </div>
+            </div>
+          </div>
+          <div class="workbench-right">
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">OpenAI-Format Request Sent</h3><span class="model-pill">model: gpt-4o</span></div>
+                <pre id="res-req-box" class="code-block">Click Send OpenAI Call to inspect OpenAI SDK request.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">OpenAI-Format Response from Apigee X</h3><span id="res-resp-pill" class="model-pill">READY</span></div>
+                <pre id="res-resp-box" class="code-block">Click Send OpenAI Call to inspect translated OpenAI chat.completion JSON.</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================================================================
+           TAB 8: REVERSIBLE PII VAULT & SSE STREAMING INSPECTION
+           ================================================================ -->
+      <section id="main-tab-pii-vault" role="tabpanel" aria-label="Reversible PII Vault and SSE Inspection" style="display:none;">
+        <div class="keynote-action-bar">
+          <div id="pii-scenario-list" class="scenario-pill-strip" aria-label="PII Vault Scenarios">
+            <button type="button" class="scenario-item active" data-pii-preset="rehydrate" aria-pressed="true">
+              <div><div class="scenario-item-title">Banking PII (Mask &rarr; Rehydrate)</div><div class="scenario-item-sub">Zero raw PII reaches Gemini; authorized caller gets full reply</div></div>
+              <span class="scenario-badge">REVERSIBLE VAULT</span>
+            </button>
+            <button type="button" class="scenario-item" data-pii-preset="redact" aria-pressed="false">
+              <div><div class="scenario-item-title">Audit Mode (Permanent Redaction)</div><div class="scenario-item-sub">Keeps tokens masked in response for logs / unprivileged roles</div></div>
+              <span class="scenario-badge">PERMANENT MASK</span>
+            </button>
+          </div>
+          <div class="action-cta-group">
+            <button type="button" id="btn-run-pii" class="btn-primary"><span>Run PII Vault</span><span aria-hidden="true">&rarr;</span></button>
+          </div>
+        </div>
+
+        <div class="keynote-stage-card">
+          <div class="stage-top-strip">
+            <div class="stage-story-pill">
+              <span id="t8-pipe-status" class="stage-story-badge">READY</span>
+              <span id="pii-status">Apigee X tokenizes Emails, Cards, Gov IDs &amp; Phones before Vertex AI sees a single byte, then rehydrates safely.</span>
+            </div>
+            <button type="button" class="stage-drawer-trigger" data-open-drawer="details-pii" data-drawer-title="Reversible PII Vault — Before / Sent-to-LLM / After Proof">
+              <span>Inspect Zero-PII Proof &rarr;</span>
+            </button>
+          </div>
+
+          <div class="pipeline-svg-wrap">
+            <svg id="t8-pipeline-svg" class="pipeline-svg" viewBox="0 0 1120 260" role="img" aria-label="Apigee X Reversible PII Vault Pipeline">
+              <path id="t8-edge-1" class="pipe-edge" d="M 186 130 L 246 130" />
+              <path id="t8-edge-2" class="pipe-edge" d="M 466 130 L 526 130" />
+              <path id="t8-edge-3" class="pipe-edge" d="M 746 130 L 806 130" />
+              <circle class="pipe-photon" r="6"><animateMotion dur="1.3s" repeatCount="indefinite" path="M 186 130 L 806 130" /></circle>
+              <g id="t8-node-client" class="pipe-node">
+                <rect class="pipe-node-box" x="16" y="76" width="170" height="108" />
+                <text class="pipe-node-kicker" x="101" y="104" text-anchor="middle">01 RAW PII</text>
+                <text class="pipe-node-title" x="101" y="132" text-anchor="middle">Banking App</text>
+                <text id="t8-sub-client" class="pipe-node-sub" x="101" y="160" text-anchor="middle">Email / Card / ID</text>
+              </g>
+              <g id="t8-node-mask" class="pipe-node">
+                <rect class="pipe-node-box" x="246" y="76" width="220" height="108" />
+                <text class="pipe-node-kicker" x="356" y="104" text-anchor="middle">02 APIGEE VAULT</text>
+                <text class="pipe-node-title" x="356" y="132" text-anchor="middle">PII Tokenization</text>
+                <text id="t8-sub-mask" class="pipe-node-sub" x="356" y="160" text-anchor="middle">&lt;CARD_1&gt; &lt;EMAIL_1&gt;</text>
+              </g>
+              <g id="t8-node-llm" class="pipe-node">
+                <rect class="pipe-node-box" x="526" y="76" width="220" height="108" />
+                <text class="pipe-node-kicker" x="636" y="104" text-anchor="middle">03 ZERO-PII LLM</text>
+                <text class="pipe-node-title" x="636" y="132" text-anchor="middle">Vertex AI Gemini</text>
+                <text id="t8-sub-llm" class="pipe-node-sub" x="636" y="160" text-anchor="middle">0 Bytes Raw PII</text>
+              </g>
+              <g id="t8-node-unmask" class="pipe-node">
+                <rect class="pipe-node-box" x="806" y="76" width="294" height="108" />
+                <text class="pipe-node-kicker" x="953" y="104" text-anchor="middle">04 REHYDRATE + SSE</text>
+                <text class="pipe-node-title" x="953" y="132" text-anchor="middle">De-Tokenize &amp; Scan</text>
+                <text id="t8-sub-unmask" class="pipe-node-sub" x="953" y="160" text-anchor="middle">Authorized Reply</text>
+              </g>
+            </svg>
+          </div>
+
+          <div class="hero-outcome-band">
+            <div class="hero-kpi"><span class="hero-kpi-label">Raw PII Sent to LLM</span><div id="hero-t8-leaks" class="hero-kpi-value tone-savings">0 Bytes</div><span id="hero-t8-leaks-sub" class="hero-kpi-sub">All sensitive entities vaulted inside Apigee X</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Entities Masked</span><div id="hero-t8-count" class="hero-kpi-value tone-cyan">Ready</div><span id="hero-t8-count-sub" class="hero-kpi-sub">Email, PAN, Gov ID &amp; Phone detection</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Rehydration &amp; SSE</span><div id="hero-t8-rehydrate" class="hero-kpi-value">Reversible</div><span id="hero-t8-rehydrate-sub" class="hero-kpi-sub">Chunk-by-chunk guardrail verification</span></div>
+          </div>
+
+          <div class="stage-footer-bar">
+            <div class="stage-footer-summary"><span>Endpoint: <strong>/v1/ai-economics/policies/pii-vault</strong> &middot; Sovereign data boundary inside Apigee X</span></div>
+            <div class="stage-footer-actions"><button type="button" class="btn-secondary" data-open-drawer="details-pii" data-drawer-title="Reversible PII Vault — Before / Sent-to-LLM / After Proof">Inspect Zero-PII Proof &rarr;</button></div>
+          </div>
+        </div>
+
+        <div id="details-pii" class="workbench-grid drawer-body-section" style="margin-top:20px;">
+          <div class="workbench-left architect-only">
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">PII Vault Controls</h3></div>
+              <div class="composer-grid">
+                <div class="field-group"><label class="field-label" for="pii-prompt-input"><span>Sensitive Customer Prompt</span></label><textarea id="pii-prompt-input" class="field-textarea" rows="4">Draft a short confirmation email to Sarah Jenkins (sarah.jenkins@acme-bank.com, phone +61 412 555 890) confirming her replacement Visa card 4532-8910-4421-9901 linked to TFN 123-45-6789 is now active.</textarea></div>
+                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Pre-LLM PII Tokenization Vault</span><input type="checkbox" id="pii-enable-vault" checked /></div><span class="toggle-desc">Replaces PII with opaque tokens inside Apigee X</span></label>
+                <label class="toggle-card enabled"><div class="toggle-card-top"><span class="toggle-title">Rehydrate Tokens for Caller</span><input type="checkbox" id="pii-enable-rehydrate" checked /></div><span class="toggle-desc">Restores original PII on response for authorized user</span></label>
+              </div>
+            </div>
+          </div>
+          <div class="workbench-right">
+            <div class="compare-grid">
+              <div class="compare-panel">
+                <div class="compare-head"><h3 class="compare-head-title">Sanitized Prompt Sent to Vertex AI</h3><span class="model-pill pill-allowed">0 RAW PII</span></div>
+                <pre id="pii-sent-box" class="code-block">Click Run PII Vault to see exact sanitized prompt sent to Gemini.</pre>
+              </div>
+              <div class="compare-panel compare-panel-gateway">
+                <div class="compare-head"><h3 class="compare-head-title">Final Response to Authorized User</h3><span id="pii-resp-pill" class="model-pill">READY</span></div>
+                <pre id="pii-final-box" class="code-block">Click Run PII Vault to inspect rehydrated response.</pre>
+              </div>
+            </div>
+            <div class="surface-card">
+              <div class="surface-card-header"><h3 class="surface-card-title">Raw Masked LLM Reply &amp; Vault Telemetry</h3></div>
+              <pre id="pii-telemetry-box" class="code-block">—</pre>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -947,6 +1295,6 @@
     </div>
   </div>
 
-  <script src="assets/app.js?v=10.1"></script>
+  <script src="assets/app.js?v=11.0"></script>
 </body>
 </html>

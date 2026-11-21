@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-McpForbidden">
+    <DisplayName>RF-McpForbidden</DisplayName>
+    <FaultResponse>
+        <Set>
+            <Headers>
+                <Header name="X-Apigee-MCP-Verdict">BLOCKED</Header>
+                <Header name="X-Apigee-Fault-Name">MCP_TOOL_FORBIDDEN</Header>
+            </Headers>
+            <Payload contentType="application/json">{
+  "error": {
+    "code": 403,
+    "fault_name": "MCP_TOOL_FORBIDDEN",
+    "message": "Apigee X MCP RBAC Policy blocked tool '{ai.mcp_tool_name}' for agent role '{ai.mcp_agent_role}'.",
+    "details": {
+      "enforced_by": "Apigee X Native Proxy (ai-gateway-v1)",
+      "jsonrpc_method": "{ai.mcp_method}",
+      "tool_name": "{ai.mcp_tool_name}",
+      "agent_role": "{ai.mcp_agent_role}",
+      "allowed_tools": "{ai.mcp_allowed_tools}"
+    }
+  }
+}</Payload>
+            <StatusCode>403</StatusCode>
+            <ReasonPhrase>Forbidden</ReasonPhrase>
+        </Set>
+    </FaultResponse>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>

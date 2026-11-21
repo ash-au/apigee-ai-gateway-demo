@@ -26,10 +26,10 @@
                 <Name>JS-ProcessPreOptimize</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
             </Step>
-            <!-- Native Apigee AI Policies Request Preparation (/policies/**) -->
+            <!-- Native Apigee AI Policies Request Preparation (/policies/** excluding MCP/Resilient/PII custom flows) -->
             <Step>
                 <Name>JS-PrepareNativePolicyRequest</Name>
-                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**") and (not (proxy.pathsuffix MatchesPath "/policies/mcp-governance")) and (not (proxy.pathsuffix MatchesPath "/policies/resilient-chat")) and (not (proxy.pathsuffix MatchesPath "/policies/pii-vault"))</Condition>
             </Step>
             <!-- Tab 5: Pure Apigee X Native System 1 Pre-Flight Dynamic Routing (/system1-routing, Zero Cloud Run) -->
             <Step>
@@ -171,6 +171,56 @@
             </Response>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/native-cache")</Condition>
         </Flow>
+        <!-- Tab 6: Native Apigee X MCP Tool Governance (JSON-RPC RBAC + Model Armor Indirect Injection Scan) -->
+        <Flow name="Policy-MCP-Governance">
+            <Request>
+                <Step>
+                    <Name>JS-McpPreCheck</Name>
+                </Step>
+                <Step>
+                    <Name>RF-McpForbidden</Name>
+                    <Condition>ai.mcp_blocked = "true"</Condition>
+                </Step>
+                <Step>
+                    <Name>SUP-SanitizeUserPrompt</Name>
+                    <Condition>request.header.X-Enable-Mcp-Armor != "false"</Condition>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>JS-McpBuildResponse</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/mcp-governance")</Condition>
+        </Flow>
+        <!-- Tab 7: Native Apigee X 429 Failover + Unified OpenAI Facade + Canary Routing -->
+        <Flow name="Policy-Resilient-OpenAI-Facade">
+            <Request>
+                <Step>
+                    <Name>JS-ResilientOpenAiRequest</Name>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>JS-ResilientOpenAiResponse</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/resilient-chat")</Condition>
+        </Flow>
+        <!-- Tab 8: Native Apigee X Reversible PII Tokenization Vault + SSE Chunk Guardrail -->
+        <Flow name="Policy-PII-Vault">
+            <Request>
+                <Step>
+                    <Name>JS-PiiVaultMask</Name>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>JS-PiiVaultUnmask</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/pii-vault")</Condition>
+        </Flow>
     </Flows>
     <PostFlow name="PostFlow">
         <Request/>
@@ -222,6 +272,10 @@
     </HTTPProxyConnection>
     <RouteRule name="Route-Options-Or-Reset">
         <Condition>(request.verb = "OPTIONS") or ((request.verb = "POST") and (proxy.pathsuffix MatchesPath "/reset"))</Condition>
+    </RouteRule>
+    <RouteRule name="Route-ResilientCanaryPro">
+        <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/resilient-chat") and (ai.resilient_route = "CANARY_PRO_GLOBAL")</Condition>
+        <TargetEndpoint>vertex-pro-global</TargetEndpoint>
     </RouteRule>
     <RouteRule name="Route-NativePolicies-VertexFlash">
         <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
