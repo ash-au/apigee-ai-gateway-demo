@@ -259,7 +259,7 @@ def _build_unoptimized_vertex_payload(req: CompareRequest) -> Dict[str, Any]:
     payload: Dict[str, Any] = {
         "contents": contents,
         "generationConfig": {
-            "temperature": 0.2,
+            "temperature": 0.1,
             "maxOutputTokens": 2048,
             "thinkingConfig": {"thinkingBudget": 256},
         },

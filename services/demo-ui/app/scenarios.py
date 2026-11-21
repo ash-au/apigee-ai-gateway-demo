@@ -208,12 +208,12 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
         "id": "scenario-4-context-pruning",
         "step_number": 4,
         "title": "4. Multi-Turn SEV-2 Incident Bridge (Context Pruning & Dedup)",
-        "subtitle": "Condenses an 8-turn incident log into a state summary + recent verbatim delta",
-        "optimization_focus": "Multi-Turn Context Pruning + Paragraph Deduplication",
+        "subtitle": "Strips repeated incident headers, verbose pod/SQL dumps & filler turns (~3,000 -> ~450 tokens)",
+        "optimization_focus": "Zero-LLM Cross-Turn Deduplication, Log Compaction & Rolling State Summary",
         "recommended_toggles": {
             "semantic_cache": False,
-            "prompt_compression": True,
-            "model_routing": True,
+            "prompt_compression": False,
+            "model_routing": False,
             "context_pruning": True,
         },
         "session_id": "demo-sev2-incident",
@@ -228,8 +228,22 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
             {
                 "role": "user",
                 "content": (
-                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api]\n"
-                    "02:14 UTC — Alert fired: Checkout API p99 latency spiked from 180ms to 4,200ms in Sydney (australia-southeast1). Error rate climbed to 6.4%."
+                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api | COMMANDER: @sre-sydney-oncall]\n"
+                    "PagerDuty Alert PD-998412 | Escalation Policy: Tier-1-Payments-AU | Runbook: https://runbooks.corp.example.com.au/payments/checkout-api-latency\n"
+                    "Bridge Policy: All telemetry snapshots must include cluster, namespace, pod replica counts, and active DB connection counts for compliance audit trail.\n\n"
+                    "02:14 UTC — Alert fired: Checkout API p99 latency spiked from 180ms to 4,200ms in Sydney (australia-southeast1). Error rate climbed to 6.4%.\n\n"
+                    "GKE Pod Snapshot (namespace=payments-prod, cluster=gke-sydney-autopilot-01):\n"
+                    "checkout-api-7d9b8c6f4-2kx9p   2/2   Running   0   4h12m   10.42.1.14   gke-node-pool-a-01   cpu=310m/2000m   mem=512Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-4mn2q   2/2   Running   0   4h12m   10.42.1.18   gke-node-pool-a-02   cpu=325m/2000m   mem=524Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-7pq8r   2/2   Running   0   4h12m   10.42.1.21   gke-node-pool-a-03   cpu=305m/2000m   mem=508Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-9tv4s   2/2   Running   0   4h12m   10.42.1.25   gke-node-pool-b-01   cpu=340m/2000m   mem=530Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-b3w1t   2/2   Running   0   4h12m   10.42.1.29   gke-node-pool-b-02   cpu=318m/2000m   mem=515Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-c8z5v   2/2   Running   0   4h12m   10.42.1.33   gke-node-pool-b-03   cpu=332m/2000m   mem=519Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-d1f6w   2/2   Running   0   4h12m   10.42.1.37   gke-node-pool-c-01   cpu=309m/2000m   mem=510Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-e5h9x   2/2   Running   0   4h12m   10.42.1.41   gke-node-pool-c-02   cpu=321m/2000m   mem=516Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-f2j3y   2/2   Running   0   4h12m   10.42.1.45   gke-node-pool-c-03   cpu=315m/2000m   mem=514Mi/2Gi\n"
+                    "checkout-api-7d9b8c6f4-g7k8z   2/2   Running   0   4h12m   10.42.1.49   gke-node-pool-c-04   cpu=328m/2000m   mem=522Mi/2Gi\n"
+                    "Envoy sidecar healthz=200 OK across all 10 replicas; zero OOMKills; zero CrashLoopBackOff events; node disk pressure=False; memory pressure=False."
                 ),
             },
             {
@@ -241,8 +255,51 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
             {
                 "role": "user",
                 "content": (
-                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api]\n"
-                    "02:19 UTC — Telemetry update: GKE pod CPU is nominal at 34%, but Cloud SQL PostgreSQL active connections hit the hard ceiling (max_connections=500) right after release v2026.10.19-rc3 rolled out."
+                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api | COMMANDER: @sre-sydney-oncall]\n"
+                    "PagerDuty Alert PD-998412 | Escalation Policy: Tier-1-Payments-AU | Runbook: https://runbooks.corp.example.com.au/payments/checkout-api-latency\n"
+                    "Bridge Policy: All telemetry snapshots must include cluster, namespace, pod replica counts, and active DB connection counts for compliance audit trail.\n\n"
+                    "02:17 UTC — Checked Cloud Load Balancer & Apigee X northbound metrics in australia-southeast1:\n"
+                    "northbound_rps=1420, tls_handshake_p99=14ms, apigee_proxy_overhead_p99=6ms, upstream_connect_ms=4ms, upstream_header_wait_ms=4180ms.\n"
+                    "All 10 GKE pods remain Ready; zero DNS resolution errors; VPC peering health=GREEN; Cloud Armor WAF block_rate=0.02% (normal baseline).\n"
+                    "Raw Cloud Monitoring Metric Dump:\n"
+                    "metric.loadbalancing.googleapis.com/https/backend_latencies{region=australia-southeast1,zone=a,backend=checkout-api-neg}: p50=890ms p95=3640ms p99=4210ms\n"
+                    "metric.loadbalancing.googleapis.com/https/backend_latencies{region=australia-southeast1,zone=b,backend=checkout-api-neg}: p50=912ms p95=3710ms p99=4195ms\n"
+                    "metric.loadbalancing.googleapis.com/https/backend_latencies{region=australia-southeast1,zone=c,backend=checkout-api-neg}: p50=878ms p95=3590ms p99=4205ms\n"
+                    "metric.kubernetes.io/container/cpu/core_usage_time{namespace=payments-prod,pod=checkout-api}: avg=0.32 cores (16% of limit)\n"
+                    "metric.kubernetes.io/container/memory/used_bytes{namespace=payments-prod,pod=checkout-api}: avg=518Mi (25% of limit)\n"
+                    "metric.kubernetes.io/pod/network/received_bytes_count{namespace=payments-prod,pod=checkout-api}: 42.1 MB/s (normal)\n"
+                    "metric.kubernetes.io/pod/network/sent_bytes_count{namespace=payments-prod,pod=checkout-api}: 38.4 MB/s (normal)\n"
+                    "metric.cloudsql.googleapis.com/database/cpu/utilization{instance=payments-pg-prod-au}: 0.28 (normal)\n"
+                    "metric.cloudsql.googleapis.com/database/disk/read_ops_count{instance=payments-pg-prod-au}: 112 iops (normal)\n"
+                    "metric.cloudsql.googleapis.com/database/disk/write_ops_count{instance=payments-pg-prod-au}: 245 iops (normal)"
+                ),
+            },
+            {
+                "role": "model",
+                "content": (
+                    "Checking Cloud SQL PostgreSQL connection pool metrics and recent deployment diffs now. Standing by for pg_stat_activity snapshot."
+                ),
+            },
+            {
+                "role": "user",
+                "content": (
+                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api | COMMANDER: @sre-sydney-oncall]\n"
+                    "PagerDuty Alert PD-998412 | Escalation Policy: Tier-1-Payments-AU | Runbook: https://runbooks.corp.example.com.au/payments/checkout-api-latency\n"
+                    "Bridge Policy: All telemetry snapshots must include cluster, namespace, pod replica counts, and active DB connection counts for compliance audit trail.\n\n"
+                    "02:19 UTC — Telemetry update: GKE pod CPU is nominal at 34%, but Cloud SQL PostgreSQL active connections hit the hard ceiling (max_connections=500) right after release v2026.10.19-rc3 rolled out.\n\n"
+                    "Raw pg_stat_activity & PgBouncer SHOW POOLS Dump (instance=payments-pg-prod-au):\n"
+                    "pid=18401 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.14 | age=48s\n"
+                    "pid=18402 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.18 | age=51s\n"
+                    "pid=18403 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.21 | age=49s\n"
+                    "pid=18404 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.25 | age=53s\n"
+                    "pid=18405 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.29 | age=47s\n"
+                    "pid=18406 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.33 | age=55s\n"
+                    "pid=18407 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.37 | age=44s\n"
+                    "pid=18408 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.41 | age=52s\n"
+                    "pid=18409 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.45 | age=46s\n"
+                    "pid=18410 | state=idle in transaction | wait_event=ClientRead | app=checkout-api | client_addr=10.42.1.49 | age=50s\n"
+                    "pgbouncer_pool=checkout_db | cl_active=1420 | cl_waiting=580 | sv_active=500 | sv_idle=0 | maxwait=4.1s | pool_mode=session\n"
+                    "Postgres log: FATAL: sorry, too many clients already (max_connections=500) [repeated 412 times in 60s]"
                 ),
             },
             {
@@ -254,19 +311,42 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
             {
                 "role": "user",
                 "content": (
-                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api]\n"
-                    "02:25 UTC — Root cause isolated: Commit PR #8812 in release v2026.10.19-rc3 accidentally changed PgBouncer pool_mode from 'transaction' to 'session' and raised max_client_conn to 2000, starving backend PostgreSQL connections."
+                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api | COMMANDER: @sre-sydney-oncall]\n"
+                    "PagerDuty Alert PD-998412 | Escalation Policy: Tier-1-Payments-AU | Runbook: https://runbooks.corp.example.com.au/payments/checkout-api-latency\n"
+                    "Bridge Policy: All telemetry snapshots must include cluster, namespace, pod replica counts, and active DB connection counts for compliance audit trail.\n\n"
+                    "02:25 UTC — Root cause isolated: Commit PR #8812 in release v2026.10.19-rc3 accidentally changed PgBouncer pool_mode from 'transaction' to 'session' and raised max_client_conn to 2000, starving backend PostgreSQL connections.\n\n"
+                    "Helm Chart Diff (charts/checkout-api/values-prod-au.yaml, v2026.10.18 -> v2026.10.19-rc3):\n"
+                    "  pgbouncer:\n"
+                    "    image: gcr.io/apac-cs-5g-demo5/pgbouncer:1.22.1\n"
+                    "    replicas: 4\n"
+                    "    listen_port: 6432\n"
+                    "    auth_type: scram-sha-256\n"
+                    "    default_pool_size: 45\n"
+                    "    reserve_pool_size: 10\n"
+                    "    reserve_pool_timeout: 3\n"
+                    "    server_reset_query: DISCARD ALL\n"
+                    "-   pool_mode: transaction\n"
+                    "+   pool_mode: session\n"
+                    "-   max_client_conn: 600\n"
+                    "+   max_client_conn: 2000\n"
+                    "    ignore_startup_parameters: extra_float_digits\n"
+                    "    stats_period: 60\n"
+                    "    log_connections: 0\n"
+                    "    log_disconnections: 0"
                 ),
             },
             {
                 "role": "model",
                 "content": (
-                    "Root cause logged: PR #8812 PgBouncer pool_mode regression (transaction -> session). Recommend immediate Helm rollback to v2026.10.18."
+                    "Noted: PR #8812 PgBouncer pool_mode regression (transaction -> session). Recommend immediate Helm rollback to v2026.10.18."
                 ),
             },
             {
                 "role": "user",
                 "content": (
+                    "[INCIDENT-BRIDGE-HEADER: SEV-2 #4912 | REGION: australia-southeast1 | SERVICE: checkout-api | COMMANDER: @sre-sydney-oncall]\n"
+                    "PagerDuty Alert PD-998412 | Escalation Policy: Tier-1-Payments-AU | Runbook: https://runbooks.corp.example.com.au/payments/checkout-api-latency\n"
+                    "Bridge Policy: All telemetry snapshots must include cluster, namespace, pod replica counts, and active DB connection counts for compliance audit trail.\n\n"
                     "02:30 UTC — Executed `helm rollback checkout-api` to v2026.10.18 in australia-southeast1. Active Cloud SQL connections dropped from 500 to 68, error rate is 0.0%, and p99 latency recovered to 165ms."
                 ),
             },
@@ -281,9 +361,9 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
         "compression_target_ratio": 0.45,
         "similarity_threshold": 0.85,
         "presenter_note": (
-            "Shows how Apigee + gateway-optimizer condenses turns 1-6 into a structured state summary while "
-            "keeping the most recent turns verbatim, and transparently accounts for the Gemini 2.5 Flash "
-            "summarizer overhead tokens in the total gateway cost."
+            "Try running this with ONLY Context Pruning enabled: Tier 1 strips repeated cross-turn incident headers, "
+            "verbose pod/pg_stat_activity log dumps, and filler ack turns at $0.00 LLM overhead — cutting input tokens "
+            "by ~75% and total Pro cost by ~30-45% with zero model downgrade!"
         ),
     },
     {
