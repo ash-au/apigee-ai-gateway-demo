@@ -31,14 +31,22 @@
                 <Name>JS-PrepareNativePolicyRequest</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**")</Condition>
             </Step>
-            <!-- Tab 5: System 1 (TypeSafe Jev) Pre-Flight Dynamic Routing (/system1-routing) -->
+            <!-- Tab 5: Pure Apigee X Native System 1 Pre-Flight Dynamic Routing (/system1-routing, Zero Cloud Run) -->
+            <Step>
+                <Name>KVM-GetSystem1Keys</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
             <Step>
                 <Name>JS-PrepareJevPreRoute</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
             </Step>
             <Step>
-                <Name>SC-JevPreRoute</Name>
-                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+                <Name>SC-GeminiDecisionPreRoute</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing") and (ai.system1_provider = "gemini_decision_1")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-TypeSafeJevPreRoute</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing") and (ai.system1_provider = "typesafe_jev")</Condition>
             </Step>
             <Step>
                 <Name>JS-ProcessJevPreRoute</Name>
@@ -179,14 +187,26 @@
                 <Name>JS-BuildFinalResponse</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/chat")</Condition>
             </Step>
-            <!-- Tab 5: System 1 (TypeSafe Jev) Stage 2 Post-Verifier & SDE Cascade -->
+            <!-- Tab 5: Pure Apigee X Native Stage 2 5-Head Noul Battery & Conditional L2 Pro Escalation (Zero Cloud Run) -->
             <Step>
                 <Name>JS-PrepareJevPostVerify</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
             </Step>
             <Step>
-                <Name>SC-JevPostVerify</Name>
+                <Name>SC-GeminiDecisionPostVerify</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing") and (ai.run_post_verify = "true") and (ai.system1_provider = "gemini_decision_1")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-TypeSafeJevPostVerify</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing") and (ai.run_post_verify = "true") and (ai.system1_provider = "typesafe_jev")</Condition>
+            </Step>
+            <Step>
+                <Name>JS-EvaluateNoulBattery</Name>
                 <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing")</Condition>
+            </Step>
+            <Step>
+                <Name>SC-EscalateVertexPro</Name>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/system1-routing") and (ai.escalate_to_pro = "true")</Condition>
             </Step>
             <Step>
                 <Name>JS-BuildJevFinalResponse</Name>

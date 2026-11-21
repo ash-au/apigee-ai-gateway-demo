@@ -17,7 +17,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=7.1" />
+  <link rel="stylesheet" href="/v1/ai-economics/assets/styles.css?v=7.2" />
 </head>
 <body>
   <div class="editorial-shell">
@@ -1364,8 +1364,8 @@
             </div>
           </div>
           <div class="composer-footer">
-            <div class="footer-route-meta">
-              Apigee Flow: <strong>SC-JevPreRoute &rarr; Dynamic RouteRule (Flash vs. Pro) &rarr; SC-JevPostVerify (5-Head Noul Battery)</strong>
+            <div class="footer-route-meta" id="s1-flow-footer">
+              Apigee Flow (Zero Cloud Run): <strong>KVM-GetSystem1Keys &rarr; SC-GeminiDecisionPreRoute &rarr; RouteRule &rarr; SC-GeminiDecisionPostVerify &rarr; SC-EscalateVertexPro</strong>
             </div>
             <div class="btn-group">
               <span id="s1-status" class="status-text" role="status" aria-live="polite"></span>
@@ -1645,9 +1645,9 @@
             <td>Enterprise domain guardrail enforcement (<code>enterprise-domain-guardrail</code>) and native Apigee XML vector caching backed by Vertex AI Vector Search (<code>SHARD_SIZE_MEDIUM</code>).</td>
           </tr>
           <tr>
-            <td><strong>Tab 5: System 1 + System 2</strong></td>
-            <td><code>SC-JevPreRoute</code>, <code>SC-JevPostVerify</code>, <code>gemini-decision-1</code> / <code>jev-latest</code></td>
-            <td>Toggle live between <strong>Google Gemini Decision 1</strong> (<code>generativelanguage.googleapis.com/v1beta/decisions</code>) and <strong>TypeSafe Jev</strong> (<code>api.typesafe.ai/v1/systemone</code>) for single-pass calibrated routing (<code>Choice</code>, <code>Score</code>) and 5-head <code>Noul</code> battery verification.</td>
+            <td><strong>Tab 5: System 1 + System 2</strong><br/>Pure Apigee X (Zero Cloud Run)</td>
+            <td><code>KVM-GetSystem1Keys</code>, <code>SC-GeminiDecisionPreRoute</code>, <code>SC-GeminiDecisionPostVerify</code>, <code>SC-EscalateVertexPro</code></td>
+            <td>Direct Apigee X <code>ServiceCallout</code> policies backed by encrypted KVM <code>system1-api-keys</code> toggle live between <strong>Google Gemini Decision 1</strong> (<code>generativelanguage.googleapis.com/v1beta/decisions</code>) and <strong>TypeSafe Jev</strong> (<code>api.typesafe.ai/v1/systemone</code>) with conditional <code>&lt;GoogleAccessToken&gt;</code> L<sub>2</sub> Pro escalation &mdash; zero Cloud Run hop.</td>
           </tr>
         </tbody>
       </table>
@@ -1950,6 +1950,6 @@
     </div>
   </div>
 
-  <script src="/v1/ai-economics/assets/app.js?v=7.1"></script>
+  <script src="/v1/ai-economics/assets/app.js?v=7.2"></script>
 </body>
 </html>

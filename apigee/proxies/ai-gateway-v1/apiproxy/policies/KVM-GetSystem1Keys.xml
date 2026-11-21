@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<KeyValueMapOperations continueOnError="false" enabled="true" name="KVM-GetSystem1Keys" mapIdentifier="system1-api-keys">
+    <DisplayName>KVM-GetSystem1Keys</DisplayName>
+    <Properties/>
+    <ExclusiveCache>false</ExclusiveCache>
+    <ExpiryTimeInSecs>300</ExpiryTimeInSecs>
+    <Get assignTo="private.gemini_decisions_api_key">
+        <Key>
+            <Parameter>gemini_decisions_api_key</Parameter>
+        </Key>
+    </Get>
+    <Get assignTo="private.typesafe_api_key">
+        <Key>
+            <Parameter>typesafe_api_key</Parameter>
+        </Key>
+    </Get>
+    <Scope>environment</Scope>
+</KeyValueMapOperations>

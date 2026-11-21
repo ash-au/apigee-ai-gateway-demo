@@ -1,21 +1,55 @@
-// Apigee X PostFlow (Tab 5): Build final System 1 (Jev) + System 2 (Gemini) response & telemetry envelope
+// Apigee X PostFlow (Tab 5): Build Final Pure-Apigee System 1 + System 2 Response & Telemetry Envelope
+// Strict ES5 for Apigee X Mozilla Rhino runtime.
 var totalEndMs = Date.now();
 var gatewayStartMs = Number(context.getVariable("ai.gateway_start_ms") || totalEndMs);
 var totalGatewayLatencyMs = Math.max(1, totalEndMs - gatewayStartMs);
+
+function parseVertexResponse(raw, modelName) {
+    var candidates = (raw && raw.candidates) || [];
+    var textParts = [];
+    if (candidates.length > 0 && candidates[0].content && candidates[0].content.parts) {
+        var parts = candidates[0].content.parts;
+        for (var i = 0; i < parts.length; i++) {
+            var p = parts[i];
+            if (p && typeof p.text === "string" && !p.thought) {
+                textParts.push(p.text);
+            }
+        }
+    }
+    var text = textParts.join("\n").replace(/^\s+|\s+$/g, "");
+
+    var usageMeta = (raw && raw.usageMetadata) || {};
+    var promptTokens = Number(usageMeta.promptTokenCount || 0);
+    var candidateTokens = Number(usageMeta.candidatesTokenCount || 0);
+    var thinkingTokens = Number(usageMeta.thoughtsTokenCount || 0);
+    var totalTokens = Number(usageMeta.totalTokenCount || (promptTokens + candidateTokens + thinkingTokens));
+
+    var isPro = modelName === "gemini-2.5-pro";
+    var inRate = isPro ? 1.25 : 0.30;
+    var outRate = isPro ? 10.00 : 2.50;
+    var costUsd = Number((
+        (promptTokens / 1000000.0) * inRate +
+        ((candidateTokens + thinkingTokens) / 1000000.0) * outRate
+    ).toFixed(8));
+
+    return {
+        text: text,
+        usage: {
+            model: modelName,
+            prompt_tokens: promptTokens,
+            candidate_tokens: candidateTokens,
+            thinking_tokens: thinkingTokens,
+            total_tokens: totalTokens,
+            cost_usd: costUsd
+        }
+    };
+}
 
 var preData = {};
 try {
     preData = JSON.parse(context.getVariable("ai.jev_pre_telemetry_json") || "{}");
 } catch (e) {
     preData = {};
-}
-
-var verifyRawStr = context.getVariable("jevPostVerifyResponse.content") || "{}";
-var verifyData = {};
-try {
-    verifyData = JSON.parse(verifyRawStr);
-} catch (e) {
-    verifyData = {};
 }
 
 var zeroUsage = {
@@ -27,21 +61,105 @@ var zeroUsage = {
     cost_usd: 0.0
 };
 
-var l1Usage = verifyData.l1_usage || zeroUsage;
-var l2Usage = verifyData.l2_usage || null;
-var l1LatencyMs = Number(context.getVariable("ai.l1_vertex_latency_ms") || 0);
-var l2LatencyMs = Number(verifyData.l2_latency_ms || 0);
+var parsedL1Usage = zeroUsage;
+try {
+    parsedL1Usage = JSON.parse(context.getVariable("ai.l1_usage_json") || "null") || zeroUsage;
+} catch (e) {
+    parsedL1Usage = zeroUsage;
+}
+
+var stage2Data = {};
+try {
+    stage2Data = JSON.parse(context.getVariable("ai.stage2_telemetry_json") || "{}");
+} catch (e) {
+    stage2Data = {};
+}
 
 var jPre = preData.jev_pre_route || {};
-var jPost = verifyData.jev_post_verify || null;
+var resolvedProvider = preData.system1_provider || jPre.provider || context.getVariable("ai.system1_provider") || "gemini_decision_1";
+var isGemini = resolvedProvider === "gemini_decision_1";
+var resolvedProviderLabel = preData.system1_provider_label || jPre.provider_label || (isGemini ? "Google Gemini Decision 1" : "TypeSafe Jev");
+var shortLabel = isGemini ? "Gemini Decision 1" : "Jev";
+var defaultS1Model = isGemini ? "gemini-decision-1" : "jev-latest";
+var defaultEndpoint = isGemini
+    ? "https://generativelanguage.googleapis.com/v1beta/decisions"
+    : "https://api.typesafe.ai/v1/systemone";
+
+var routingDecision = context.getVariable("ai.routing_decision") || "GEMINI_2_5_FLASH";
+var initialTargetModel = preData.target_model || context.getVariable("ai.target_model") || "gemini-2.5-flash";
+var directToPro = routingDecision === "GEMINI_2_5_PRO" || initialTargetModel === "gemini-2.5-pro";
+var postVerifierExecuted = Boolean(stage2Data.executed);
+var escalatedToPro = context.getVariable("ai.escalate_to_pro") === "true";
+
+var l1Text = context.getVariable("ai.l1_response_text") || "";
+var candidateText = context.getVariable("ai.candidate_text_for_verification") || l1Text;
+var l1LatencyMs = Number(context.getVariable("ai.l1_vertex_latency_ms") || 0);
+
+var l1Usage = directToPro ? zeroUsage : parsedL1Usage;
+var l2Usage = directToPro ? parsedL1Usage : null;
+var l2LatencyMs = 0;
+var finalResponseText = candidateText;
+var finalModelUsed;
+var routePath;
+var escalationReason;
+var l1ResponsePreview = "";
+
+var policiesExecuted = [
+    "KVM-GetSystem1Keys",
+    "JS-PrepareJevPreRoute",
+    isGemini ? "SC-GeminiDecisionPreRoute" : "SC-TypeSafeJevPreRoute",
+    "JS-ProcessJevPreRoute",
+    directToPro ? "Route-VertexPro" : "Route-VertexFlash",
+    "JS-PrepareJevPostVerify"
+];
+
+if (postVerifierExecuted) {
+    policiesExecuted.push(isGemini ? "SC-GeminiDecisionPostVerify" : "SC-TypeSafeJevPostVerify");
+    policiesExecuted.push("JS-EvaluateNoulBattery");
+}
+
+if (directToPro) {
+    finalResponseText = l1Text;
+    finalModelUsed = "gemini-2.5-pro (Direct System 2 Fast-Track via " + shortLabel + ")";
+    routePath = shortLabel + " Pre-Router (Apigee SC) -> Direct Gemini 2.5 Pro (Skipped L1 Flash)";
+    escalationReason = "Stage 1 fast-tracked directly to System 2 Pro via Apigee Route-VertexPro.";
+} else if (escalatedToPro) {
+    policiesExecuted.push("SC-EscalateVertexPro");
+    var l2StartMs = Number(context.getVariable("ai.l2_start_ms") || totalEndMs);
+    l2LatencyMs = Math.max(1, totalEndMs - l2StartMs);
+    var l2RawStr = context.getVariable("l2ProResponse.content") || "{}";
+    var l2Raw = {};
+    try {
+        l2Raw = JSON.parse(l2RawStr);
+    } catch (e) {
+        l2Raw = {};
+    }
+    var parsedL2 = parseVertexResponse(l2Raw, "gemini-2.5-pro");
+    finalResponseText = parsedL2.text;
+    l2Usage = parsedL2.usage;
+    finalModelUsed = "gemini-2.5-flash -> gemini-2.5-pro (" + shortLabel + " SDE Cascade Escalated)";
+    routePath = shortLabel + " Pre-Router -> L1 Flash -> " + shortLabel + " Noul Battery (FIRED) -> Apigee SC-EscalateVertexPro";
+    escalationReason = stage2Data.escalation_reason || "Noul battery fired; escalated to Gemini 2.5 Pro.";
+    l1ResponsePreview = candidateText.substring(0, 500);
+} else if (postVerifierExecuted) {
+    finalModelUsed = "gemini-2.5-flash (Verified by " + shortLabel + " Noul Battery)";
+    routePath = shortLabel + " Pre-Router -> L1 Gemini 2.5 Flash -> " + shortLabel + " Noul Battery (ACCEPTED)";
+    escalationReason = "All 5 Noul heads <= fire_threshold; L1 Gemini 2.5 Flash response accepted.";
+} else {
+    finalModelUsed = "gemini-2.5-flash";
+    routePath = shortLabel + " Pre-Router -> L1 Gemini 2.5 Flash (Verifier Disabled)";
+    escalationReason = "Post-Verifier Disabled; L1 Gemini 2.5 Flash response returned.";
+}
+policiesExecuted.push("JS-BuildJevFinalResponse");
 
 var jevStage1InputTokens = Number(jPre.input_tokens || 0);
 var jevStage1OutputTokens = Number(jPre.output_tokens || 0);
 var jevStage1CostUsd = Number(jPre.cost_usd || 0);
 
-var jevStage2InputTokens = Number((jPost && jPost.input_tokens) || 0);
-var jevStage2OutputTokens = Number((jPost && jPost.output_tokens) || 0);
-var jevStage2CostUsd = Number((jPost && jPost.cost_usd) || 0);
+var st2Usage = stage2Data.usage || {};
+var jevStage2InputTokens = Number(st2Usage.input_tokens || 0);
+var jevStage2OutputTokens = Number(st2Usage.output_tokens || 0);
+var jevStage2CostUsd = Number(st2Usage.cost_usd || 0);
 
 var totalJevInputTokens = jevStage1InputTokens + jevStage2InputTokens;
 var totalJevOutputTokens = jevStage1OutputTokens + jevStage2OutputTokens;
@@ -52,24 +170,18 @@ var llmCandidateTokens = Number(l1Usage.candidate_tokens || 0) + (l2Usage ? Numb
 var llmThinkingTokens = Number(l1Usage.thinking_tokens || 0) + (l2Usage ? Number(l2Usage.thinking_tokens || 0) : 0);
 var llmTotalTokens = Number(l1Usage.total_tokens || 0) + (l2Usage ? Number(l2Usage.total_tokens || 0) : 0);
 var llmCostUsd = Number(l1Usage.cost_usd || 0) + (l2Usage ? Number(l2Usage.cost_usd || 0) : 0);
-
 var totalCostUsd = Number((llmCostUsd + totalJevCostUsd).toFixed(8));
 
 var apigeeOrgName = context.getVariable("organization.name") || "apac-cs-5g-demo5";
 var apigeeEnvName = context.getVariable("environment.name") || "demo";
-var routingDecision = context.getVariable("ai.routing_decision") || "GEMINI_2_5_FLASH";
-
 var tierObj = jPre.target_tier || {};
 var compObj = jPre.complexity || {};
-var resolvedProvider = preData.system1_provider || jPre.provider || context.getVariable("ai.system1_provider") || "typesafe_jev";
-var resolvedProviderLabel = preData.system1_provider_label || jPre.provider_label || (resolvedProvider === "gemini_decision_1" ? "Google Gemini Decision 1" : "TypeSafe Jev");
-var defaultS1Model = resolvedProvider === "gemini_decision_1" ? "gemini-decision-1" : "jev-latest";
 
 var stage1Normalized = {
     provider: resolvedProvider,
     provider_label: resolvedProviderLabel,
-    endpoint: jPre.endpoint || "",
-    pricing_per_million_usd: Number(jPre.pricing_per_million_usd || (resolvedProvider === "gemini_decision_1" ? 0.10 : 0.042)),
+    endpoint: jPre.endpoint || defaultEndpoint,
+    pricing_per_million_usd: Number(jPre.pricing_per_million_usd || (isGemini ? 0.10 : 0.042)),
     model: jPre.model || defaultS1Model,
     latency_ms: Number(jPre.latency_ms || 0),
     confidence_threshold: Number(jPre.confidence_threshold || 0.75),
@@ -87,46 +199,24 @@ var stage1Normalized = {
     }
 };
 
-var noulTable = [];
-var firingHeadsList = [];
-var holisticVal = 0;
-if (jPost && jPost.noul_battery) {
-    var nb = jPost.noul_battery;
-    var fThresh = Number(jPost.fire_threshold || 0.70);
-    for (var k in nb) {
-        if (Object.prototype.hasOwnProperty.call(nb, k)) {
-            var pVal = Number(nb[k] || 0);
-            if (k.indexOf("__overall__") === 0) {
-                holisticVal = pVal;
-            } else {
-                var didFire = pVal > fThresh;
-                if (didFire) {
-                    firingHeadsList.push(k + "=" + pVal.toFixed(2));
-                }
-                noulTable.push({
-                    question: k,
-                    probability: pVal,
-                    fired: didFire
-                });
-            }
-        }
-    }
-}
-
 var stage2Normalized = {
     provider: resolvedProvider,
     provider_label: resolvedProviderLabel,
-    executed: Boolean(verifyData.post_verifier_executed),
-    skipped_reason: verifyData.direct_to_pro ? "Direct System 2 Pro Fast-Track (No L1 Flash call)" : (!verifyData.post_verifier_executed ? "Post-Verifier Disabled" : null),
-    model: (jPost && jPost.model) || defaultS1Model,
-    latency_ms: Number((jPost && jPost.latency_ms) || 0),
-    fire_threshold: Number((jPost && jPost.fire_threshold) || 0.70),
-    max_noul_value: Number((jPost && jPost.max_defect_noul) || 0),
-    any_flag_fired: Boolean(verifyData.escalated_to_pro),
-    firing_heads: firingHeadsList,
-    holistic_escalate_judge: holisticVal,
-    response_quality_score: Number((jPost && jPost.response_quality && jPost.response_quality.score) || 0),
-    noul_battery_table: noulTable,
+    endpoint: stage2Data.endpoint || defaultEndpoint,
+    pricing_per_million_usd: Number(stage2Data.pricing_per_million_usd || (isGemini ? 0.10 : 0.042)),
+    executed: postVerifierExecuted,
+    skipped_reason: directToPro
+        ? "Direct System 2 Pro Fast-Track (No L1 Flash call)"
+        : (!postVerifierExecuted ? "Post-Verifier Disabled" : null),
+    model: stage2Data.model || defaultS1Model,
+    latency_ms: Number(stage2Data.latency_ms || 0),
+    fire_threshold: Number(stage2Data.fire_threshold || Number(context.getVariable("ai.jev_fire_threshold") || 0.70)),
+    max_noul_value: Number(stage2Data.max_noul_value || 0),
+    any_flag_fired: Boolean(stage2Data.any_flag_fired),
+    firing_heads: stage2Data.firing_heads || [],
+    holistic_escalate_judge: Number(stage2Data.holistic_escalate_judge || 0),
+    response_quality_score: Number(stage2Data.response_quality_score || 0),
+    noul_battery_table: stage2Data.noul_battery_table || [],
     usage: {
         input_tokens: jevStage2InputTokens,
         output_tokens: jevStage2OutputTokens,
@@ -136,22 +226,24 @@ var stage2Normalized = {
 
 var finalEnvelope = {
     gateway: "Apigee X (" + apigeeOrgName + " / env: " + apigeeEnvName + " / australia-southeast1)",
+    execution_architecture: "Pure Apigee X Native ServiceCallout (Zero Cloud Run)",
+    apigee_policies_executed: policiesExecuted,
     apigee_organization: apigeeOrgName,
     apigee_environment: apigeeEnvName,
     system1_provider: resolvedProvider,
     system1_provider_label: resolvedProviderLabel,
     system1_model: stage1Normalized.model,
-    response_text: verifyData.final_response_text || "",
-    final_model_used: verifyData.final_model_used || preData.target_model || "gemini-2.5-flash",
-    route_path: verifyData.route_path || "",
+    response_text: finalResponseText,
+    final_model_used: finalModelUsed,
+    route_path: routePath,
     initial_routing_decision: routingDecision,
-    initial_target_model: preData.target_model || "gemini-2.5-flash",
-    apigee_route_rule_taken: routingDecision === "GEMINI_2_5_PRO" ? "Route-VertexPro (vertex-pro-global)" : "Route-VertexFlash (vertex-flash-au)",
+    initial_target_model: initialTargetModel,
+    apigee_route_rule_taken: directToPro ? "Route-VertexPro (vertex-pro-global)" : "Route-VertexFlash (vertex-flash-au)",
     routing_reason: preData.routing_reason || "",
-    cascade_evaluated: Boolean(verifyData.post_verifier_executed),
-    escalated_to_pro: Boolean(verifyData.escalated_to_pro),
-    escalation_reason: verifyData.escalation_reason || "All 5 Noul heads <= fire_threshold; L1 Gemini 2.5 Flash response accepted.",
-    l1_response_preview: verifyData.l1_response_preview || "",
+    cascade_evaluated: postVerifierExecuted,
+    escalated_to_pro: escalatedToPro,
+    escalation_reason: escalationReason,
+    l1_response_preview: l1ResponsePreview,
     latency_ms: totalGatewayLatencyMs,
     latency_breakdown_ms: {
         stage1_jev_pre_route_ms: stage1Normalized.latency_ms,

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-TypeSafeJevPostVerify">
+    <DisplayName>SC-TypeSafeJevPostVerify</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="s1PostRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+                <Header name="Authorization">Bearer {private.typesafe_api_key}</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.s1_post_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>s1PostResponse</Response>
+    <Timeout>30000</Timeout>
+    <HTTPTargetConnection>
+        <LoadBalancer>
+            <Server name="ts-typesafe-jev"/>
+        </LoadBalancer>
+        <Path>/v1/systemone</Path>
+        <Properties>
+            <Property name="keepalive.timeout.millis">60000</Property>
+            <Property name="connect.timeout.millis">10000</Property>
+            <Property name="io.timeout.millis">30000</Property>
+        </Properties>
+    </HTTPTargetConnection>
+</ServiceCallout>

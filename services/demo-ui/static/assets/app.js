@@ -1975,6 +1975,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         '<strong>Stage 1</strong> evaluates <code>Choice</code>, <code>Score</code>, and pre-<code>Noul</code>s to route via Apigee <code>RouteRules</code> to Flash or fast-track directly to Pro. ' +
         '<strong>Stage 2</strong> runs a decomposed 5-head <code>Noul</code> battery (<code>max(nouls) &gt; fire_threshold</code>) to escalate subtle L<sub>1</sub> defects to System 2 Pro.',
       gwSubtitleHtml: "Google <code>gemini-decision-1</code> System 1 + Vertex AI System 2",
+      flowFooterHtml:
+        "Apigee Flow (Zero Cloud Run): <strong>KVM-GetSystem1Keys &rarr; SC-GeminiDecisionPreRoute &rarr; RouteRule &rarr; SC-GeminiDecisionPostVerify &rarr; SC-EscalateVertexPro</strong>",
       bannerHeadingHtml:
         'Two-Stage Confidence-Gated Routing &amp; 5-Head <code>Noul</code> Battery (Google <code>gemini-decision-1</code>)',
       ctaText: "Execute Gemini Decision 1 + System 2 Routing Comparison",
@@ -1995,6 +1997,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         '<strong>Stage 1</strong> evaluates <code>Choice</code>, <code>Score</code>, and pre-<code>Noul</code>s to route via Apigee <code>RouteRules</code> to Flash or fast-track directly to Pro. ' +
         '<strong>Stage 2</strong> runs a decomposed 5-head <code>Noul</code> battery (<code>max(nouls) &gt; fire_threshold</code>) to escalate subtle L<sub>1</sub> defects to System 2 Pro.',
       gwSubtitleHtml: "TypeSafe <code>jev-latest</code> System 1 + Vertex AI System 2",
+      flowFooterHtml:
+        "Apigee Flow (Zero Cloud Run): <strong>KVM-GetSystem1Keys &rarr; SC-TypeSafeJevPreRoute &rarr; RouteRule &rarr; SC-TypeSafeJevPostVerify &rarr; SC-EscalateVertexPro</strong>",
       bannerHeadingHtml:
         'Two-Stage Confidence-Gated Routing &amp; 5-Head <code>Noul</code> Battery (TypeSafe <code>jev-latest</code>)',
       ctaText: "Execute TypeSafe Jev + System 2 Routing Comparison",
@@ -2032,6 +2036,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     setHtml("s1-banner-desc", meta.bannerDescHtml);
     setText("s1-provider-price-pill", meta.pricePill);
     setHtml("s1-provider-endpoint-meta", `Endpoint: <code>${escapeHtml(meta.endpoint)}</code>`);
+    setHtml("s1-flow-footer", meta.flowFooterHtml);
     setText("btn-run-s1", meta.ctaText);
     setHtml(
       "s1-pipeline-title",
@@ -2234,6 +2239,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
 
         const st1Lines = [
           `=== STAGE 1: ${providerUpper} PRE-FLIGHT ROUTER (${st1Model}) ===`,
+          `Execution Architecture    : ${g.execution_architecture || "Pure Apigee X Native ServiceCallout"}`,
+          `Apigee Policies Executed  : ${(g.apigee_policies_executed || []).join(" -> ") || "Native ServiceCallout"}`,
           `System 1 Endpoint         : ${st1.endpoint || respMeta.endpoint}`,
           `Apigee RouteRule Selected : ${g.apigee_route_rule_taken}`,
           `Routing Decision          : ${g.initial_routing_decision} (${g.initial_target_model})`,

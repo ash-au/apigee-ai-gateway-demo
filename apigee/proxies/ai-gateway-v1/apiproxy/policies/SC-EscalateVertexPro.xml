@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-EscalateVertexPro">
+    <DisplayName>SC-EscalateVertexPro</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="l2ProRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.l2_pro_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>l2ProResponse</Response>
+    <Timeout>90000</Timeout>
+    <HTTPTargetConnection>
+        <Authentication>
+            <GoogleAccessToken>
+                <Scopes>
+                    <Scope>https://www.googleapis.com/auth/cloud-platform</Scope>
+                </Scopes>
+            </GoogleAccessToken>
+        </Authentication>
+        <URL>https://aiplatform.googleapis.com/v1/projects/apac-cs-5g-demo5/locations/global/publishers/google/models/gemini-2.5-pro:generateContent</URL>
+    </HTTPTargetConnection>
+</ServiceCallout>

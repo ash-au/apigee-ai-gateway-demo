@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ServiceCallout continueOnError="false" enabled="true" name="SC-GeminiDecisionPreRoute">
+    <DisplayName>SC-GeminiDecisionPreRoute</DisplayName>
+    <Properties/>
+    <Request clearPayload="true" variable="s1PreRequest">
+        <IgnoreUnresolvedVariables>false</IgnoreUnresolvedVariables>
+        <Set>
+            <Headers>
+                <Header name="Content-Type">application/json</Header>
+                <Header name="x-goog-api-key">{private.gemini_decisions_api_key}</Header>
+            </Headers>
+            <Payload contentType="application/json">{ai.s1_pre_request_body}</Payload>
+            <Verb>POST</Verb>
+        </Set>
+    </Request>
+    <Response>s1PreResponse</Response>
+    <Timeout>30000</Timeout>
+    <HTTPTargetConnection>
+        <LoadBalancer>
+            <Server name="ts-gemini-decisions"/>
+        </LoadBalancer>
+        <Path>/v1beta/decisions</Path>
+        <Properties>
+            <Property name="keepalive.timeout.millis">60000</Property>
+            <Property name="connect.timeout.millis">10000</Property>
+            <Property name="io.timeout.millis">30000</Property>
+        </Properties>
+    </HTTPTargetConnection>
+</ServiceCallout>

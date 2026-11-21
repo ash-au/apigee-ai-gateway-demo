@@ -13,11 +13,16 @@
         <Policy>JS-PrepareNativePolicyRequest</Policy>
         <Policy>JS-PreparePreOptimize</Policy>
         <Policy>JS-ProcessPreOptimize</Policy>
+        <Policy>KVM-GetSystem1Keys</Policy>
         <Policy>JS-PrepareJevPreRoute</Policy>
-        <Policy>SC-JevPreRoute</Policy>
+        <Policy>SC-GeminiDecisionPreRoute</Policy>
+        <Policy>SC-TypeSafeJevPreRoute</Policy>
         <Policy>JS-ProcessJevPreRoute</Policy>
         <Policy>JS-PrepareJevPostVerify</Policy>
-        <Policy>SC-JevPostVerify</Policy>
+        <Policy>SC-GeminiDecisionPostVerify</Policy>
+        <Policy>SC-TypeSafeJevPostVerify</Policy>
+        <Policy>JS-EvaluateNoulBattery</Policy>
+        <Policy>SC-EscalateVertexPro</Policy>
         <Policy>JS-BuildJevFinalResponse</Policy>
         <Policy>LTQ-EnforceOnly</Policy>
         <Policy>LTQ-EnforceTokenQuota</Policy>
@@ -45,6 +50,7 @@
         <Resource>jsc://prepare_jev_pre_route.js</Resource>
         <Resource>jsc://process_jev_pre_route.js</Resource>
         <Resource>jsc://prepare_jev_post_verify.js</Resource>
+        <Resource>jsc://evaluate_noul_battery.js</Resource>
         <Resource>jsc://build_jev_final_response.js</Resource>
     </Resources>
     <TargetEndpoints>
