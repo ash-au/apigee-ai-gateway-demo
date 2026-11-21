@@ -993,6 +993,16 @@
     document.getElementById("ledger-cost-saved").textContent =
       `${fmtUsd(Math.abs(costSaved), 6)} net ${costSaved >= 0 ? "saved" : "added"}`;
 
+    if (L.runs > 0 && costPct !== null && tokPct !== null) {
+      const cSign = costSaved >= 0 ? "-" : "+";
+      const tSign = tokSaved >= 0 ? "-" : "+";
+      recordLiveOutcome(
+        "cost",
+        `${cSign}${Math.abs(Number(costPct))}% Cost · ${tSign}${Math.abs(Number(tokPct))}% Tokens (${L.runs} ${L.runs === 1 ? "run" : "runs"})`,
+        `${fmtUsd(L.gatewayCostUsd, 6)} via Apigee X vs. ${fmtUsd(L.directCostUsd, 6)} Direct (${fmtInt(L.gatewayTokens)} vs. ${fmtInt(L.directTokens)} tok)`
+      );
+    }
+
     updateAnnualProjectionUI();
   }
 
@@ -1235,7 +1245,6 @@
     if (r1gBar) r1gBar.style.transform = `scaleX(${Math.max(0.03, r1gCost / r1Max).toFixed(4)})`;
     if (r1dLbl) r1dLbl.textContent = `${fmtUsd(r1dCost, 6)} · ${fmtInt(direct.latency_ms)} ms`;
     if (r1gLbl) r1gLbl.textContent = `${fmtUsd(r1gCost, 6)} · ${fmtInt(gw.latency_ms)} ms`;
-    recordLiveOutcome("cost", `${costSign}${Math.abs(cmp.cost_reduction_pct)}% Cost · ${tokSign}${Math.abs(cmp.token_reduction_pct)}% Tokens`, `${fmtUsd(r1gCost, 6)} via Apigee X vs. ${fmtUsd(r1dCost, 6)} Direct (${fmtInt(gw.latency_ms)} ms)`);
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
