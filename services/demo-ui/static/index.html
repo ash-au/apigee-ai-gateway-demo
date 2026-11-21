@@ -17,7 +17,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=10.0" />
+  <link rel="stylesheet" href="assets/styles.css?v=10.1" />
 </head>
 <body>
   <!-- ====================================================================
@@ -84,6 +84,7 @@
           <p id="stage-active-subtitle" class="stage-subtitle">Live Direct Vertex AI vs. Apigee X Gateway — Cache, Compress, Route &amp; Prune</p>
         </div>
         <div class="stage-utility-links">
+          <button type="button" id="btn-copy-curl" class="btn-secondary">Copy curl</button>
           <button type="button" id="btn-open-about" class="btn-secondary">Architecture &amp; Pricing</button>
           <button type="button" id="btn-open-glossary" class="btn-secondary">System 1 Glossary</button>
         </div>
@@ -181,6 +182,18 @@
             </svg>
           </div>
 
+          <!-- Live Direct vs. Apigee X Race Strip -->
+          <div class="race-strip" aria-label="Direct vs Apigee X Live Comparison">
+            <div class="race-lane">
+              <div class="race-lane-head"><span>Direct Vertex AI (Baseline)</span><span id="t1-race-direct-label" class="race-lane-val">Awaiting run</span></div>
+              <div class="race-track"><div id="t1-race-direct-bar" class="race-fill race-fill-direct" style="transform:scaleX(0.08)"></div></div>
+            </div>
+            <div class="race-lane">
+              <div class="race-lane-head"><span>Apigee X AI Gateway</span><span id="t1-race-gw-label" class="race-lane-val">Optimized path</span></div>
+              <div class="race-track"><div id="t1-race-gw-bar" class="race-fill race-fill-gateway" style="transform:scaleX(0.08)"></div></div>
+            </div>
+          </div>
+
           <!-- Zone 3: 3 Live KPIs + PERMANENT ANNUALIZED ROI VALUE CARD -->
           <div class="hero-outcome-band hero-outcome-band-4">
             <div class="hero-kpi">
@@ -262,13 +275,15 @@
             </div>
 
             <div class="surface-card">
-              <div class="surface-card-header"><h2 class="surface-card-title">Live Prompt Composer</h2></div>
-              <div class="composer-grid">
-                <div class="field-group"><label class="field-label" for="input-prompt"><span>User Prompt</span></label><textarea id="input-prompt" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label><textarea id="input-system" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label><textarea id="input-rag" class="field-textarea" rows="2"></textarea></div>
-                <div class="field-group"><label class="field-label" for="input-history"><span>Chat History (JSON)</span><span id="meta-history-turns">0 turns</span></label><textarea id="input-history" class="field-textarea" rows="2"></textarea></div>
-              </div>
+              <details class="workbench-details" style="border-top:none;margin-top:0;padding-top:0;">
+                <summary>Live Prompt Composer (Click to Edit Payload)</summary>
+                <div class="composer-grid" style="margin-top:12px;">
+                  <div class="field-group"><label class="field-label" for="input-prompt"><span>User Prompt</span></label><textarea id="input-prompt" class="field-textarea" rows="2"></textarea></div>
+                  <div class="field-group"><label class="field-label" for="input-system"><span>System Prompt</span><span id="meta-system-len">0 chars</span></label><textarea id="input-system" class="field-textarea" rows="2"></textarea></div>
+                  <div class="field-group"><label class="field-label" for="input-rag"><span>RAG Context</span><span id="meta-rag-len">0 chars</span></label><textarea id="input-rag" class="field-textarea" rows="2"></textarea></div>
+                  <div class="field-group"><label class="field-label" for="input-history"><span>Chat History (JSON)</span><span id="meta-history-turns">0 turns</span></label><textarea id="input-history" class="field-textarea" rows="2"></textarea></div>
+                </div>
+              </details>
             </div>
           </div>
 
@@ -668,10 +683,15 @@
             </svg>
           </div>
 
-          <div class="hero-outcome-band">
-            <div class="hero-kpi"><span class="hero-kpi-label">Semantic Policy Outcome</span><div id="hero-t4-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t4-verdict-sub" class="hero-kpi-sub">Native Apigee X vector lookup &amp; cache populate</span></div>
-            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t4-latency" class="hero-kpi-value tone-cyan">Live</div><span id="hero-t4-latency-sub" class="hero-kpi-sub">Bypass Vertex AI completely on semantic hit</span></div>
+          <div class="hero-outcome-band hero-outcome-band-4">
+            <div class="hero-kpi"><span class="hero-kpi-label">Semantic Policy Outcome</span><div id="hero-t4-verdict" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t4-verdict-sub" class="hero-kpi-sub">Native Apigee X vector lookup &amp; populate</span></div>
+            <div class="hero-kpi"><span class="hero-kpi-label">Edge Latency</span><div id="hero-t4-latency" class="hero-kpi-value tone-cyan">Live</div><span id="hero-t4-latency-sub" class="hero-kpi-sub">Bypasses Vertex AI on semantic hit</span></div>
             <div class="hero-kpi"><span class="hero-kpi-label">Vector Search Node</span><div id="vs-cost-badge" class="hero-kpi-value">—</div><span id="vs-resource-details" class="hero-kpi-sub">Checking Vertex AI Vector Search status...</span></div>
+            <div class="hero-roi-card">
+              <div class="roi-hero-head"><span class="hero-kpi-label">Projected Annual Savings</span><span id="t4-scale-label" class="metric-sub">At 10M req/mo</span></div>
+              <div id="t4-annual-savings" class="roi-hero-value">$0 / yr</div>
+              <span class="hero-kpi-sub">On semantic cache hits (0 Vertex AI tokens)</span>
+            </div>
           </div>
 
           <div class="stage-footer-bar">
@@ -788,10 +808,30 @@
             </svg>
           </div>
 
-          <div class="hero-outcome-band">
+          <!-- Live Direct Pro vs. System 1 Race Strip -->
+          <div class="race-strip" aria-label="Direct Pro vs System 1 Live Comparison">
+            <div class="race-lane">
+              <div class="race-lane-head"><span>Direct Gemini 2.5 Pro (Always System 2)</span><span id="t5-race-direct-label" class="race-lane-val">Awaiting run</span></div>
+              <div class="race-track"><div id="t5-race-direct-bar" class="race-fill race-fill-direct" style="transform:scaleX(0.08)"></div></div>
+            </div>
+            <div class="race-lane">
+              <div class="race-lane-head"><span>Apigee X System 1 / System 2</span><span id="t5-race-gw-label" class="race-lane-val">Fast-track + Noul Gate</span></div>
+              <div class="race-track"><div id="t5-race-gw-bar" class="race-fill race-fill-gateway" style="transform:scaleX(0.08)"></div></div>
+            </div>
+          </div>
+
+          <div class="hero-outcome-band hero-outcome-band-4">
             <div class="hero-kpi"><span class="hero-kpi-label">System 1 Cost Savings</span><div id="hero-t5-savings" class="hero-kpi-value tone-savings">Ready</div><span id="hero-t5-savings-sub" class="hero-kpi-sub">Fast-tracks simple tasks, escalates defects</span></div>
             <div class="hero-kpi"><span class="hero-kpi-label">Routing Decision</span><div id="hero-t5-route" class="hero-kpi-value tone-violet">Apigee X</div><span id="hero-t5-route-sub" class="hero-kpi-sub">Native ServiceCallout + TargetServer</span></div>
             <div class="hero-kpi"><span class="hero-kpi-label">Noul Quality Gate</span><div id="hero-t5-gate" class="hero-kpi-value">Standby</div><span id="hero-t5-gate-sub" class="hero-kpi-sub">Checks hallucination, grounding &amp; safety</span></div>
+            <div class="hero-roi-card">
+              <div class="roi-hero-head"><span class="hero-kpi-label">Projected Annual Savings</span><span id="t5-scale-label" class="metric-sub">At 10M req/mo</span></div>
+              <div id="t5-annual-savings" class="roi-hero-value">$0 / yr</div>
+              <div class="roi-slider-row">
+                <label for="t5-scale-slider" class="metric-label">Volume</label>
+                <input id="t5-scale-slider" type="range" min="1" max="100" step="1" value="10" aria-label="System 1 monthly requests in millions" />
+              </div>
+            </div>
           </div>
 
           <div class="stage-footer-bar">
@@ -907,6 +947,6 @@
     </div>
   </div>
 
-  <script src="assets/app.js?v=10.0"></script>
+  <script src="assets/app.js?v=10.1"></script>
 </body>
 </html>

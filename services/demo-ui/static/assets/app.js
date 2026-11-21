@@ -1005,7 +1005,7 @@
       el.setAttribute("aria-pressed", isSelected ? "true" : "false");
     });
 
-    elActiveScenarioMeta.textContent = `${scen.title} • Session: ${scen.session_id}`;
+    elActiveScenarioMeta.textContent = scen.subtitle || `${cleanScenarioLabel(scen.title)} · ${scen.optimization_focus}`;
     elPresenterNote.innerHTML = `<strong>Presenter Note (${escapeHtml(scen.optimization_focus)}):</strong> ${escapeHtml(scen.presenter_note)}`;
 
     elInputSystem.value = scen.system_instruction || "";
@@ -1202,6 +1202,19 @@
     if (elH1RouteSub) {
       elH1RouteSub.textContent = `Apigee ${fmtInt(gw.latency_ms)} ms vs. Direct ${fmtInt(direct.latency_ms)} ms`;
     }
+
+    // Update Tab 1 Live Race Strip
+    const r1dCost = Number(direct.cost_accounting.total_cost_usd || 0);
+    const r1gCost = Number(gw.cost_accounting.total_cost_usd || 0);
+    const r1Max = Math.max(r1dCost, r1gCost, 0.000001);
+    const r1dBar = document.getElementById("t1-race-direct-bar");
+    const r1gBar = document.getElementById("t1-race-gw-bar");
+    const r1dLbl = document.getElementById("t1-race-direct-label");
+    const r1gLbl = document.getElementById("t1-race-gw-label");
+    if (r1dBar) r1dBar.style.transform = `scaleX(${Math.max(0.06, r1dCost / r1Max).toFixed(4)})`;
+    if (r1gBar) r1gBar.style.transform = `scaleX(${Math.max(0.03, r1gCost / r1Max).toFixed(4)})`;
+    if (r1dLbl) r1dLbl.textContent = `${fmtUsd(r1dCost, 6)} · ${fmtInt(direct.latency_ms)} ms`;
+    if (r1gLbl) r1gLbl.textContent = `${fmtUsd(r1gCost, 6)} · ${fmtInt(gw.latency_ms)} ms`;
 
     const overheadTok =
       Number(gw.token_accounting.embedding_overhead_tokens || 0) +
@@ -1930,6 +1943,18 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         popMetric(h4l);
       }
       if (h4ls) h4ls.textContent = `Apigee X vs. ${fmtInt(d.latency_ms)} ms Direct`;
+
+      // Update Tab 4 Projected Annual Savings (on semantic cache hits)
+      const t4SavEl = document.getElementById("t4-annual-savings");
+      const t4LblEl = document.getElementById("t4-scale-label");
+      const millionsMo = Number((elScaleSlider && elScaleSlider.value) || 10);
+      if (t4LblEl) t4LblEl.textContent = `At ${millionsMo}M req/mo`;
+      if (t4SavEl) {
+        const hitSaved = Boolean(fv.scl_cache_hit) ? Number(d.cost_usd || 0) : 0;
+        const annual = hitSaved * (millionsMo * 1_000_000) * 12;
+        t4SavEl.textContent = `${fmtCurrencyLarge(annual)} / yr`;
+        popMetric(t4SavEl);
+      }
       statusEl.textContent = `Completed at ${data.timestamp_utc}`;
     } catch (e) {
       statusEl.textContent = `Error: ${e.message}`;
@@ -2043,11 +2068,88 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     if (el) el.addEventListener("input", updateComposerCounters);
   });
 
-      wireTablistKeyboardNav();
+  function updateTab5AnnualROI() {
+    const slider = document.getElementById("t5-scale-slider");
+    const lbl = document.getElementById("t5-scale-label");
+    const valEl = document.getElementById("t5-annual-savings");
+    if (!valEl) return;
+    const millionsMo = Number((slider && slider.value) || (elScaleSlider && elScaleSlider.value) || 10);
+    if (lbl) lbl.textContent = `At ${millionsMo}M req/mo`;
+    const perReq = Number(state.lastS1SavedPerReq || 0);
+    const annual = perReq * (millionsMo * 1_000_000) * 12;
+    valEl.textContent = `${annual < 0 ? "-" : ""}${fmtCurrencyLarge(Math.abs(annual))} / yr`;
+    popMetric(valEl);
+  }
+
+  function initClickableNodes() {
+    const nodeMap = {
+      "t1-node-cache": { drawer: "details-economics", title: "Semantic Cache & Pruning Inspection", auditTab: "tab-cache-prune" },
+      "t1-node-compress": { drawer: "details-economics", title: "RAG Prompt Compression Diff", auditTab: "tab-compression" },
+      "t1-node-prune": { drawer: "details-economics", title: "Context Pruning & Cache Audit", auditTab: "tab-cache-prune" },
+      "t1-node-router": { drawer: "details-economics", title: "Smart Model Routing Cascade", auditTab: "tab-cascade" },
+      "t1-node-llm": { drawer: "details-economics", title: "Vertex AI Outputs & Raw Headers", auditTab: "tab-headers-raw" },
+      "t2-node-ptl": { drawer: "details-finops", title: "Prompt Token Limit Policy & XML" },
+      "t2-node-ltq": { drawer: "details-finops", title: "Rolling Token Quota Policy & XML" },
+      "t3-node-sup": { drawer: "details-armor", title: "Model Armor SanitizeUserPrompt" },
+      "t3-node-smr": { drawer: "details-armor", title: "Model Armor SanitizeModelResponse" },
+      "t4-node-pre": { drawer: "details-semantic", title: "Native SemanticCacheLookup" },
+      "t4-node-post": { drawer: "details-semantic", title: "Native SemanticCachePopulate" },
+      "t5-node-stage1": { drawer: "details-system1", title: "Stage 1 System 1 Pre-Router" },
+      "t5-node-stage2": { drawer: "details-system1", title: "Stage 2 Noul Quality Verifier" },
+    };
+    Object.entries(nodeMap).forEach(([nodeId, cfg]) => {
+      const node = document.getElementById(nodeId);
+      if (!node) return;
+      node.addEventListener("click", () => {
+        if (cfg.auditTab) {
+          const tabBtn = document.querySelector(`.audit-tab[data-tab="${cfg.auditTab}"]`);
+          if (tabBtn) tabBtn.click();
+        }
+        const mode = document.documentElement.getAttribute("data-view");
+        if (mode === "architect") {
+          const target = document.getElementById(cfg.drawer);
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          openKeynoteDrawer(cfg.drawer, cfg.title);
+        }
+      });
+    });
+  }
+
+  function initCopyCurl() {
+    const btn = document.getElementById("btn-copy-curl");
+    if (!btn) return;
+    btn.addEventListener("click", async () => {
+      const url = (document.getElementById("footer-apigee-url") || {}).textContent || "https://eval-group.34-120-155-152.nip.io/v1/ai-economics/chat";
+      const promptText = ((elInputPrompt && elInputPrompt.value) || "Explain Apigee X AI Gateway benefits in 2 sentences.").replace(/"/g, '\\"');
+      const curlCmd =
+        `curl -sS -X POST "${url.trim()}" \\\n` +
+        `  -H "Content-Type: application/json" \\\n` +
+        `  -H "X-Opt-Cache: ${elToggleCache && elToggleCache.checked ? "true" : "false"}" \\\n` +
+        `  -H "X-Opt-Compress: ${elToggleCompress && elToggleCompress.checked ? "true" : "false"}" \\\n` +
+        `  -H "X-Opt-Route: ${elToggleRoute && elToggleRoute.checked ? "true" : "false"}" \\\n` +
+        `  -H "X-Opt-Prune: ${elTogglePrune && elTogglePrune.checked ? "true" : "false"}" \\\n` +
+        `  -d '{"prompt":"${promptText}"}'`;
+      try {
+        await navigator.clipboard.writeText(curlCmd);
+        btn.textContent = "Copied curl!";
+        setTimeout(() => { btn.textContent = "Copy curl"; }, 2000);
+      } catch (e) {
+        btn.textContent = "Copy failed";
+        setTimeout(() => { btn.textContent = "Copy curl"; }, 2000);
+      }
+    });
+  }
+
+  wireTablistKeyboardNav();
   initThemeSwitcher();
   initKeynoteDrawer();
   initViewModeSwitcher();
+  initClickableNodes();
+  initCopyCurl();
   syncPolicySwitches();
+  const elT5Slider = document.getElementById("t5-scale-slider");
+  if (elT5Slider) elT5Slider.addEventListener("input", updateTab5AnnualROI);
   syncNoulThresholdLines();
 
   const elFireThreshold = document.getElementById("s1-fire-threshold");
@@ -2480,6 +2582,21 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           popMetric(h5g);
         }
         if (h5gs) h5gs.textContent = g.escalated_to_pro ? "Auto-recovered via Gemini 2.5 Pro" : "Noul quality battery passed";
+
+        // Update Tab 5 Live Race Strip & Projected Annual Savings
+        state.lastS1SavedPerReq = costSaved;
+        const r5dCost = Number(dCost.total_cost_usd || 0);
+        const r5gCost = Number(gCost.total_cost_usd || 0);
+        const r5Max = Math.max(r5dCost, r5gCost, 0.000001);
+        const r5dBar = document.getElementById("t5-race-direct-bar");
+        const r5gBar = document.getElementById("t5-race-gw-bar");
+        const r5dLbl = document.getElementById("t5-race-direct-label");
+        const r5gLbl = document.getElementById("t5-race-gw-label");
+        if (r5dBar) r5dBar.style.transform = `scaleX(${Math.max(0.06, r5dCost / r5Max).toFixed(4)})`;
+        if (r5gBar) r5gBar.style.transform = `scaleX(${Math.max(0.03, r5gCost / r5Max).toFixed(4)})`;
+        if (r5dLbl) r5dLbl.textContent = `${fmtUsd(r5dCost, 6)} · ${fmtInt(d.latency_ms)} ms`;
+        if (r5gLbl) r5gLbl.textContent = `${fmtUsd(r5gCost, 6)} · ${fmtInt(g.client_observed_latency_ms || g.latency_ms)} ms`;
+        updateTab5AnnualROI();
 
         let gwBodyText = g.response_text || "";
         if (g.escalated_to_pro && g.l1_response_preview) {

@@ -303,11 +303,11 @@ button, input, textarea, select {
 }
 
 [data-view="architect"] .pipeline-svg-wrap {
-  padding: 12px 20px;
+  padding: 20px 24px;
 }
 
 [data-view="architect"] .pipeline-svg {
-  max-height: 175px;
+  max-height: 340px;
 }
 
 [data-view="architect"] .hero-kpi,
@@ -893,6 +893,15 @@ button, input, textarea, select {
   font-size: 13px;
 }
 
+.pipe-node {
+  cursor: pointer;
+}
+
+.pipe-node:hover .pipe-node-box {
+  stroke: var(--accent-blue);
+  filter: drop-shadow(0 0 12px var(--accent-blue-glow));
+}
+
 .pipe-node.state-active .pipe-node-box { stroke: var(--accent-cyan); stroke-width: 2.5; filter: drop-shadow(0 0 16px rgba(56, 189, 248, 0.38)); }
 .pipe-node.state-savings .pipe-node-box { stroke: var(--sig-savings); stroke-width: 2.5; filter: drop-shadow(0 0 16px rgba(52, 211, 153, 0.40)); }
 .pipe-node.state-alert .pipe-node-box { stroke: var(--sig-alert); stroke-width: 2.5; filter: drop-shadow(0 0 16px rgba(251, 113, 133, 0.42)); }
@@ -923,6 +932,90 @@ button, input, textarea, select {
 .pipeline-svg.is-running .pipe-photon,
 .pipeline-svg.pipe-running .pipe-photon {
   opacity: 1;
+}
+
+/* Live Direct vs. Apigee X Visual Race Strip (Above-the-fold gut-punch) */
+.race-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 10px 24px;
+  background-color: var(--bg-surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.race-lane {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.race-lane-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+
+.race-lane-val {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-primary);
+}
+
+.race-track {
+  height: 8px;
+  border-radius: var(--r-pill);
+  background-color: var(--bg-well);
+  overflow: hidden;
+}
+
+.race-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  width: 100%;
+  transform-origin: left center;
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.race-fill-direct {
+  background: linear-gradient(90deg, #64748b, #94a3b8);
+}
+
+.race-fill-gateway {
+  background: linear-gradient(90deg, #10b981, #34d399, #38bdf8);
+}
+
+/* Collapsible Workbench Details */
+.workbench-details {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 12px;
+  padding-top: 12px;
+}
+
+.workbench-details summary {
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-primary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.workbench-details summary::after {
+  content: "+";
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.workbench-details[open] summary::after {
+  content: "−";
 }
 
 /* ==========================================================================
