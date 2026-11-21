@@ -965,6 +965,7 @@ async def passthrough_gateway_chat(
 
 
 class McpGovernanceRequest(BaseModel):
+    user_principal: str = "support-lead@acme-bank.com"
     agent_role: str = "support-agent"
     spiffe_id: Optional[str] = None
     tool_name: str = "search_kb"
@@ -995,14 +996,29 @@ async def execute_mcp_governance(req: McpGovernanceRequest) -> Dict[str, Any]:
         "readonly-bot": "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/readonly/sa/audit-viewer-bot",
         "untrusted-shadow": "spiffe://untrusted-external.cloud/ns/rogue/sa/shadow-bot",
     }
+    user_scope_map = {
+        "intern@acme-bank.com": "kb:read",
+        "support-lead@acme-bank.com": "kb:read tickets:write",
+        "cfo@acme-bank.com": "kb:read tickets:write finance:wire",
+    }
+    user_sub = req.user_principal or "support-lead@acme-bank.com"
+    user_scope = user_scope_map.get(user_sub, "kb:read")
     spiffe_id = req.spiffe_id or default_spiffe_map.get(req.agent_role, default_spiffe_map["support-agent"])
     now_sec = int(time.time())
-    jwt_header = {"alg": "ES256", "typ": "JWT", "kid": "spiffe-svid-demo-key"}
+    jwt_header = {"alg": "ES256", "typ": "JWT", "kid": "rfc8693-spiffe-svid-key"}
     jwt_claims = {
-        "sub": spiffe_id,
-        "aud": ["https://apigee-ai-gateway.apac-cs-5g-demo5.internal"],
+        "sub": user_sub,
+        "scope": user_scope,
+        "aud": ["https://apigee-ai-gateway.apac-cs-5g-demo5.internal/mcp"],
+        "iss": "https://sts.apac-cs-5g-demo5.internal",
         "iat": now_sec,
         "exp": now_sec + 300,
+        "act": {
+            "sub": spiffe_id,
+            "act": {
+                "sub": "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/orchestrator/sa/concierge-agent"
+            },
+        },
     }
     def _b64url(obj: Dict[str, Any]) -> str:
         return base64.urlsafe_b64encode(json.dumps(obj, separators=(",", ":")).encode()).rstrip(b"=").decode()

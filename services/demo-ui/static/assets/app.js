@@ -2168,7 +2168,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   }
 
   function initNewEnterpriseTabs() {
-    // --- TAB 6: MCP TOOL GOVERNANCE + LIVE SPIFFE IDENTITY ---
+    // --- TAB 6: MCP TOOL GOVERNANCE + RFC 8693 IDENTITY PROVENANCE ---
+    const mcpUser = document.getElementById("mcp-user-select");
     const mcpRole = document.getElementById("mcp-role-select");
     const mcpTool = document.getElementById("mcp-tool-input");
     const mcpPoison = document.getElementById("mcp-sim-poison");
@@ -2182,16 +2183,20 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     };
 
     function syncSpiffeCard() {
+      const userVal = (mcpUser && mcpUser.value) || "support-lead@acme-bank.com";
       const role = (mcpRole && mcpRole.value) || "support-agent";
       const info = spiffeMap[role] || spiffeMap["support-agent"];
       const card = document.getElementById("mcp-spiffe-card");
+      const chainEl = document.getElementById("mcp-provenance-chain");
       const uriEl = document.getElementById("mcp-spiffe-uri");
       const tagEl = document.getElementById("mcp-spiffe-trust-tag");
+      if (chainEl) chainEl.textContent = `sub: ${userVal} → act: ${role}`;
       if (uriEl) uriEl.textContent = info.uri;
       if (tagEl) tagEl.textContent = info.trusted ? "Trusted Domain" : "UNTRUSTED DOMAIN";
       if (card) card.classList.toggle("spiffe-untrusted", !info.trusted);
     }
     if (mcpRole) mcpRole.addEventListener("change", syncSpiffeCard);
+    if (mcpUser) mcpUser.addEventListener("change", syncSpiffeCard);
     syncSpiffeCard();
 
     document.querySelectorAll("#mcp-scenario-list .scenario-item").forEach((btn) => {
@@ -2204,18 +2209,27 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         btn.setAttribute("aria-pressed", "true");
         const p = btn.dataset.mcpPreset;
         if (p === "safe") {
+          if (mcpUser) mcpUser.value = "support-lead@acme-bank.com";
           if (mcpRole) mcpRole.value = "support-agent";
           if (mcpTool) mcpTool.value = "search_kb";
           if (mcpPoison) mcpPoison.checked = false;
+        } else if (p === "intersection") {
+          if (mcpUser) mcpUser.value = "intern@acme-bank.com";
+          if (mcpRole) mcpRole.value = "finance-admin";
+          if (mcpTool) mcpTool.value = "wire_transfer";
+          if (mcpPoison) mcpPoison.checked = false;
         } else if (p === "forbidden") {
+          if (mcpUser) mcpUser.value = "support-lead@acme-bank.com";
           if (mcpRole) mcpRole.value = "support-agent";
           if (mcpTool) mcpTool.value = "drop_production_db";
           if (mcpPoison) mcpPoison.checked = false;
         } else if (p === "poisoned") {
+          if (mcpUser) mcpUser.value = "support-lead@acme-bank.com";
           if (mcpRole) mcpRole.value = "support-agent";
           if (mcpTool) mcpTool.value = "search_kb";
           if (mcpPoison) mcpPoison.checked = true;
         } else if (p === "untrusted") {
+          if (mcpUser) mcpUser.value = "support-lead@acme-bank.com";
           if (mcpRole) mcpRole.value = "untrusted-shadow";
           if (mcpTool) mcpTool.value = "search_kb";
           if (mcpPoison) mcpPoison.checked = false;
@@ -2224,7 +2238,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const hTool = document.getElementById("hero-t6-tool");
         const hToolSub = document.getElementById("hero-t6-tool-sub");
         if (hTool && mcpTool) hTool.textContent = mcpTool.value;
-        if (hToolSub && mcpRole) hToolSub.textContent = `Role: ${mcpRole.value}`;
+        if (hToolSub && mcpUser && mcpRole) hToolSub.textContent = `${mcpUser.value} via ${mcpRole.value}`;
       });
     });
 
@@ -2236,14 +2250,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
         const statusEl = document.getElementById("mcp-status");
         const pipeBadge = document.getElementById("t6-pipe-status");
         if (pipeBadge) pipeBadge.textContent = "RUNNING";
-        if (statusEl) statusEl.textContent = "Verifying SPIFFE JWT-SVID & executing MCP call through Apigee X...";
+        if (statusEl) statusEl.textContent = "Verifying RFC 8693 Delegation JWT (User ∩ SPIFFE Agent) inside Apigee X...";
         try {
+          const userPrincipal = mcpUser ? mcpUser.value : "support-lead@acme-bank.com";
           const role = mcpRole ? mcpRole.value : "support-agent";
           const spiffeInfo = spiffeMap[role] || spiffeMap["support-agent"];
           const resp = await apiFetch("/api/mcp/execute", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
+              user_principal: userPrincipal,
               agent_role: role,
               spiffe_id: spiffeInfo.uri,
               tool_name: mcpTool ? mcpTool.value.trim() : "search_kb",
@@ -2256,6 +2272,8 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           const blocked = Boolean(data.blocked);
           const isSpiffeReject = data.http_status_code === 401;
           const isRbacBlock = data.http_status_code === 403;
+          const rawErrStr = JSON.stringify(data.apigee_response || {});
+          const isIntersection = isRbacBlock && rawErrStr.indexOf("PERMISSION_INTERSECTION") !== -1;
           setNodeState("t6-node-agent", isSpiffeReject ? "state-alert" : "state-active", "t6-sub-agent", isSpiffeReject ? "SPIFFE 401" : role);
           setEdgeState("t6-edge-1", isSpiffeReject || isRbacBlock ? "edge-alert" : "edge-active");
           if (isSpiffeReject) {
@@ -2263,16 +2281,16 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
             setNodeState("t6-node-armor", "state-bypass", "t6-sub-armor", "Skipped");
             setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Never called");
           } else if (isRbacBlock) {
-            setNodeState("t6-node-rbac", "state-alert", "t6-sub-rbac", "BLOCKED 403");
+            setNodeState("t6-node-rbac", "state-alert", "t6-sub-rbac", isIntersection ? "USER∩AGENT 403" : "BLOCKED 403");
             setNodeState("t6-node-armor", "state-bypass", "t6-sub-armor", "Skipped");
             setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Never called");
           } else if (blocked) {
-            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "SPIFFE + RBAC OK");
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "User∩Agent OK");
             setEdgeState("t6-edge-2", "edge-alert");
             setNodeState("t6-node-armor", "state-alert", "t6-sub-armor", `BLOCKED ${data.http_status_code}`);
             setNodeState("t6-node-llm", "state-bypass", "t6-sub-llm", "Injection stopped");
           } else {
-            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "SPIFFE + RBAC OK");
+            setNodeState("t6-node-rbac", "state-savings", "t6-sub-rbac", "User∩Agent OK");
             setEdgeState("t6-edge-2", "edge-savings");
             setNodeState("t6-node-armor", "state-savings", "t6-sub-armor", "Clean");
             setEdgeState("t6-edge-3", "edge-savings");
@@ -2281,7 +2299,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
 
           const spiffePill = document.getElementById("mcp-spiffe-status-pill");
           if (spiffePill) {
-            spiffePill.textContent = isSpiffeReject ? "✗ SPIFFE Rejected (401)" : "✓ SPIFFE Verified";
+            spiffePill.textContent = isSpiffeReject ? "✗ SPIFFE Rejected (401)" : "✓ RFC 8693 + SPIFFE Verified";
             spiffePill.className = `soft-pill ${isSpiffeReject ? "pill-red" : "pill-green"}`;
           }
 
@@ -2292,13 +2310,13 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           const hl = document.getElementById("hero-t6-lat");
           const hls = document.getElementById("hero-t6-lat-sub");
           if (hv) {
-            hv.textContent = isSpiffeReject ? "401 SPIFFE" : isRbacBlock ? "403 BLOCKED" : blocked ? "ARMOR BLOCK" : "ALLOWED";
+            hv.textContent = isSpiffeReject ? "401 SPIFFE" : isIntersection ? "403 USER∩AGENT" : isRbacBlock ? "403 BLOCKED" : blocked ? "ARMOR BLOCK" : "ALLOWED";
             hv.className = `kpi-val ${blocked ? "tone-alert" : "tone-savings"}`;
             popMetric(hv);
           }
-          if (hvs) hvs.textContent = isSpiffeReject ? "Untrusted SPIFFE trust domain rejected at edge" : isRbacBlock ? "Blocked by Apigee X MCP RBAC Allowlist" : blocked ? "Indirect prompt injection caught by Model Armor" : "SPIFFE verified, tool authorized & scanned clean";
+          if (hvs) hvs.textContent = isSpiffeReject ? "Untrusted SPIFFE trust domain rejected at edge" : isIntersection ? `Blocked privilege escalation: ${userPrincipal} lacks tool scope` : isRbacBlock ? "Blocked by Apigee X MCP RBAC Allowlist" : blocked ? "Indirect prompt injection caught by Model Armor" : "User ∩ Agent verified & scanned clean";
           if (ht && mcpTool) ht.textContent = mcpTool.value;
-          if (hts) hts.textContent = data.spiffe_id || `Role: ${role}`;
+          if (hts) hts.textContent = `${userPrincipal} via ${role}`;
           if (hl) {
             hl.textContent = `${fmtInt(data.latency_ms)} ms`;
             popMetric(hl);
@@ -2307,7 +2325,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           if (pipeBadge) pipeBadge.textContent = blocked ? `HTTP ${data.http_status_code}` : "HTTP 200";
           if (statusEl) statusEl.textContent = `Completed at ${data.timestamp_utc}`;
           document.getElementById("mcp-req-box").textContent = JSON.stringify(
-            { spiffe_svid_claims: data.spiffe_jwt_claims, jsonrpc: data.jsonrpc_request },
+            { rfc8693_delegation_jwt: data.spiffe_jwt_claims, jsonrpc: data.jsonrpc_request },
             null,
             2
           );
