@@ -147,12 +147,12 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
         "id": "scenario-3-rag-compression",
         "step_number": 3,
         "title": "3. Verbose RAG Compliance Audit (LLMLingua-2 Compression)",
-        "subtitle": "Prunes redundant legal boilerplate & irrelevant retrieved chunks before LLM inference",
-        "optimization_focus": "LLMLingua-2 Coarse-to-Fine Prompt Compression + Flash Routing",
+        "subtitle": "Compresses a ~3,000-token top-6 RAG retrieval & 5 few-shots before LLM inference",
+        "optimization_focus": "LLMLingua-2 Coarse-to-Fine Prompt Compression (Input Token Reduction)",
         "recommended_toggles": {
             "semantic_cache": False,
             "prompt_compression": True,
-            "model_routing": True,
+            "model_routing": False,
             "context_pruning": False,
         },
         "session_id": "demo-rag-compliance",
@@ -163,45 +163,114 @@ PRESET_SCENARIOS: List[Dict[str, Any]] = [
             "regions, encryption standards, and retention numbers."
         ),
         "rag_context": (
-            "DOCUMENT 1 (ENTERPRISE CLOUD DATA SOVEREIGNTY STANDARD v4.2 - SECTION 9.1): "
-            "In accordance with our global enterprise data governance framework and APRA Prudential "
-            "Standard CPS 234 (Information Security), it is strictly mandated that all Customer "
-            "Personally Identifiable Information (PII), core banking ledger snapshots, and Payment "
-            "Card Industry Data Security Standard (PCI-DSS v4.0) workloads deployed on Google Cloud "
-            "Platform must reside exclusively within the australia-southeast1 (Sydney) or "
+            "DOCUMENT 1 (ENTERPRISE CLOUD DATA SOVEREIGNTY STANDARD v4.2 — PREAMBLE & SECTION 9.1): "
+            "This Enterprise Cloud Data Sovereignty and Information Security Standard (Document Reference "
+            "GOV-SEC-2026-4.2, reviewed annually by the Group Risk, Compliance, and Architecture Committee "
+            "and approved by the Chief Information Security Officer and Chief Risk Officer) establishes "
+            "the mandatory baseline controls, governance responsibilities, and operational guardrails for "
+            "all business units, subsidiaries, joint ventures, and third-party managed service providers "
+            "operating production, pre-production, disaster recovery, or analytical workloads across "
+            "public cloud infrastructure. In accordance with our global enterprise data governance "
+            "framework and APRA Prudential Standard CPS 234 (Information Security), it is strictly mandated "
+            "that all Customer Personally Identifiable Information (PII), core banking ledger snapshots, "
+            "and Payment Card Industry Data Security Standard (PCI-DSS v4.0) workloads deployed on Google "
+            "Cloud Platform must reside exclusively within the australia-southeast1 (Sydney) or "
             "australia-southeast2 (Melbourne) regions. Cross-border replication of unmasked customer "
-            "records to non-Australian regions is strictly prohibited under Australian Privacy "
-            "Principle 8 (APP 8). Furthermore, all persistent disks, Cloud SQL instances, and BigQuery "
-            "datasets storing Tier-1 regulated data must utilize Customer-Managed Encryption Keys "
-            "(CMEK) hosted in Cloud KMS with a mandatory 90-day automatic key rotation schedule and "
-            "365-day immutable Cloud Audit Log retention.\n\n"
-            "DOCUMENT 2 (LEGACY ARCHIVE DUPLICATE - 2024 COMPLIANCE BULLETIN): "
-            "As previously communicated in the quarterly compliance bulletin, in accordance with our "
-            "global enterprise data governance framework, it is strictly required that all Customer "
-            "Personally Identifiable Information (PII) and Payment Card Industry (PCI-DSS) workloads "
-            "deployed on Google Cloud Platform must reside exclusively within the australia-southeast1 "
-            "(Sydney) or australia-southeast2 (Melbourne) regions.\n\n"
-            "DOCUMENT 3 (RETRIEVED VECTOR NOISE - SYDNEY FACILITIES MEMO #882): "
-            "Please be advised that the Level 14 commercial espresso machine and chilled sparkling "
-            "water tap in the Sydney Barangaroo headquarters will undergo scheduled quarterly "
-            "descaling maintenance this Friday between 14:00 and 16:00 AEST. Staff and visiting "
-            "contractors are encouraged to utilize the Level 12 client pantry during this window."
+            "records to non-Australian regions is strictly prohibited under Australian Privacy Principle 8 "
+            "(APP 8) unless a formal cross-border data transfer impact assessment has been counter-signed "
+            "by General Counsel and logged in the Enterprise Risk Register. Furthermore, all persistent "
+            "disks, Cloud SQL instances, Cloud Spanner databases, and BigQuery datasets storing Tier-1 "
+            "regulated data must utilize Customer-Managed Encryption Keys (CMEK) hosted in Cloud KMS "
+            "with a mandatory 90-day automatic key rotation schedule and 365-day immutable Cloud Audit "
+            "Log retention stored in a locked Cloud Storage bucket with Organization Policy enforcement.\n\n"
+            "DOCUMENT 2 (LEGACY ARCHIVE DUPLICATE — 2024 QUARTERLY COMPLIANCE BULLETIN #19): "
+            "As previously communicated in the quarterly enterprise risk and compliance bulletin distributed "
+            "to all engineering chapter leads, cloud platform architects, and product owners across the "
+            "Retail Banking, Institutional Markets, and Wealth Management divisions, in accordance with "
+            "our global enterprise data governance framework and standing regulatory obligations, it is "
+            "strictly required that all Customer Personally Identifiable Information (PII) and Payment "
+            "Card Industry (PCI-DSS) workloads deployed on Google Cloud Platform must reside exclusively "
+            "within the australia-southeast1 (Sydney) or australia-southeast2 (Melbourne) regions. "
+            "Division heads are reminded to complete their semi-annual attestation checklists inside the "
+            "ServiceNow GRC portal prior to the final Friday of each calendar quarter and to ensure that "
+            "newly onboarded contractors complete Module 1 through Module 4 of the mandatory Cloud "
+            "Governance Induction curriculum within fourteen business days of receiving corporate credentials.\n\n"
+            "DOCUMENT 3 (RETRIEVED VECTOR NOISE — ENTERPRISE VENDOR PROCUREMENT POLICY v3.8): "
+            "All software-as-a-service subscriptions, professional services statements of work, and "
+            "third-party cloud marketplace commitments exceeding AUD 50,000 in annual contract value must "
+            "undergo competitive three-bid procurement review coordinated by Strategic Sourcing. Vendors "
+            "must submit audited SOC 2 Type II or ISO 27001:2022 certificates, modern slavery compliance "
+            "declarations, and public liability insurance certificates showing minimum coverage of AUD 20 "
+            "million per occurrence. Standard payment terms are Net 45 days from receipt of a valid tax "
+            "invoice containing an approved purchase order number issued through Coupa. Invoices lacking "
+            "a valid cost center code or executive sponsor sign-off will be automatically returned to "
+            "the supplier accounts receivable team for correction and resubmission.\n\n"
+            "DOCUMENT 4 (RETRIEVED VECTOR NOISE — SYDNEY BARANGAROO FACILITIES MEMO #882): "
+            "Please be advised that the Level 14 commercial espresso machine, automated milk steamer, "
+            "and chilled sparkling water tap in the Sydney Barangaroo headquarters will undergo scheduled "
+            "quarterly descaling and preventative filter replacement maintenance this Friday between "
+            "14:00 and 16:00 AEST. Staff and visiting contractors are encouraged to utilize the Level 12 "
+            "client pantry or the Level 10 collaboration hub during this two-hour maintenance window. "
+            "Additionally, please remember that all conference rooms booked via Google Calendar that remain "
+            "unoccupied for more than fifteen minutes past the scheduled start time will be automatically "
+            "released by the room occupancy sensors. End-of-trip bicycle locker renewals for the upcoming "
+            "financial year open next Monday at 09:00 AEST via the Workplace Experience intranet portal.\n\n"
+            "DOCUMENT 5 (RETRIEVED VECTOR NOISE — APAC CLOUD FINOPS & SUSTAINABILITY NEWSLETTER Q3): "
+            "Welcome to the Q3 Cloud FinOps and Green Engineering update! Over the past ninety days, "
+            "engineering squads across Sydney, Melbourne, Auckland, and Singapore successfully migrated "
+            "over 420 legacy virtual machines to right-sized Compute Engine N2D and C3D families and "
+            "adopted Committed Use Discounts covering 74% of steady-state compute spend. Our quarterly "
+            "Carbon Footprint dashboard shows a 19% reduction in estimated gross Scope 2 emissions "
+            "attributable to batch analytics workloads scheduled during off-peak renewable grid windows. "
+            "Congratulations to the Core Payments Platform squad for winning the Q3 FinOps Champion "
+            "trophy after decommissioning 180 orphaned persistent disk snapshots and 64 idle staging "
+            "load balancers. Submit your team's optimization wins by the 15th of next month to be "
+            "featured in the upcoming All-Hands engineering showcase.\n\n"
+            "DOCUMENT 6 (RETRIEVED VECTOR NOISE — ARCHIVED DR TABLETOP NOTES — MARCH 2025): "
+            "During the March 2025 regional failover tabletop simulation, participants from Application "
+            "Engineering, Network Operations, Database Reliability, and Corporate Communications walked "
+            "through a hypothetical fiber cut affecting primary interconnect circuits in Eastern Sydney. "
+            "Action items recorded during the retrospective included updating Slack incident channel "
+            "naming conventions, refreshing laminated emergency contact cards in the operations war room, "
+            "confirming catering vendor delivery procedures for extended bridge sessions exceeding six "
+            "hours, and verifying that backup satellite phones in the Melbourne secondary office are "
+            "charged and tested on the first Tuesday of every calendar month.\n\n"
+            "DOCUMENT 7 (RETRIEVED VECTOR NOISE — TRAVEL & EXPENSE REIMBURSEMENT GUIDE v2.4): "
+            "Domestic air travel between Sydney, Melbourne, and Brisbane should be booked in economy "
+            "class at least fourteen calendar days prior to departure using the corporate Concur booking "
+            "portal. Airport taxi and rideshare receipts under AUD 75 do not require itemized manager "
+            "pre-approval provided the trip purpose is documented in the expense line description. "
+            "Daily meal allowances for domestic business travel are capped at AUD 110 per day excluding "
+            "alcoholic beverages, and corporate Amex statements must be reconciled within thirty days "
+            "of the monthly billing cycle close to avoid automated card suspension reminders.\n\n"
+            "DOCUMENT 8 (RETRIEVED VECTOR NOISE — ENGINEERING ONBOARDING & LAPTOP REFRESH FAQ): "
+            "Full-time software engineers and cloud architects are eligible for a standard corporate "
+            "laptop hardware refresh every thirty-six months. Supported configurations include 14-inch "
+            "and 16-inch workstations pre-imaged with corporate endpoint detection, Chrome Enterprise "
+            "browser management, and hardware security keys. Before returning a legacy device to the "
+            "IT Asset Management depot, employees must verify that local Git branches are pushed to "
+            "approved enterprise repositories, confirm Google Drive desktop sync completion, and remove "
+            "any personal stickers or peripheral dongles attached to the chassis."
         ),
         "few_shot_examples": [
             "Example Q: Where must Tier-1 regulated data keys be managed?\nExample A: In Cloud KMS using Customer-Managed Encryption Keys (CMEK) with a 90-day rotation schedule.",
             "Example Q: What is the office Wi-Fi password for guests?\nExample A: Guest Wi-Fi credentials are provisioned at the Barangaroo ground floor concierge desk.",
+            "Example Q: How many days in advance should domestic flights be booked?\nExample A: Domestic economy flights should be booked at least 14 calendar days ahead via Concur.",
+            "Example Q: What is the daily domestic meal allowance?\nExample A: Domestic meal allowances are capped at AUD 110 per day excluding alcohol.",
+            "Example Q: How often are engineering laptops refreshed?\nExample A: Standard corporate workstations are eligible for hardware refresh every 36 months.",
         ],
         "conversation_history": [],
         "user_prompt": (
             "Which GCP regions are approved for Customer PII and PCI-DSS workloads, what encryption "
             "key policy applies, and how long must audit logs be retained?"
         ),
-        "compression_target_ratio": 0.38,
+        "compression_target_ratio": 0.30,
         "similarity_threshold": 0.85,
         "presenter_note": (
-            "Open the 'Prompt Compression Diff' tab below after running: LLMLingua-2 strips the irrelevant "
-            "few-shot example and prunes low-information tokens across the 3 RAG documents by ~55%, while "
-            "preserving every compliance entity (australia-southeast1/2, APP 8, CMEK 90-day, 365-day logs)."
+            "Try running with ONLY Prompt Compression enabled: LLMLingua-2 strips the 4 irrelevant "
+            "few-shot examples and compresses ~2,500+ tokens of verbose RAG policy boilerplate & "
+            "retrieved vector noise down by ~65% while preserving every compliance entity "
+            "(australia-southeast1/2, APP 8, CMEK 90-day, 365-day logs)."
         ),
     },
     {
