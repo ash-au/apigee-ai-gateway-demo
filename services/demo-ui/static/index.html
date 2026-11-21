@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=12.3" />
+  <link rel="stylesheet" href="assets/styles.css?v=12.4" />
 </head>
 <body>
   <!-- ====================================================================
@@ -151,6 +151,19 @@
             <div class="field-group"><label class="field-label" for="tg-quota-id"><span>Tenant Quota ID</span></label><input id="tg-quota-id" class="field-input" type="text" value="tenant-finops-demo" /></div>
             <div class="field-group"><label class="field-label" for="tg-prompt"><span>Test Prompt</span></label><textarea id="tg-prompt" class="field-textarea" rows="3"></textarea></div>
             <button type="button" id="btn-run-tg" class="btn-run-primary">Test Token Quota Policy &rarr;</button>
+          </div>
+
+          <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border-subtle);display:flex;flex-direction:column;gap:8px;">
+            <div class="gc-card-head" style="margin-bottom:0;">
+              <h3 class="gc-card-title">Agent Loop Circuit Breaker</h3>
+              <div class="preset-btn-group" role="group" aria-label="Loop Breaker Mode">
+                <button type="button" id="btn-loop-mode-enforce" class="preset-btn active">Enforce</button>
+                <button type="button" id="btn-loop-mode-observe" class="preset-btn">Observe</button>
+              </div>
+            </div>
+            <span class="kpi-sub">Session-scoped intent hash prevents false positives on legitimate multi-step agents.</span>
+            <button type="button" id="btn-run-loop-runaway" class="btn-secondary" style="width:100%;">Simulate Runaway Loop (6 Turns) &rarr;</button>
+            <button type="button" id="btn-run-loop-legit" class="btn-secondary" style="width:100%;">Legitimate Multi-Step Agent (5 Turns) &rarr;</button>
           </div>
         </div>
 
@@ -472,7 +485,16 @@
         </div>
 
         <div class="exec-body">
-          <div class="status-banner"><span id="tg-status">Ready to test native Apigee X token governance.</span></div>
+          <div class="status-banner"><span id="tg-status">Ready to test native Apigee X token governance &amp; runaway agent loop breaker.</span></div>
+
+          <div id="loop-ticker-card" class="loop-ticker-card" style="display:none;">
+            <div class="compare-box-head">
+              <h3 class="compare-box-title">Live Agent Loop Circuit Breaker (Apigee X Cache)</h3>
+              <span id="loop-summary-pill" class="soft-pill pill-idle">IDLE</span>
+            </div>
+            <div id="loop-ticker-list" class="loop-ticker-list"></div>
+          </div>
+
           <div>
             <div class="viz-row-head" style="margin-bottom:4px;"><span id="t2-quota-used-label">Quota Used: 0 tokens</span><span id="t2-quota-pct" class="viz-val">0%</span><span id="t2-quota-rem-label">Remaining: —</span></div>
             <div id="t2-quota-progressbar" class="viz-track" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><div id="t2-quota-fill" class="viz-fill viz-fill-blue" style="width:0%"></div></div>
@@ -871,6 +893,6 @@
     </div>
   </aside>
 
-  <script src="assets/app.js?v=12.3"></script>
+  <script src="assets/app.js?v=12.4"></script>
 </body>
 </html>

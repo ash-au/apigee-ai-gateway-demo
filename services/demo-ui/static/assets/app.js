@@ -2657,6 +2657,174 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
     });
   }
 
+  function initAgentLoopBreaker() {
+    const btnRunaway = document.getElementById("btn-run-loop-runaway");
+    const btnLegit = document.getElementById("btn-run-loop-legit");
+    const btnEnforce = document.getElementById("btn-loop-mode-enforce");
+    const btnObserve = document.getElementById("btn-loop-mode-observe");
+    const card = document.getElementById("loop-ticker-card");
+    const listEl = document.getElementById("loop-ticker-list");
+    const summaryPill = document.getElementById("loop-summary-pill");
+    const statusEl = document.getElementById("tg-status");
+    if (!btnRunaway || !btnLegit || !listEl) return;
+
+    let loopMode = "enforce";
+    if (btnEnforce && btnObserve) {
+      btnEnforce.addEventListener("click", () => {
+        loopMode = "enforce";
+        btnEnforce.classList.add("active");
+        btnObserve.classList.remove("active");
+      });
+      btnObserve.addEventListener("click", () => {
+        loopMode = "observe";
+        btnObserve.classList.add("active");
+        btnEnforce.classList.remove("active");
+      });
+    }
+
+    async function runBurst(kind) {
+      btnRunaway.disabled = true;
+      btnLegit.disabled = true;
+      if (card) card.style.display = "flex";
+      listEl.innerHTML = "";
+      setPipeRunning("t2-pipeline-svg", true);
+      resetPipeSvg("t2-pipeline-svg");
+
+      const sessId = `sess-${kind}-${Date.now().toString(36)}`;
+      const turns =
+        kind === "runaway"
+          ? [
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+              { tool: "retry_billing_query", prompt: "Retry failed billing query for invoice #99412" },
+            ]
+          : [
+              { tool: "plan_research", prompt: "Step 1: Outline Q3 cloud cost drivers" },
+              { tool: "fetch_billing_docs", prompt: "Step 2: Retrieve Vertex AI token invoice" },
+              { tool: "analyze_anomalies", prompt: "Step 3: Identify top 3 token spikes" },
+              { tool: "draft_summary", prompt: "Step 4: Draft executive FinOps summary" },
+              { tool: "finalize_report", prompt: "Step 5: Format final recommendations" },
+            ];
+
+      if (summaryPill) {
+        summaryPill.textContent = `RUNNING (${loopMode.toUpperCase()})`;
+        summaryPill.className = "soft-pill pill-blue";
+      }
+      if (statusEl) {
+        statusEl.textContent =
+          kind === "runaway"
+            ? `Firing 6-turn runaway loop (${sessId}) in ${loopMode.toUpperCase()} mode...`
+            : `Firing 5-turn legitimate multi-step agent (${sessId}) — verifying 0% false positives...`;
+      }
+
+      let blockedCount = 0;
+      let wouldBlockCount = 0;
+      let allowedCount = 0;
+
+      try {
+        for (let i = 0; i < turns.length; i++) {
+          const t = turns[i];
+          const resp = await apiFetch("/api/agent-loop/turn", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              session_id: sessId,
+              tool_name: t.tool,
+              prompt: t.prompt,
+              mode: loopMode,
+              max_repeats: 3,
+            }),
+          });
+          const data = await resp.json();
+          const b = (data.apigee_response && data.apigee_response.apigee_loop_breaker) || {};
+          const tripped = Boolean(data.tripped);
+          const verdict = tripped ? "TRIPPED" : b.verdict || "ALLOW";
+
+          let pillCls = "pill-green";
+          let pillText = "200 OK";
+          if (tripped) {
+            blockedCount += 1;
+            pillCls = "pill-red";
+            pillText = "429 CIRCUIT OPEN (0 tok)";
+          } else if (verdict === "OBSERVE_WOULD_BLOCK") {
+            wouldBlockCount += 1;
+            allowedCount += 1;
+            pillCls = "pill-amber";
+            pillText = "200 OBSERVE (WOULD BLOCK)";
+          } else if (verdict === "WARN") {
+            allowedCount += 1;
+            pillCls = "pill-amber";
+            pillText = "200 WARN (REPEAT 2/3)";
+          } else {
+            allowedCount += 1;
+          }
+
+          const row = document.createElement("div");
+          row.className = "loop-turn-row";
+          row.innerHTML = `
+            <div class="loop-turn-left">
+              <span class="loop-turn-step">Turn ${i + 1}</span>
+              <span class="loop-turn-desc">${escapeHtml(t.tool)} — ${escapeHtml(t.prompt)}</span>
+            </div>
+            <div class="loop-turn-right">
+              <span class="kpi-sub">${fmtInt(data.latency_ms)} ms</span>
+              <span class="soft-pill ${pillCls}">${pillText}</span>
+            </div>
+          `;
+          listEl.appendChild(row);
+        }
+
+        const hv = document.getElementById("hero-t2-verdict");
+        const hvs = document.getElementById("hero-t2-verdict-sub");
+        const hc = document.getElementById("hero-t2-cost");
+        const hcs = document.getElementById("hero-t2-cost-sub");
+
+        if (blockedCount > 0) {
+          setNodeState("t2-node-ptl", "state-alert", "t2-sub-ptl", `TRIPPED (${blockedCount}x 429)`);
+          setNodeState("t2-node-llm", "state-bypass", "t2-sub-llm", "Protected (0 tok)");
+          if (summaryPill) {
+            summaryPill.textContent = `TRIPPED AT TURN 3 · ${blockedCount} TURNS STOPPED`;
+            summaryPill.className = "soft-pill pill-red";
+          }
+          if (hv) { hv.textContent = "429 TRIPPED"; hv.className = "kpi-val tone-alert"; popMetric(hv); }
+          if (hvs) hvs.textContent = `Isolated session ${sessId} after 3 identical repeats`;
+          if (hc) { hc.textContent = "$0.0000"; popMetric(hc); }
+          if (hcs) hcs.textContent = `${blockedCount} runaway turns short-circuited at edge`;
+        } else if (wouldBlockCount > 0) {
+          setNodeState("t2-node-ptl", "state-amber", "t2-sub-ptl", `OBSERVE (${wouldBlockCount} flagged)`);
+          if (summaryPill) {
+            summaryPill.textContent = `OBSERVE MODE · ${wouldBlockCount} WOULD-BLOCK LOGGED`;
+            summaryPill.className = "soft-pill pill-amber";
+          }
+          if (hv) { hv.textContent = "OBSERVE"; hv.className = "kpi-val tone-blue"; popMetric(hv); }
+          if (hvs) hvs.textContent = `Logged X-Apigee-Would-Block without interrupting agent`;
+        } else {
+          setNodeState("t2-node-ptl", "state-savings", "t2-sub-ptl", "5/5 Distinct OK");
+          setNodeState("t2-node-llm", "state-savings", "t2-sub-llm", "All 5 Executed");
+          if (summaryPill) {
+            summaryPill.textContent = `5/5 ALLOWED · 0% FALSE POSITIVES`;
+            summaryPill.className = "soft-pill pill-green";
+          }
+          if (hv) { hv.textContent = "5/5 ALLOWED"; hv.className = "kpi-val tone-savings"; popMetric(hv); }
+          if (hvs) hvs.textContent = "High intent diversity — legitimate multi-step agent untouched";
+        }
+        if (statusEl) statusEl.textContent = `Completed ${turns.length}-turn burst (${allowedCount} allowed, ${blockedCount} blocked).`;
+      } catch (e) {
+        if (statusEl) statusEl.textContent = `Loop burst error: ${e.message}`;
+      } finally {
+        setPipeRunning("t2-pipeline-svg", false);
+        btnRunaway.disabled = false;
+        btnLegit.disabled = false;
+      }
+    }
+
+    btnRunaway.addEventListener("click", () => runBurst("runaway"));
+    btnLegit.addEventListener("click", () => runBurst("legit"));
+  }
+
   wireTablistKeyboardNav();
   initThemeSwitcher();
   initKeynoteDrawer();
@@ -2665,6 +2833,7 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
   initCopyCurl();
   initNewEnterpriseTabs();
   initGuidedTour();
+  initAgentLoopBreaker();
   syncPolicySwitches();
   const elT5Slider = document.getElementById("t5-scale-slider");
   if (elT5Slider) elT5Slider.addEventListener("input", updateTab5AnnualROI);

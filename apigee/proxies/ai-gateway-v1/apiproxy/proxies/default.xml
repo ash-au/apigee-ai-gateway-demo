@@ -29,7 +29,7 @@
             <!-- Native Apigee AI Policies Request Preparation (/policies/** excluding MCP/Resilient/PII custom flows) -->
             <Step>
                 <Name>JS-PrepareNativePolicyRequest</Name>
-                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**") and (not (proxy.pathsuffix MatchesPath "/policies/mcp-governance")) and (not (proxy.pathsuffix MatchesPath "/policies/resilient-chat")) and (not (proxy.pathsuffix MatchesPath "/policies/pii-vault"))</Condition>
+                <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/**") and (not (proxy.pathsuffix MatchesPath "/policies/mcp-governance")) and (not (proxy.pathsuffix MatchesPath "/policies/resilient-chat")) and (not (proxy.pathsuffix MatchesPath "/policies/pii-vault")) and (not (proxy.pathsuffix MatchesPath "/policies/agent-loop"))</Condition>
             </Step>
             <!-- Tab 5: Pure Apigee X Native System 1 Pre-Flight Dynamic Routing (/system1-routing, Zero Cloud Run) -->
             <Step>
@@ -224,6 +224,33 @@
                 </Step>
             </Response>
             <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/pii-vault")</Condition>
+        </Flow>
+        <!-- Tab 2b: Native Apigee X Runaway Agent Loop Circuit Breaker (LookupCache + PopulateCache + RaiseFault 429) -->
+        <Flow name="Policy-Agent-Loop-Breaker">
+            <Request>
+                <Step>
+                    <Name>JS-LoopPrepareKey</Name>
+                </Step>
+                <Step>
+                    <Name>LC-LookupLoopState</Name>
+                </Step>
+                <Step>
+                    <Name>JS-LoopEvaluateBreaker</Name>
+                </Step>
+                <Step>
+                    <Name>PC-SaveLoopState</Name>
+                </Step>
+                <Step>
+                    <Name>RF-AgentLoopTripped</Name>
+                    <Condition>ai.loop_tripped = "true"</Condition>
+                </Step>
+            </Request>
+            <Response>
+                <Step>
+                    <Name>JS-LoopBuildResponse</Name>
+                </Step>
+            </Response>
+            <Condition>(request.verb = "POST") and (proxy.pathsuffix MatchesPath "/policies/agent-loop")</Condition>
         </Flow>
     </Flows>
     <PostFlow name="PostFlow">

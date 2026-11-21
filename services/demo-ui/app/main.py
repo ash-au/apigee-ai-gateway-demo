@@ -1121,6 +1121,47 @@ async def execute_pii_vault(req: PiiVaultRequest) -> Dict[str, Any]:
     }
 
 
+class AgentLoopTurnRequest(BaseModel):
+    session_id: str = "sess-loop-demo"
+    spiffe_id: str = "spiffe://apac-cs-5g-demo5.svc.id.goog/ns/support/sa/tier1-support-agent"
+    tool_name: str = "retry_billing_query"
+    prompt: str = "Retry failed billing query for invoice #99412"
+    mode: str = "enforce"
+    max_repeats: int = 3
+
+
+@app.post("/api/agent-loop/turn")
+async def execute_agent_loop_turn(req: AgentLoopTurnRequest) -> Dict[str, Any]:
+    target_url = f"{APIGEE_GATEWAY_URL}/policies/agent-loop"
+    payload = {
+        "session_id": req.session_id,
+        "spiffe_id": req.spiffe_id,
+        "tool_name": req.tool_name,
+        "prompt": req.prompt,
+    }
+    headers = {
+        "Content-Type": "application/json",
+        "X-Loop-Mode": "observe" if req.mode.lower() == "observe" else "enforce",
+        "X-Loop-Max-Repeats": str(max(2, min(10, int(req.max_repeats)))),
+    }
+    t0 = time.perf_counter()
+    async with httpx.AsyncClient(timeout=45.0, verify=False) as client:
+        resp = await client.post(target_url, headers=headers, json=payload)
+    latency_ms = round((time.perf_counter() - t0) * 1000, 1)
+    try:
+        data = resp.json()
+    except Exception:
+        data = {"raw_body": resp.text[:1000]}
+    return {
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(),
+        "http_status_code": resp.status_code,
+        "tripped": resp.status_code == 429,
+        "latency_ms": latency_ms,
+        "apigee_response": data,
+        "apigee_headers": {k: v for k, v in resp.headers.items() if k.lower().startswith("x-apigee") or k.lower() == "retry-after"},
+    }
+
+
 STATIC_DIR = Path(__file__).resolve().parent.parent / "static"
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets"), check_dir=False), name="assets")

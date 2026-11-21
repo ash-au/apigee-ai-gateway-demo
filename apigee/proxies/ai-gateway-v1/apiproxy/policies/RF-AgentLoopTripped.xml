@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-AgentLoopTripped">
+    <DisplayName>RF-AgentLoopTripped</DisplayName>
+    <FaultResponse>
+        <Set>
+            <Headers>
+                <Header name="Retry-After">60</Header>
+                <Header name="X-Apigee-Breaker-State">OPEN</Header>
+                <Header name="X-Apigee-Fault-Name">AGENT_LOOP_CIRCUIT_OPEN</Header>
+            </Headers>
+            <Payload contentType="application/json">{
+  "error": {
+    "code": 429,
+    "fault_name": "AGENT_LOOP_CIRCUIT_OPEN",
+    "action": "REQUIRE_HUMAN_APPROVAL",
+    "retry_after_seconds": 60,
+    "message": "Apigee X isolated runaway agent session '{ai.loop_session_id}' after {ai.loop_repeat_count} identical turns (sig={ai.loop_sig_hash}). Other healthy sessions remain unaffected.",
+    "details": {
+      "enforced_by": "Apigee X Native Cache + Circuit Breaker (ai-gateway-v1)",
+      "session_id": "{ai.loop_session_id}",
+      "spiffe_id": "{ai.loop_spiffe_id}",
+      "tool_name": "{ai.loop_tool_name}",
+      "signature_hash": "{ai.loop_sig_hash}",
+      "repeat_count": {ai.loop_repeat_count},
+      "max_repeats": {ai.loop_max_repeats},
+      "breaker_state": "OPEN",
+      "vertex_ai_tokens_billed": 0
+    }
+  }
+}</Payload>
+            <StatusCode>429</StatusCode>
+            <ReasonPhrase>Too Many Requests</ReasonPhrase>
+        </Set>
+    </FaultResponse>
+    <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>

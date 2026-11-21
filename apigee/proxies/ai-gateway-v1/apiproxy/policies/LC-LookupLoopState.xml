@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<LookupCache async="false" continueOnError="true" enabled="true" name="LC-LookupLoopState">
+    <DisplayName>LC-LookupLoopState</DisplayName>
+    <CacheKey>
+        <Prefix>agent_loop</Prefix>
+        <KeyFragment ref="ai.loop_cache_key"/>
+    </CacheKey>
+    <Scope>Exclusive</Scope>
+    <AssignTo>ai.loop_cached_count</AssignTo>
+</LookupCache>

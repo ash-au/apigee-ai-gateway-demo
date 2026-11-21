@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PopulateCache async="false" continueOnError="true" enabled="true" name="PC-SaveLoopState">
+    <DisplayName>PC-SaveLoopState</DisplayName>
+    <CacheKey>
+        <Prefix>agent_loop</Prefix>
+        <KeyFragment ref="ai.loop_cache_key"/>
+    </CacheKey>
+    <Scope>Exclusive</Scope>
+    <ExpirySettings>
+        <TimeoutInSec>120</TimeoutInSec>
+    </ExpirySettings>
+    <Source>ai.loop_repeat_count</Source>
+</PopulateCache>
