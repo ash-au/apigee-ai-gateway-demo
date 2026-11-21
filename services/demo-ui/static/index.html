@@ -15,7 +15,7 @@
       } catch (e) {}
     })();
   </script>
-  <link rel="stylesheet" href="assets/styles.css?v=12.2" />
+  <link rel="stylesheet" href="assets/styles.css?v=12.3" />
 </head>
 <body>
   <!-- ====================================================================
@@ -230,7 +230,9 @@
         <div id="left-ctrl-mcp" class="left-ctrl-panel" style="display:none;">
           <div id="mcp-scenario-list" class="scenario-chips" style="margin-bottom:12px;">
             <button type="button" class="scenario-item active" data-mcp-preset="safe" aria-pressed="true"><span class="scenario-item-title">Allowed: search_kb</span></button>
+            <button type="button" class="scenario-item" data-mcp-preset="cfo_support" aria-pressed="false"><span class="scenario-item-title">VP &rarr; Support Agent (403)</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="intersection" aria-pressed="false"><span class="scenario-item-title">Intern &rarr; Finance Agent (403)</span></button>
+            <button type="button" class="scenario-item" data-mcp-preset="cfo_finance" aria-pressed="false"><span class="scenario-item-title">VP &rarr; Finance Agent (200)</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="forbidden" aria-pressed="false"><span class="scenario-item-title">Rogue: drop_production_db</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="poisoned" aria-pressed="false"><span class="scenario-item-title">Poisoned Tool Output</span></button>
             <button type="button" class="scenario-item" data-mcp-preset="untrusted" aria-pressed="false"><span class="scenario-item-title">Shadow Agent (401 SPIFFE)</span></button>
@@ -238,12 +240,12 @@
 
           <div id="mcp-spiffe-card" class="spiffe-card" style="margin-bottom:12px;">
             <div class="spiffe-card-label">
-              <span>RFC 8693 Identity Provenance</span>
+              <span>RFC 8693 Identity Provenance (User &cap; Agent)</span>
               <span id="mcp-spiffe-trust-tag">Trusted Domain</span>
             </div>
             <span id="mcp-provenance-chain" class="spiffe-uri">sub: support-lead@acme-bank.com &rarr; act: tier1-support-agent</span>
             <span id="mcp-spiffe-uri" class="kpi-sub" style="word-break:break-all;">spiffe://apac-cs-5g-demo5.svc.id.goog/ns/support/sa/tier1-support-agent</span>
-            <span class="kpi-sub"><strong>Rule:</strong> Effective Access = Human Scope &cap; Agent Capabilities (prevents privilege escalation)</span>
+            <span class="kpi-sub" style="margin-top:4px;line-height:1.45;">Even if Alice is a Finance VP, a <strong>support-agent</strong> still can't call <code>wire_transfer</code>. And even if <strong>finance-agent</strong> can call <code>wire_transfer</code>, it gets blocked when acting on behalf of an intern (who lacks finance scope).</span>
           </div>
 
           <div class="field-stack">
@@ -869,6 +871,6 @@
     </div>
   </aside>
 
-  <script src="assets/app.js?v=12.2"></script>
+  <script src="assets/app.js?v=12.3"></script>
 </body>
 </html>

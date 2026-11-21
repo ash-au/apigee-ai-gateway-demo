@@ -2213,8 +2213,18 @@ Public Domain: 958897680.australia-southeast1-1019413155504.vdb.vertexai.goog</d
           if (mcpRole) mcpRole.value = "support-agent";
           if (mcpTool) mcpTool.value = "search_kb";
           if (mcpPoison) mcpPoison.checked = false;
+        } else if (p === "cfo_support") {
+          if (mcpUser) mcpUser.value = "cfo@acme-bank.com";
+          if (mcpRole) mcpRole.value = "support-agent";
+          if (mcpTool) mcpTool.value = "wire_transfer";
+          if (mcpPoison) mcpPoison.checked = false;
         } else if (p === "intersection") {
           if (mcpUser) mcpUser.value = "intern@acme-bank.com";
+          if (mcpRole) mcpRole.value = "finance-admin";
+          if (mcpTool) mcpTool.value = "wire_transfer";
+          if (mcpPoison) mcpPoison.checked = false;
+        } else if (p === "cfo_finance") {
+          if (mcpUser) mcpUser.value = "cfo@acme-bank.com";
           if (mcpRole) mcpRole.value = "finance-admin";
           if (mcpTool) mcpTool.value = "wire_transfer";
           if (mcpPoison) mcpPoison.checked = false;
